@@ -37,5 +37,7 @@ jobs:
         run: npm ci
       - name: "Typecheck"
         run: npm run typecheck
+      - name: "Data validation (plan/02 schema and coverage)"
+        run: npm run validate
       - name: "Unit tests"
         run: npm test

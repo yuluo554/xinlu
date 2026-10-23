@@ -14,9 +14,9 @@
 
 | 依据 | 来源 | 查证状态 | 渠道/快照 |
 |---|---|---|---|
-| MBTI 四维（E-I / S-N / T-F / J-P）公开定义 | 16personalities、Myers-Briggs 官网等公开资料 | ⬜ 待 M1 前核对原文并留渠道 | — |
-| 品类需求真实性（人生重开模拟器传播度） | GitHub / 新闻报道 | ⬜ 待核对（检索式与日期快照见 plan/01 §一） | — |
-| 开源空白（人格演化向人生模拟） | GitHub 检索（**软论据**，不作硬锚点） | ⬜ 待 M1 前核对 | — |
+| MBTI 四维（E-I / S-N / T-F / J-P）公开定义 | 16personalities、Myers-Briggs 官网等公开资料 | ✅ 已核对（2026-10-24） | 英文维基百科 Myers–Briggs Type Indicator 条目（引注官方文献：MBTI Manual 3rd ed. / Myers & Myers《Gifts Differing》/ Myers & Briggs Foundation「MBTI Basics」）：四维 = introversion/extraversion、sensing/intuition、thinking/feeling、judging/perceiving，各取一偏好组合成 16 型。官网 myersbriggs.org 直读被拒（403）、16personalities 理论页为脚本渲染无法直读正文，故经上述引注链核对；另记：16personalities 实际采用 Mind/Energy/Nature/Tactics(+Identity) 自有命名，本作采用经典四维命名 |
+| 品类需求真实性（人生重开模拟器传播度） | GitHub / 新闻报道 | ✅ 已核对（2026-10-24） | 检索式「人生重开模拟器 github lifeRestart」（2026-10-24）：原版 VickScarlet/lifeRestart（2021 年登 GitHub Trending，cnblogs「GitHub 热点速览 v.21.36」有存档记录）及多个派生仓库（LastHeaven/lifeRestart、nex-world/lifeRestart-AI、Clouds-Heath/PM-life-restart、EmbraceAGI/LifeReloaded 等）——品类传播度有实证 |
+| 开源空白（人格演化向人生模拟） | GitHub 检索（**软论据**，不作硬锚点） | 🟡 部分核对（2026-10-24） | 检索式「github 开源 人生模拟 MBTI 人格演化 游戏」+ GitHub 站内「personality evolution life simulator MBTI game engine」：最近邻为 agent-topia/evolving_personality（LLM 智能体人格演化框架，非人生模拟游戏）与属性制人生重开（lifeRestart / LifeReloaded）；未见「确定性引擎 + 四维连续演化 + 人生模拟」同款。否定性结论无法穷尽验证 → 保持 🟡，仅作软论据 |
 
 ## 数值口径
 

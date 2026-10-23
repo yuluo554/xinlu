@@ -273,7 +273,8 @@ function checkReleaseDoc(done) {
 function checkDocumentedToolsExist(doneMilestones) {
   const EXEMPT = new Set(); // 形如 "tools/xxx.mjs"：确实不打算实现时逐条登记理由
   // 文档已点名、但该里程碑尚未完成（K：里程碑翻 ✅ 落位脚本的同提交必须删除本行）
-  const PENDING_TOOLS = { "scripts/validate-data.mjs": 1 };
+  // M1 已清空（scripts/validate-data.mjs 于 M1 落位并同提交删登记）；后续新点名脚本在此登记
+  const PENDING_TOOLS = {};
   const docs = ["AGENTS.md", ...(existsSync(join(ROOT, "plan")) ? readdirSyncSafe() : [])];
   const referenced = new Set();
   for (const rel of docs) {
