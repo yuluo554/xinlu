@@ -1,5 +1,7 @@
 # 00 · 项目总览 —— 《心路》（暂定名）：人格演化人生模拟
 
+> 方法论：`ai-tool-project-sprint`（装订 2026-10-23）｜布局门：`node tools/check-sprint-layout.mjs`｜续接对话第一件事 = 跑它（详见 [AGENTS.md](../AGENTS.md)）
+>
 > 一句话：《心路》是一款界面清爽、手机电脑双端的网页人生模拟游戏——从出生环境出发，四维倾向值逐渐长成 MBTI 人格，每一次抉择都在演化轨迹上留痕，终局生成人格演化报告。
 >
 > 本目录（`plan/`）是项目唯一计划事实源。README 只做产品页，里程碑与架构一律放这里（发布时 `DEVELOPMENT.md` 只做索引，不复制内容，防止分叉）。
@@ -31,6 +33,8 @@
 | 2026-10-23 | 技术栈 | Vite + TypeScript，**零运行时依赖** | React/Vue：状态规模小，不值得引入运行时与心智成本；单文件 HTML：create-project 对简单项目偏好单文件，但本作事件库（百级条目）+ 单测需求使其不可维护——记录此偏离及理由 |
 | 2026-10-23 | 暂定名 | 《心路》 | 《人生演化论》偏学术，《人格工厂》偏机械；定名随 M5 门面阶段决策 |
 | 2026-10-23 | 部署 | GitHub Pages | Vercel：多一层账号与平台依赖，Pages 与仓库同源；本机直连 GitHub 不通的风险与对策见 04 §风险 |
+| 2026-10-23 | 开源许可 | MIT（仓库根 `LICENSE` 文件，`package.json` license 字段同值） | 无 LICENSE：GitHub 公开传播无授权基础；Apache-2.0：专利条款对本作无增益且文本更重 |
+| 2026-10-23 | 方法论装订 | `ai-tool-project-sprint`：AGENTS.md 锚点 + `tools/check-sprint-layout.mjs` 布局门 + `tools/check-desensitized.mjs` 脱敏门，进 CI layout job | 只靠对话记忆：实测会让交接漏写、状态副本漂移（skill 硬约束③） |
 
 ## 招牌动词表（标题/定位宣言的能力名词 → 产出 → 断言；填不出即删词）
 
@@ -69,17 +73,17 @@
 | 演示 GIF | 实玩录屏 | README | `git ls-files` | ⬜ 待 M5 录制 |
 | 线上可玩（Pages） | M6 部署 | URL | 浏览器实开 | ⬜ 待 M6 部署 |
 
-## 里程碑总表（DoD 列只能加不能减；要减必须在决策记录留行）
+## 里程碑总表（DoD 列只能加不能减；要减必须在决策记录留行。状态列与 README 状态表是两处机读副本，改状态必须同步翻齐）
 
-| 里程碑 | 内容 | DoD |
-|---|---|---|
-| M0 | 仓库骨架 + 脚手架 | git 首提交（中文信息）并 `git log` 验证；`npm run dev` 打开空页面；data/README 建立 |
-| M1 | 数据先行：schema + birth-map + 样例事件 + 校验脚本 | `npm run validate` 0 FAIL；故意造错一条必须报红（门禁自检） |
-| M2 | 演化引擎 + 存档 | `npx vitest run` 全绿；同种子两次通关终局四维全等；回滚任一钳制逻辑对应测试必须变红 |
-| M3 | 界面 + 可视化 + 双端响应式 | 375/768/1280px 手动清单全过并留痕；一周目可完整玩通 |
-| M4 | 完整内容：事件密度达标 + 多结局 + 画像文案 | `npm run validate` 全绿；≥3 条不同出生环境全通关实玩留痕；实际事件数回填本档台账 |
-| M5 | 打磨 + 门面（README 产品页 / DEVELOPMENT.md / GIF） | README 门清单（04 §M5）逐项过；全部实物表路径存在 |
-| M6 | 发布：构建→干净环境验证→Pages→CHANGELOG→tag→Release→留档 | **三件套：tag + Release 附产物（dist.zip + sha256）+ plan/05 留档**；Release 说明含五部分；tag 在构建与验证之后 |
+| 里程碑 | 内容 | DoD | 状态 |
+|---|---|---|---|
+| M0 | 仓库骨架 + 脚手架 | git 首提交（中文信息）并 `git log` 验证；`npm run dev` 打开空页面；data/README 建立 | ✅（2026-10-23） |
+| M1 | 数据先行：schema + birth-map + 样例事件 + 校验脚本 | `npm run validate` 0 FAIL；故意造错一条必须报红（门禁自检） | ⬜ 待 M1 |
+| M2 | 演化引擎 + 存档 | `npx vitest run` 全绿；同种子两次通关终局四维全等；回滚任一钳制逻辑对应测试必须变红 | ⬜ 待 M2 |
+| M3 | 界面 + 可视化 + 双端响应式 | 375/768/1280px 手动清单全过并留痕；一周目可完整玩通 | ⬜ 待 M3 |
+| M4 | 完整内容：事件密度达标 + 多结局 + 画像文案 | `npm run validate` 全绿；≥3 条不同出生环境全通关实玩留痕；实际事件数回填本档台账 | ⬜ 待 M4 |
+| M5 | 打磨 + 门面（README 产品页 / DEVELOPMENT.md / GIF） | README 门清单（04 §M5）逐项过；全部实物表路径存在 | ⬜ 待 M5 |
+| M6 | 发布：构建→干净环境验证→Pages→CHANGELOG→tag→Release→留档 | **三件套：tag + Release 附产物（dist.zip + sha256）+ plan/05 留档**；Release 说明含五部分；tag 在构建与验证之后 | ⬜ 待 M6 |
 
 ## 可选外部门禁
 

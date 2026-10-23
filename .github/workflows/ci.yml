@@ -1,0 +1,41 @@
+name: ci
+
+"on":
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  layout:
+    name: "Methodology gates (sprint layout + desensitization)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Set up Node"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: "Sprint layout gate (methodology binding)"
+        run: node tools/check-sprint-layout.mjs
+      - name: "Desensitization gate (no host paths or local proxies)"
+        run: node tools/check-desensitized.mjs
+
+  test:
+    name: "Vitest (node ${{ matrix.node }})"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Set up Node"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - name: "Install dependencies"
+        run: npm ci
+      - name: "Typecheck"
+        run: npm run typecheck
+      - name: "Unit tests"
+        run: npm test

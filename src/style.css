@@ -1,0 +1,29 @@
+/* M0 骨架占位样式：仅保证空页可开不破相。设计规范（浅色、大留白、单一强调色）在 M3 落地。 */
+:root {
+  color-scheme: light;
+  font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #fafaf7;
+  color: #2b2b28;
+}
+
+.shell {
+  max-width: 640px;
+  margin: 18vh auto 0;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.shell h1 {
+  font-size: 2rem;
+  letter-spacing: 0.1em;
+}
+
+.muted {
+  color: #8a8a82;
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
