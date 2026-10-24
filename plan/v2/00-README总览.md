@@ -62,12 +62,12 @@
 | 承诺项 | 素材来源 | 交付物内可达 | 核验方式 | 状态 |
 |---|---|---|---|---|
 | 人格鱼零新画（现有素材参数化） | assets/ fish/ 62 张 | 全程 mascot | 纯函数单测 + 素材清单对账 | ✅（2026-10-24：D1=B 后 fish/ 62 张处理版入库（台账记档 + 已知限制声明），[fish.ts](../../src/viz/fish.ts) 参数纯函数 19 项单测 + 映射 19/19 覆盖校验（validate M 区）+ FRAMES 绑定对齐断言） |
-| 分享卡三端可存 | 导出实现 | 终局面 | 实存图留痕（手机相册/桌面） | ⬜ 待 v2-M3' 实现 |
+| 分享卡三端可存 | 导出实现 | 终局面 | 实存图留痕（手机相册/桌面） | ✅（2026-10-24：[share-card.ts](../../src/ui/share-card.ts) 布局纯函数/绘制分离（单测 12 项含规格硬尺寸/文件名口径/截断/水印不重叠）+ 终局「保存分享卡」按钮；E2E 真实下载落盘 `xinlu-ESFJ-20261024.png` 文件名口径断言双端过，实存图 [docs/assets/share-card-375.png](../../docs/assets/share-card-375.png)/[share-card-1280.png](../../docs/assets/share-card-1280.png)；手机相册端留 v2-M4' 发布后真机补验） |
 | 8 条件结局 + 兜底全可达 | B1 事件补齐 | 全结局 | 引擎级可达性扫描 + 防回退测试 | ✅（2026-10-24：9 条 T/P 侧事件入库，[check-ending-reachability.mjs](../../scripts/check-ending-reachability.mjs) 96 组扫描 9 结局全可达退出码 0；防回退测试删事件必红留痕） |
 | 双端 E2E 自动化 | IAB 套路（HANDOFF-M7 §五） | 脚本库 | `npm run e2e` 绿 | ✅（2026-10-24：[tests/e2e/smoke.mjs](../../tests/e2e/smoke.mjs) CDP 驱动 375/1280 双端通关，断言必红自检留痕） |
 | 16 型图鉴独立存储 | 图鉴设计 | 图鉴屏 | 单测 + 枚举封闭校验 | ⬜ 待 v2-M4' 实现 |
-| 入库素材 ⊆ 许可白名单 | assets/README.md 台账 | 全部 dist 素材 | check-assets-license 变异自检 | ⬜ 待 v2-M3' 实现 |
-| dist gzip ≤ 500KB | 预算口径（02 §七） | 构建产物 | check-dist-budget + build 输出 | ⬜ 待 v2-M3' 实现 |
+| 入库素材 ⊆ 许可白名单 | assets/README.md 台账 | 全部 dist 素材 | check-assets-license 变异自检 | ✅（2026-10-24：许可门 [tools/check-assets-license.mjs](../../tools/check-assets-license.mjs) 0 FAIL（git 跟踪图像 ⊆ 白名单 + dist 24 件溯源 + ❌ 层双向 + credits 署名 4 行）；变异自检两向必红留痕见 [docs/v2-M2-gates.md](../../docs/v2-M2-gates.md)） |
+| dist gzip ≤ 500KB | 预算口径（02 §七） | 构建产物 | check-dist-budget + build 输出 | ✅（2026-10-24：[tools/check-dist-budget.mjs](../../tools/check-dist-budget.mjs) 445.51KB 绿 0 WARN；上线即红 797.13KB 留痕→dist 引用集压缩（表情 192px q65 / watermark 200px / 背景 768+640px）→ 绿；变异自检塞 600KB 必红→复原绿，[docs/v2-M3-gates.md](../../docs/v2-M3-gates.md)） |
 | 历史存档重开声明 | 双层版本规则 | Release 说明 | CHANGELOG/Release 五部分核对 | ⬜ 待 v2-M4' 实现 |
 
 ## 里程碑总表（DoD 只加不减；要减必须在本档决策记录留行）

@@ -18,7 +18,8 @@
     "validate": "node scripts/validate-data.mjs --full",
     "gate:layout": "node tools/check-sprint-layout.mjs",
     "gate:desens": "node tools/check-desensitized.mjs",
-    "gate:license": "node tools/check-assets-license.mjs"
+    "gate:license": "node tools/check-assets-license.mjs",
+    "gate:budget": "node tools/check-dist-budget.mjs"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

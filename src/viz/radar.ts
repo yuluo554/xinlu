@@ -10,6 +10,16 @@ const RADIUS = 88;
 const ANGLES: Record<DimKey, number> = { ei: -90, sn: 0, tf: 90, jp: 180 };
 const AXIS_LABEL: Record<DimKey, string> = { ei: "E–I", sn: "S–N", tf: "T–F", jp: "J–P" };
 
+/**
+ * 雷达几何单源导出(v2-M3' 分享卡复用,新增导出——不改 v1 既有函数)。
+ * 口径:轴方位 ei 上/sn 右/tf 下/jp 左;值 0 在圆心、100 在外沿。
+ */
+export function radarVertex(dim: DimKey, value: number, cx: number, cy: number, radius: number): [number, number] {
+  const rad = (ANGLES[dim] * Math.PI) / 180;
+  const r = (sanitize(value) / 100) * radius;
+  return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+}
+
 function point(dim: DimKey, value: unknown): [number, number] {
   const rad = (ANGLES[dim] * Math.PI) / 180;
   const r = (sanitize(value) / 100) * RADIUS;

@@ -582,3 +582,54 @@ body {
     animation: none;
   }
 }
+
+/* —— v2 场景氛围(v2-M3' 3.3):出生环境 → 水域背景,浅色纸面上低透明纹理 —— */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.scene-water {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+  background-size: 384px 384px;
+  opacity: 0.16;
+}
+
+.scene-clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 42vh;
+  background-repeat: repeat-x;
+  background-size: 320px 320px;
+  opacity: 0.3;
+}
+
+/* 阶段小结图标(Simple Worlds 提取件,装饰性) */
+.stage-icon {
+  width: 34px;
+  height: 34px;
+  vertical-align: -6px;
+  margin-left: 12px;
+}
+
+/* about 链接(素材与许可说明) */
+.about-links {
+  margin-top: 8px;
+}
+
+.about-links a {
+  color: var(--ink-3);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.about-links a:hover {
+  color: var(--accent);
+}

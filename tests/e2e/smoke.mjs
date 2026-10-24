@@ -8,7 +8,7 @@
 // 纪律：本脚本不加任何 devDependencies（K2 零运行时依赖的测试侧延伸）。
 
 import { spawn, execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,6 +29,9 @@ const VIEWPORTS = [
     shot: "e2e-smoke-375.png",
     fishCardShot: "v2m2-mascot-card-375.png",
     fishEndingShot: "v2m2-mascot-375.png",
+    env: null, // 默认组合(era=60s/大城):预期最深水色 + 最浓云层
+    expectScene: { brightness: "brightness(0.70)", clouds: "opacity:0.70" },
+    shareShot: "share-card-375.png",
   },
   {
     width: 1280,
@@ -37,6 +40,9 @@ const VIEWPORTS = [
     shot: "e2e-smoke-1280.png",
     fishCardShot: "v2m2-mascot-card-1280.png",
     fishEndingShot: "v2m2-mascot-1280.png",
+    env: { era: "10s", place: "农村" }, // 提交前改选:预期最亮暖水色 + 最稀云层
+    expectScene: { brightness: "brightness(1.05)", clouds: "opacity:0.15" },
+    shareShot: "share-card-1280.png",
   },
 ];
 const MAX_STEPS = 600; // 121 事件 + aftermath + 8 小结 + 开局，余量 ~2 倍
@@ -211,6 +217,19 @@ async function main() {
       const startSeen = await cdp.evaluate("!!document.querySelector('.screen-start')");
       if (!startSeen) throw new Error("开局屏未出现");
 
+      // v2-M3' 场景氛围:双端用不同出生环境,断言水域背景随之变化(scene-water filter / scene-clouds opacity)
+      if (vp.env) {
+        const switched = await cdp.evaluate(`(() => {
+          let ok = true;
+          for (const [k, v] of Object.entries(${JSON.stringify(vp.env)})) {
+            const el = document.querySelector('input[name="' + k + '"][value="' + v + '"]');
+            if (el) el.click(); else ok = false;
+          }
+          return ok;
+        })()`);
+        if (!switched) throw new Error(`${vp.width} 档:改选出生环境失败`);
+      }
+
       // v2-M2' 卡片流 mascot 断言:提交开局进入首卡,mascot 已挂载且表情帧 href 非空(待机态)
       await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
       const cardFish = await cdp.evaluate(`(() => {
@@ -222,6 +241,21 @@ async function main() {
       if (!cardFish) throw new Error(`${vp.width} 档：卡片流 mascot 未渲染`);
       if (!cardFish.idle) throw new Error(`${vp.width} 档：卡片流 mascot 不在待机态`);
       if (!cardFish.href) throw new Error(`${vp.width} 档：mascot 表情帧 href 为空`);
+
+      // v2-M3' 场景背景断言:水面滤镜与云层不透明度 = 出生环境映射值(scene.ts 口径)
+      const scene = await cdp.evaluate(`(() => {
+        const w = document.querySelector(".screen-card .scene-water");
+        const c = document.querySelector(".screen-card .scene-clouds");
+        return { water: w?.getAttribute("style") ?? "", clouds: c?.getAttribute("style") ?? "" };
+      })()`);
+      if (!scene.water.includes(vp.expectScene.brightness)) {
+        throw new Error(`${vp.width} 档：场景水面滤镜不符(预期含 ${vp.expectScene.brightness},实得 ${scene.water})`);
+      }
+      if (!scene.clouds.includes(vp.expectScene.clouds)) {
+        throw new Error(`${vp.width} 档：场景云层不透明度不符(预期含 ${vp.expectScene.clouds},实得 ${scene.clouds})`);
+      }
+      // 截图留痕(暖帧丢弃:屏切 rise 动画 0.28s,先拍一张丢掉再拍正式——HANDOFF-M7 §五纪律)
+      await cdp.send("Page.captureScreenshot", { format: "png" });
       const cardShot = await cdp.send("Page.captureScreenshot", { format: "png" });
       writeFileSync(join(ROOT, "docs", "assets", vp.fishCardShot), Buffer.from(cardShot.data, "base64"));
 
@@ -254,15 +288,42 @@ async function main() {
         const radarSvg = !!ending?.querySelector("[data-slot='radar'] svg");
         const fishSvg = ending?.querySelector(".fish-mascot");
         const fishHref = fishSvg?.querySelector(".fish-frame")?.getAttribute("href") ?? "";
-        return { title, letters, radarSvg, fishSvg: !!fishSvg, fishHref };
+        const shareBtn = !!ending?.querySelector("[data-share]");
+        const credits = !!ending?.querySelector(".about-links a[href*='credits']");
+        return { title, letters, radarSvg, fishSvg: !!fishSvg, fishHref, shareBtn, credits };
       })()`);
       if (!verdict.title) throw new Error(`${vp.width} 档：终局标题为空`);
       if (!/^[EI][SN][TF][JP]$/.test(verdict.letters)) {
         throw new Error(`${vp.width} 档：终局类型字母非法「${verdict.letters}」`);
       }
+      if (!verdict.credits) throw new Error(`${vp.width} 档：终局 credits 链接未渲染`);
       if (!verdict.radarSvg) throw new Error(`${vp.width} 档：终局雷达未渲染`);
       if (!verdict.fishSvg) throw new Error(`${vp.width} 档：终局 mascot 未渲染`);
       if (!verdict.fishHref) throw new Error(`${vp.width} 档：终局 mascot 表情帧 href 为空`);
+
+      // v2-M3' 分享卡:终局「保存分享卡」按钮 → 真实下载落盘 → 文件名口径 xinlu-<mbti>-<yyyymmdd>.png
+      if (!verdict.shareBtn) throw new Error(`${vp.width} 档：终局分享卡按钮未渲染`);
+      const dlDir = join(tmpdir(), "xinlu-e2e-downloads-" + vp.width);
+      rmSync(dlDir, { recursive: true, force: true });
+      mkdirSync(dlDir, { recursive: true });
+      // Browser domain 在 page session 直发(Edge/Chromium 支持);事件不依赖——轮询目录为准
+      try {
+        await cdp.send("Browser.setDownloadBehavior", { behavior: "allow", downloadPath: dlDir });
+      } catch {
+        await cdp.send("Page.setDownloadBehavior", { behavior: "allow", downloadPath: dlDir });
+      }
+      await cdp.evaluate(`document.querySelector("[data-share]").click()`);
+      const shareName = await waitFor(() => {
+        if (!existsSync(dlDir)) return null;
+        const names = readdirSync(dlDir).filter((n) => /^xinlu-[A-Z]{4}-\d{8}\.png$/.test(n));
+        for (const n of names) {
+          const size = statSync(join(dlDir, n)).size;
+          if (size > 30000) return `${n}(${Math.round(size / 1024)}KB)`; // 完整 PNG(未完成的 .crdownload 不匹配)
+        }
+        return null;
+      }, "分享卡 PNG 落盘", 30000);
+      copyFileSync(join(dlDir, shareName.split("(")[0]), join(ROOT, "docs", "assets", vp.shareShot));
+      verdict.share = shareName;
 
       // 截图留痕（暖帧丢弃：第一张合成器可能滞后，丢）
       await cdp.evaluate("window.scrollTo(0, 0)");
@@ -270,14 +331,14 @@ async function main() {
       const shot = await cdp.send("Page.captureScreenshot", { format: "png" });
       writeFileSync(join(ROOT, "docs", "assets", vp.shot), Buffer.from(shot.data, "base64"));
       writeFileSync(join(ROOT, "docs", "assets", vp.fishEndingShot), Buffer.from(shot.data, "base64"));
-      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters });
-      out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）`);
+      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share });
+      out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}`);
     }
 
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share})`);
     }
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
     out("=".repeat(56));

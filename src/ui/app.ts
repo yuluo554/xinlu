@@ -10,9 +10,10 @@ import {
   pickEvent,
   resolveEnding,
 } from "../engine/engine";
-import { STAGES, type BirthEnv, type Dims, type RunState, type Stage } from "../engine/model";
+import { STAGES, type BirthEnv, type Dims, type Ending, type RunState, type Stage } from "../engine/model";
 import { clear, hasSaveKey, load, save } from "../storage/storage";
 import { createFishParams, endingFrame, pickChoiceFrame, renderFish, stageFrame, type DeltaDir } from "../viz/fish";
+import { sceneBackdrop } from "../viz/scene";
 import { renderCurve } from "../viz/curve";
 import { renderRadar } from "../viz/radar";
 import {
@@ -22,6 +23,8 @@ import {
   stageDeltas,
   stageEntries,
 } from "./logic";
+import { exportShareCard } from "./share-card";
+import portraits from "../data/portraits.json" with { type: "json" };
 import * as S from "./screens";
 
 type View = "start" | "card" | "aftermath" | "summary" | "ending" | "corrupt";
@@ -133,6 +136,7 @@ function renderCard(): void {
     text: event.text,
     options: event.options.map((o) => o.text),
     fishRadius: createFishParams(state.dims).orderliness.radius,
+    backdrop: sceneBackdrop(state.env),
   });
   hydrateFish(choiceFeedback ?? undefined);
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-option]")) {
@@ -174,6 +178,7 @@ function renderAftermath(): void {
     stage: pendingAftermath.stage,
     ageHint: pendingAftermath.ageHint,
     aftermath: pendingAftermath.text,
+    backdrop: sceneBackdrop(state.env),
   });
   hydrateFish(choiceFeedback ?? undefined);
   bindContinue();
@@ -209,6 +214,7 @@ function renderSummary(): void {
     count: stageEntries(state.history, stage).length,
     deltas: stageDeltas(state, stage),
     fishRadius: createFishParams(state.dims).orderliness.radius,
+    backdrop: sceneBackdrop(state.env),
   });
   hydrateFish(stageFrame(stage));
   hydrateRadar([dimsAtStageStart(state, stage)]);
@@ -227,12 +233,46 @@ function renderEnding(): void {
     criticals: criticalChoices(state.history),
     seed: state.seed,
     fishRadius: createFishParams(state.dims).orderliness.radius,
+    backdrop: sceneBackdrop(state.env),
   });
   hydrateFish(endingFrame(ending.id));
   hydrateRadar(STAGES.map((s) => dimsAtStageStart(state!, s)));
   const curveSlot = root.querySelector("[data-slot='curve']");
   if (curveSlot) renderCurve(state.history, curveSlot, initialDimsOf(state.env));
+  bindShare(ending);
   bindRestart();
+}
+
+/** 「保存分享卡」(v2/03 §3):终局屏导出 1080×1440 PNG,纯客户端零上传;失败原地提示,不打断复盘。 */
+function bindShare(ending: Ending): void {
+  const btn = root.querySelector<HTMLButtonElement>("[data-share]");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    if (!state) return;
+    const letters = endingLetters(ending, state);
+    const input = {
+      title: ending.title,
+      letters,
+      dims: state.dims,
+      portrait: (portraits as Record<string, string>)[letters] ?? "",
+      criticals: criticalChoices(state.history)
+        .slice(0, 3)
+        .map((c) => ({ q: c.event.text, a: c.optionText })),
+      frame: endingFrame(ending.id),
+      date: new Date(),
+    };
+    btn.disabled = true;
+    btn.textContent = "正在生成…";
+    exportShareCard(input)
+      .then(() => {
+        btn.textContent = "已保存 ✓";
+        btn.disabled = false;
+      })
+      .catch(() => {
+        btn.textContent = "生成失败，请重试";
+        btn.disabled = false;
+      });
+  });
 }
 
 function hydrateRadar(past: readonly Dims[]): void {

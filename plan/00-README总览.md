@@ -91,7 +91,7 @@
 | M6 | 发布：构建→干净环境验证→Pages→CHANGELOG→tag→Release→留档 | **三件套：tag + Release 附产物（dist.zip + sha256）+ plan/05 留档**；Release 说明含五部分；tag 在构建与验证之后 | ✅（2026-10-24，tag v1.0.0 @ 3f64564；Release dist.zip sha256 复核一致；留档 plan/05） |
 | v2-M1' | 回归基线与内容修复（E2E 双端冒烟 + B1 可达性 + assets 跟踪策略） | DoD 单源见 [v2/00 §里程碑总表](v2/00-README总览.md)（只加不减）；公共门 + e2e 全绿 | ✅（2026-10-24，e2e 双端通关 + B1 扫描 9 结局全可达 + assets 策略 40 件入库；见 [v2/HANDOFF-v2-M2.md](v2/HANDOFF-v2-M2.md)） |
 | v2-M2' | 人格鱼 avatar（参数纯函数 + 常驻 mascot + 表情映射） | DoD 单源同上 | ✅（2026-10-24，fish.ts 参数/渲染单测 19 项 + mascot 三场景接入 + E2E mascot 断言双端通关 + validate 映射校验区；见 [v2/HANDOFF-v2-M3.md](v2/HANDOFF-v2-M3.md)） |
-| v2-M3' | 分享卡 + 场景氛围 + 许可门/预算门 + credits | DoD 单源同上 | ⬜ 待开工（套件待评审） |
+| v2-M3' | 分享卡 + 场景氛围 + 许可门/预算门 + credits | DoD 单源同上 | ✅（2026-10-24，share-card.ts 布局纯函数/绘制分离 + E2E 真实下载落盘文件名口径断言 + 实存图双端留痕（手机相册端留 v2-M4' 真机补验）+ 预算门上线 797KB 红留痕→压缩素材后 445KB 绿 + 场景氛围双端断言 + credits 链入；评审门三方核对表见 [docs/v2-M3-gates.md](../docs/v2-M3-gates.md)，交接 [v2/HANDOFF-v2-M4.md](v2/HANDOFF-v2-M4.md)） |
 | v2-M4' | 16 型图鉴 + 发布 v2.0.0（三件套） | DoD 单源同上 | ⬜ 待开工（套件待评审） |
 
 ## 可选外部门禁

@@ -19,7 +19,7 @@ assets/
 │   └── deepseek-fat-fish-codex-pet/  idle / working / success / hover 四张 GIF 竖排精灵图（上游无许可证文件 ⚠️）
 └── cc-by/                            严格可商用素材（须署名）
     ├── open-ocean-game-art/          OpenOceanArt.zip（原包留底）+ 解压 27 件：Fish 18 / Other 5 / UI 4
-    └── simple-worlds-ocean-animals/  SVG 源文件 + LICENSE.TXT（上游随附）
+    └── simple-worlds-ocean-animals/  SVG 源文件 + LICENSE.TXT（上游随附）+ jellyfish.svg（v2-M3' 提取件：大 SVG 水母组装态 g9785 + defs 引用闭包，12.1KB；一次性提取脚本未入库）
 ```
 
 ## 溯源与许可台账
@@ -68,6 +68,7 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 - **git 只跟踪**：`assets/web-ready/`（压缩 WebP，单张 ≤50KB 已核查 40/40 全绿）+ 许可/溯源文本（LICENSE / SOURCES / ASSET_LICENSE / manifest.json）+ `simple-worlds` SVG 矢量源 + **⚠️ `fish/` 62 张处理版 webp（D1=B 档显式豁免，2026-10-24；含 dist 引用的 19 张表情 / whale-idle 等，62 张体积约 1.9MB 原样入库，`fish/*` + `!fish/*.webp` 形态豁免、非 webp 仍排除）**。
 - **原始位图件（png/gif/ico）一律不入 git**（.gitignore 扩展名规则，本地留底）；❌ 层（梗图原图、4 张 GIF 原件）与 upstream 无许可目录维持排除。
 - **web-ready 转换口径**：ffmpeg libwebp，q85 起，>50KB 依次降档（缩宽 1024→q60、缩宽 800→q45 / 缩宽 512→q70）；`正面_238.png` 因源损坏未转换（见上表）。
+- **v2-M3' dist 引用集压缩记录（2026-10-24，预算门上线）**：dist 引用的 19 张表情 + `whale-idle` 重压至 192×192 q65（600KB→约 325KB，ffmpeg libwebp lanczos；320→192 目检画质留痕 docs/v2-M3-gates.md）、`watermark.webp` 重压至 200×200 q65（92.9KB→12.8KB，印制尺寸 ≤120px 的 1.67x）；open-ocean 组 `WikndWakerWater` 重压至 768×768 q50（44.1→31.8KB）、`Clouds` 重压至 640×640 q50（43.7→25.3KB）——两者随 v2-M3' 3.3 场景氛围进 dist。**非 dist 引用件维持 D1=B「原样入库」不动**（character-sheet / whale-* 立绘 / GIF 拆帧 / 三视图等 43 张；预算门 WARN 只扫 dist 内文件）。
 
 ## 工程注意
 

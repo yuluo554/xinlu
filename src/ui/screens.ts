@@ -8,7 +8,21 @@ import {
   type Dims,
   type Stage,
 } from "../engine/model";
+import type { SceneBackdrop } from "../viz/scene";
 import { DIM_SHORT, STAGE_LABEL, type ChoiceReview } from "./logic";
+// 场景氛围素材 URL(vite 静态 import → dist hash 文件名;水面/云层 = CC-BY Open Ocean 组,图标 = Simple Worlds 提取件)
+import waterUrl from "../../assets/web-ready/open-ocean/Other/WikndWakerWater_Background.webp";
+import cloudsUrl from "../../assets/web-ready/open-ocean/Other/Clouds_Background.webp";
+import jellyfishSvg from "../../assets/cc-by/simple-worlds-ocean-animals/jellyfish.svg";
+
+/** 场景氛围层(3.3):水面纹理 + 云层,出生环境经 sceneBackdrop 驱动;装饰性,aria-hidden。 */
+function sceneLayer(backdrop: SceneBackdrop): string {
+  return `
+    <div class="scene" data-scene aria-hidden="true">
+      <div class="scene-water" style="background-image:url('${waterUrl}');filter:${backdrop.filter}"></div>
+      <div class="scene-clouds" style="background-image:url('${cloudsUrl}');opacity:${backdrop.cloudsOpacity.toFixed(2)}"></div>
+    </div>`;
+}
 
 export function esc(text: string): string {
   const table: Record<string, string> = {
@@ -60,6 +74,7 @@ export function startScreen(options: Record<keyof BirthEnv, string[]>, error?: s
         <button type="submit" class="btn btn-primary btn-start">开始这一生</button>
       </form>
       <p class="fine-print">单机运行，进度保存在本机浏览器，无需网络与账号。</p>
+      <p class="fine-print about-links"><a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a></p>
     </section>`;
 }
 
@@ -70,9 +85,11 @@ export function cardAskScreen(vm: {
   text: string;
   options: string[];
   fishRadius: number;
+  backdrop: SceneBackdrop;
 }): string {
   return `
     <section class="screen screen-card">
+      ${sceneLayer(vm.backdrop)}
       ${topbar(vm.stageIndex)}
       <article class="card event-card">
         <p class="stage-tag">${STAGE_LABEL[vm.stage]} · ${esc(vm.ageHint)}</p>
@@ -90,9 +107,11 @@ export function cardAftermathScreen(vm: {
   stage: Stage;
   ageHint: string;
   aftermath: string;
+  backdrop: SceneBackdrop;
 }): string {
   return `
     <section class="screen screen-card">
+      ${sceneLayer(vm.backdrop)}
       ${topbar(vm.stageIndex)}
       <article class="card event-card">
         <p class="stage-tag">${STAGE_LABEL[vm.stage]} · ${esc(vm.ageHint)}</p>
@@ -110,6 +129,7 @@ export function summaryScreen(vm: {
   count: number;
   deltas: Dims;
   fishRadius: number;
+  backdrop: SceneBackdrop;
 }): string {
   const items = DIM_KEYS.map((d: DimKey) => {
     const v = vm.deltas[d];
@@ -119,8 +139,9 @@ export function summaryScreen(vm: {
   }).join("");
   return `
     <section class="screen screen-summary">
+      ${sceneLayer(vm.backdrop)}
       ${topbar(vm.stageIndex)}
-      <h2>${STAGE_LABEL[vm.stage]} · 小结</h2>
+      <h2>${STAGE_LABEL[vm.stage]} · 小结<img class="stage-icon" src="${jellyfishSvg}" alt="" aria-hidden="true"></h2>
       <p class="muted">本阶段经历了 ${vm.count} 次抉择，四维悄然挪动：</p>
       <div class="fish-slot fish-slot-stage" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
       <div class="viz-row two">
@@ -139,6 +160,7 @@ export function endingScreen(vm: {
   criticals: ChoiceReview[];
   seed: number;
   fishRadius: number;
+  backdrop: SceneBackdrop;
 }): string {
   const criticals =
     vm.criticals.length > 0
@@ -151,6 +173,7 @@ export function endingScreen(vm: {
       : `<p class="muted">这一段人生没有触发重大抉择。</p>`;
   return `
     <section class="screen screen-ending">
+      ${sceneLayer(vm.backdrop)}
       ${topbar(STAGES.length)}
       <h2>${esc(vm.title)}</h2>
       <p class="ending-type">${esc(vm.letters)}</p>
@@ -165,7 +188,9 @@ export function endingScreen(vm: {
       <h3>关键抉择</h3>
       <div class="criticals">${criticals}</div>
       <p class="fine-print">本局种子 ${vm.seed}——同种子同选择，结果可复现。</p>
-      <button type="button" class="btn btn-primary" data-restart>重开一局</button>
+      <p class="fine-print about-links"><a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a></p>
+      <button type="button" class="btn btn-primary" data-share>保存分享卡</button>
+      <button type="button" class="btn btn-ghost" data-restart>重开一局</button>
     </section>`;
 }
 

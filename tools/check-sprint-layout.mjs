@@ -320,9 +320,8 @@ function checkDocumentedToolsExist(doneMilestones) {
   // v2-M1' 已清空（scripts/check-ending-reachability.mjs 于 v2-M1' 落位并同提交删登记）。
   // 登记值 = 里程碑 ID（v1 "M<k>" / v2 "v2-M<k>'"）。v2 套件点名：预算门（v2-M3'）。
   // v2-M2' 清空 check-assets-license.mjs（许可门随 v2-M2' 提前交付，排序约束见 plan/v2/00 §决策记录）。
-  const PENDING_TOOLS = {
-    "tools/check-dist-budget.mjs": "v2-M3'",
-  };
+  // v2-M3' 清空 check-dist-budget.mjs（预算门随 v2-M3' 3.1 落位，同提交删登记）。
+  const PENDING_TOOLS = {};
   const docs = ["AGENTS.md", ...(existsSync(join(ROOT, "plan")) ? readdirSyncSafe() : [])];
   const referenced = new Set();
   for (const rel of docs) {
