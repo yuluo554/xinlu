@@ -317,9 +317,9 @@ function checkDocumentedToolsExist(doneMilestones) {
   const EXEMPT = new Set(); // 形如 "tools/xxx.mjs"：确实不打算实现时逐条登记理由
   // 文档已点名、但该里程碑尚未完成（K：里程碑翻 ✅ 落位脚本的同提交必须删除本行）
   // M1 已清空（scripts/validate-data.mjs 于 M1 落位并同提交删登记）。
-  // 登记值 = 里程碑 ID（v1 "M<k>" / v2 "v2-M<k>'"）。v2 套件点名：可达性扫描（v2-M1'）、双门禁（v2-M3'）。
+  // v2-M1' 已清空（scripts/check-ending-reachability.mjs 于 v2-M1' 落位并同提交删登记）。
+  // 登记值 = 里程碑 ID（v1 "M<k>" / v2 "v2-M<k>'"）。v2 套件点名：双门禁（v2-M3'）。
   const PENDING_TOOLS = {
-    "scripts/check-ending-reachability.mjs": "v2-M1'",
     "tools/check-assets-license.mjs": "v2-M3'",
     "tools/check-dist-budget.mjs": "v2-M3'",
   };

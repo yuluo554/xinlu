@@ -6,7 +6,7 @@
 
 | ID | 来源 | 对象 | 证据（命令+输出） | 影响 | 成本 | 状态 |
 |---|---|---|---|---|---|---|
-| B1 | 平衡缺口（八类之 2） | `src/data/events.json` 事件 delta 分布 | 96 组「环境×四维权重」引擎全程扫描（复用真实引擎，M4 dogfooding 期间临时脚本）：end-04/end-05/end-07/end-08 在线性权重策略下不可达，end-01/02/03/06+兜底可达（详见 [docs/M4-dogfooding.md](../docs/M4-dogfooding.md) §三/§四） | 2（8 条件结局半数需精心路径才可达；多结局实感受损，结构正确性不受影响） | 2（需按 T/P 侧语义补事件 + 复扫） | ⬜ 待排期 |
+| B1 | 平衡缺口（八类之 2） | `src/data/events.json` 事件 delta 分布 | 96 组「环境×四维权重」引擎全程扫描（复用真实引擎，M4 dogfooding 期间临时脚本）：end-04/end-05/end-07/end-08 在线性权重策略下不可达，end-01/02/03/06+兜底可达（详见 [docs/M4-dogfooding.md](../docs/M4-dogfooding.md) §三/§四） | 2（8 条件结局半数需精心路径才可达；多结局实感受损，结构正确性不受影响） | 2（需按 T/P 侧语义补事件 + 复扫） | ✅ 已完成（2026-10-24，v2-M1' 1.3 承接：补 9 条 T/P 侧语义事件 → [scripts/check-ending-reachability.mjs](../scripts/check-ending-reachability.mjs) 9 结局全可达退出码 0 → 防回退测试同行交付 → 实玩命中 end-05 ISTP（[docs/v2-M1-dogfooding.md](../docs/v2-M1-dogfooding.md) 局 C）） |
 
 ## 周自查记录
 

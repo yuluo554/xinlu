@@ -13,10 +13,14 @@ dist.zip
 # 本机工具目录（不入库）
 .mimosa/
 
-# v2 素材库增量护栏（台账单源 assets/README.md；❌ 层与原始 zip 永不入库，
-# 正式跟踪策略在 v2-M1' 1.2 落地——plan/v2/02 §八）
+# v2 素材库护栏（台账单源 assets/README.md；v2-M1' 1.2 跟踪策略落地——plan/v2/02 §八）：
+# git 只跟踪 assets/web-ready/（压缩 WebP ≤50KB/张）+ 许可/溯源文本 + SVG 矢量源；
+# 原始位图件与 zip 一律留本地不入 git；⚠️ fish/ 层待 D1 拍板后在台账记档并显式豁免。
 assets/**/*.zip
-assets/upstream/codex-deepseek-pet/你这吃白饭的蓝色大肥鱼.png
+assets/**/*.png
+assets/**/*.gif
+assets/**/*.ico
+assets/dafeiyu/fish/
 assets/upstream/deepseek-fat-fish-codex-pet/
 
 # 日志

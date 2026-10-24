@@ -1,7 +1,8 @@
 // 演化引擎：纯函数，无 DOM、无存储依赖（plan/03 §2，签名已于 M2 出口冻结）。
-import birthMapRaw from "../data/birth-map.json";
-import endingsRaw from "../data/endings.json";
-import eventsRaw from "../data/events.json";
+// JSON 以 import attributes 引入：同一引擎文件可被 node 原生执行（v2 可达性扫描复用真实引擎），vite 侧兼容不变。
+import birthMapRaw from "../data/birth-map.json" with { type: "json" };
+import endingsRaw from "../data/endings.json" with { type: "json" };
+import eventsRaw from "../data/events.json" with { type: "json" };
 import {
   DIM_KEYS,
   STAGES,
@@ -12,7 +13,7 @@ import {
   type EndingCond,
   type GameEvent,
   type RunState,
-} from "./model";
+} from "./model.ts";
 
 type BirthMap = Record<
   "era" | "place" | "mood" | "style",
