@@ -7,7 +7,7 @@
 
 | ID | 来源 | 对象 | 证据（命令+输出） | 影响 | 成本 | 状态 |
 |---|---|---|---|---|---|---|
-| V3-1 | v2 backlog V2-1 依头部规则转入（2026-10-24，v3-M2'' 素材采集未涉及该件） | `assets/upstream/dafeiyu-pet/sprites/正面_238.png` 坏件重下（镜像 raw + IEND 闭合校验） | v2-M1' 1.2 实测：`ffmpeg -i 正面_238.png` → Invalid PNG signature；node chunk 解析 IDAT 声明 79327B ≠ 实际 81134B（镜像续传截断先例；assets/README.md 登记未下载表在案） | 低（三视图缺 1 档，web-ready 187/306 档完好，无 dist 引用） | 0.5（镜像 raw 重下 + IEND 校验） | ⬜ 待排期 |
+| V3-1 | v2 backlog V2-1 依头部规则转入（2026-10-24，v3-M2'' 素材采集未涉及该件） | `assets/upstream/dafeiyu-pet/sprites/正面_238.png` 坏件重下（镜像 raw + IEND 闭合校验） | v2-M1' 1.2 实测：`ffmpeg -i 正面_238.png` → Invalid PNG signature；node chunk 解析 IDAT 声明 79327B ≠ 实际 81134B（镜像续传截断先例；assets/README.md 登记未下载表在案） | 低（三视图缺 1 档，web-ready 187/306 档完好，无 dist 引用） | 0.5（镜像 raw 重下 + IEND 校验） | ✅ 已完成（2026-10-25 运维期首棒承接，**坏因改判**：上游 main 分支该路径 GitHub 侧即 81134B 坏件（gh api size/sha 与本地一致、镜像重下同哈希 `59a67d81…` 同截断点 79405、该路径仅一次提交 ea18511c），v2-M1'「镜像续传截断」归因不成立；完好版实测在上游 `v1.0-basic` 分支（78316B、blob `2959aa97…`、IEND 闭合 CRC 全对 178x238，gh api base64 直取绕开镜像），以该版替换留底 + 复验（chunk 链 OK + ffmpeg 严格解码 exit 0 + 目检立绘完整）+ assets/README 登记移出未下载表与工程注意留痕；web-ready 补转换范围外不做（无 dist 引用不触发）） |
 
 ## 观察区（不入队，进队须先补证据）
 
@@ -31,3 +31,9 @@
 - 发现：
 - 用时：
 ```
+
+## 本周自查（2026-10-25）
+- 类型：上游素材坏件（v1 backlog 转入件 V3-1，运维期首次轮转）
+- 范围：`assets/upstream/dafeiyu-pet/sprites/正面_238.png`（三视图 238 档正面）
+- 发现：坏因改判——上游 main 分支该路径即坏件（gh api size/sha 与本地坏件一致 + 镜像重下同哈希同截断点），v2-M1'「镜像续传截断」归因不成立；完好版在上游 `v1.0-basic` 分支（78316B，IEND 闭合、CRC 全对），已替换留底并复验（chunk 链 OK + ffmpeg 严格解码 exit 0 + 目检立绘完整）；web-ready 补转换范围外不做。队列由此清零，观察区 8 项均未达转入条件。
+- 用时：约 30 分钟

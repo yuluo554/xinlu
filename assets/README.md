@@ -61,13 +61,12 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 | codex `assets/whale/` 全量图集 25 件（约 150MB；manifest v5：512px 单元 × 32 动作） | 逐件 raw 镜像下载，或整仓 clone | 镜像实测约 35KB/s 且曾截断大文件（需 `curl -C -` 续传）；本次已取 manifest.json + portrait.png 留底 |
 | 「吃白饭的大肥鱼」表情包原始 webp 23 张 | 仅存于上游作者本地（dsh 仓库 ASSETS.md 注明「用户本地下载」），无公开原件 | 不可获取；处理版 19 张已在 `fish/` |
 | itch.io CC0 鱼类素材（如 PixelFishes 50+ 种、Kelano Studio Wild Fish 30 种） | itch.io 对应标签页 | 本机访问 itch.io 超时，未采集 |
-| `upstream/dafeiyu-pet/sprites/正面_238.png`（重新下载） | 上游 raw 经镜像重下（`curl -C -` 校验 IEND 闭合） | 2026-10-24 实测坏件：IDAT 声明 79327B 与实际错位（镜像续传截断先例，v2/04 风险表）；web-ready 转换已剔除该件，187/306 档完好 |
 
 ## 跟踪策略（v2-M1' 1.2 落地，2026-10-24；D1=B 增记同日）
 
 - **git 只跟踪**：`assets/web-ready/`（压缩 WebP，单张 ≤50KB 已核查 40/40 全绿）+ 许可/溯源文本（LICENSE / SOURCES / ASSET_LICENSE / manifest.json）+ `simple-worlds` SVG 矢量源 + **⚠️ `fish/` 62 张处理版 webp（D1=B 档显式豁免，2026-10-24；含 dist 引用的 19 张表情 / whale-idle 等，62 张体积约 1.9MB 原样入库，`fish/*` + `!fish/*.webp` 形态豁免、非 webp 仍排除）**。
 - **原始位图件（png/gif/ico）一律不入 git**（.gitignore 扩展名规则，本地留底）；❌ 层（梗图原图、4 张 GIF 原件）与 upstream 无许可目录维持排除。
-- **web-ready 转换口径**：ffmpeg libwebp，q85 起，>50KB 依次降档（缩宽 1024→q60、缩宽 800→q45 / 缩宽 512→q70）；`正面_238.png` 因源损坏未转换（见上表）。
+- **web-ready 转换口径**：ffmpeg libwebp，q85 起，>50KB 依次降档（缩宽 1024→q60、缩宽 800→q45 / 缩宽 512→q70）；`正面_238.png` 因 v2-M1' 采集时源损坏未转换（原件已于 2026-10-25 修复留底，见工程注意末条；web-ready 补转换不在 V3-1 范围）。
 - **v2-M3' dist 引用集压缩记录（2026-10-24，预算门上线）**：dist 引用的 19 张表情 + `whale-idle` 重压至 192×192 q65（600KB→约 325KB，ffmpeg libwebp lanczos；320→192 目检画质留痕 docs/v2-M3-gates.md）、`watermark.webp` 重压至 200×200 q65（92.9KB→12.8KB，印制尺寸 ≤120px 的 1.67x）；open-ocean 组 `WikndWakerWater` 重压至 768×768 q50（44.1→31.8KB）、`Clouds` 重压至 640×640 q50（43.7→25.3KB）——两者随 v2-M3' 3.3 场景氛围进 dist。**非 dist 引用件维持 D1=B「原样入库」不动**（character-sheet / whale-* 立绘 / GIF 拆帧 / 三视图等 43 张；预算门 WARN 只扫 dist 内文件）。
 
 ## 工程注意
@@ -76,6 +75,7 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 - 中文文件名（sprites/侧面.png 等）在 git 输出显示为八进制转义属显示问题，`git -c core.quotepath=false status` 可读。
 - Open Ocean 保留原 zip 留底，解压件在同名子目录 `OpenOceanArt/` 并存。
 - 所有下载均校验过尺寸/魔数（PNG IEND、GIF 头），梗图曾因镜像截断，已断点续传补全至 1530733 字节。
+- **`upstream/dafeiyu-pet/sprites/正面_238.png` 坏件修复（2026-10-25，V3-1，坏因改判）**：上游 **main 分支**该路径 GitHub 侧记录即 81134B 坏件（blob `9f81d5f9…`；gh api base64 直取 sha256 `59a67d81…d649` 与本地坏件一致、chunk 链同断于偏移 79405、镜像重下同哈希）——v2-M1'「镜像续传截断」归因不成立，坏件源头在上游提交本身（该路径仅一次提交 ea18511c，2026-08-09）；完好版实测存在于上游 **`v1.0-basic` 分支**（78316B，blob `2959aa97…`，IHDR 178x238、IDAT×2、IEND 闭合、CRC 全对，gh api base64 直取绕开镜像），已以该版替换留底（替换后 chunk 链校验 OK + ffmpeg `-v error` 严格解码 exit 0 + 目检立绘完整）。
 
 ## v3 增量节（v3-M2'' 2.1 素材采集，2026-10-24）
 
