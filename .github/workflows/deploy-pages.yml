@@ -1,0 +1,50 @@
+name: deploy-pages
+
+# 前置条件：仓库 Pages 源须先置为 GitHub Actions
+# （gh api -X POST repos/<owner>/<repo>/pages -f build_type=workflow），否则 deploy 步骤 404。
+"on":
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: "Build and deploy dist to GitHub Pages"
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Set up Node"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: "Install dependencies"
+        run: npm ci
+      - name: "Gates before deploy (typecheck / data validation / tests)"
+        run: |
+          npm run typecheck
+          npm run validate
+          npm test
+      - name: "Build"
+        run: npm run build
+      - name: "Configure Pages"
+        uses: actions/configure-pages@v5
+      - name: "Upload dist artifact"
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: "Deploy to GitHub Pages"
+        id: deployment
+        uses: actions/deploy-pages@v4

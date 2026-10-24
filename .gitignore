@@ -3,6 +3,8 @@ node_modules/
 dist/
 coverage/
 *.local
+# 发布附件本地副本（走 Release 附件，不入库）
+dist.zip
 
 # 环境与密钥
 .env
