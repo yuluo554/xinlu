@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import endingsRaw from "../data/endings.json";
+import eventsRaw from "../data/events.json";
 import {
   advanceStage,
   applyChoice,
@@ -9,9 +10,18 @@ import {
   resolveEnding,
   seededDraw,
 } from "./engine";
-import { DIM_KEYS, STAGES, type Dims, type Ending, type RunState } from "./model";
+import {
+  DIM_KEYS,
+  STAGES,
+  type Dims,
+  type Ending,
+  type GameEvent,
+  type HistoryEntry,
+  type RunState,
+} from "./model";
 
 const ENDINGS = endingsRaw as unknown as Ending[];
+const EVENTS = eventsRaw as unknown as GameEvent[];
 
 // 手算 K8 合成：90s{ei:1,sn:0,tf:-1,jp:0} + 小城{0,1,0,1} + 和睦{1,0,2,0} + 权威{-1,1,-1,3}
 // = {ei:1, sn:2, tf:0, jp:4} → 初始值 {ei:51, sn:52, tf:50, jp:54}
@@ -20,6 +30,14 @@ const ENV = { era: "90s", place: "小城", mood: "和睦", style: "权威" };
 const ENV_LOW_EI = { era: "90s", place: "农村", mood: "和睦", style: "权威" };
 
 const dimsOf = (ei: number, sn: number, tf: number, jp: number): Dims => ({ ei, sn, tf, jp });
+
+/** 构造"谓词命中的事件全部已决"的 history：把待答事件精确顶到目标事件上（密度无关）。 */
+const historyOf = (pred: (e: GameEvent) => boolean): HistoryEntry[] =>
+  EVENTS.filter(pred).map((e) => ({
+    eventId: e.id,
+    option: 0,
+    dimsAfter: dimsOf(50, 50, 50, 50),
+  }));
 
 describe("createRun", () => {
   it("K8 合成初始四维：50 + 四要素修正量之和，不做钳制", () => {
@@ -87,10 +105,10 @@ describe("applyChoice", () => {
       env: ENV,
       stageIndex: 7,
       dims: dimsOf(99, 50, 100, 50),
-      history: [{ eventId: "elder-001", option: 0, dimsAfter: dimsOf(99, 50, 100, 50) }],
+      history: historyOf((e) => e.stage === "elder" && e.type !== "critical"),
       flags: [],
     };
-    // 待答事件 = elder-002；选项 1 deltas {ei:+2, tf:+2}
+    // elder 的 main/context 全部消费后，待答 = 库序首个 critical（elder-002）；选项 1 deltas {ei:+2, tf:+2}
     const after = applyChoice(state, 1);
     expect(after.dims).toEqual(dimsOf(100, 50, 100, 50));
   });
@@ -101,10 +119,10 @@ describe("applyChoice", () => {
       env: ENV,
       stageIndex: 7,
       dims: dimsOf(0, 50, 0, 50),
-      history: [{ eventId: "elder-001", option: 0, dimsAfter: dimsOf(0, 50, 0, 50) }],
+      history: historyOf((e) => e.stage === "elder" && e.type !== "critical"),
       flags: [],
     };
-    // 选项 0 deltas {ei:-1, jp:+3, tf:+1}
+    // 待答事件 = elder-002；选项 0 deltas {ei:-1, jp:+3, tf:+1}
     const after = applyChoice(state, 0);
     expect(after.dims).toEqual(dimsOf(0, 50, 1, 53));
   });
@@ -112,9 +130,9 @@ describe("applyChoice", () => {
   it("中立值 50 无偏移的维度保持不动", () => {
     const fresh = createRun(ENV, 7);
     const state: RunState = { ...fresh, dims: dimsOf(50, 50, 50, 50) };
-    // infant-001 选项 1 deltas {sn:+1, jp:+1}
+    // infant-001 选项 1 deltas {ei:-1, sn:2}
     const after = applyChoice(state, 1);
-    expect(after.dims).toEqual(dimsOf(50, 51, 50, 51));
+    expect(after.dims).toEqual(dimsOf(49, 52, 50, 50));
   });
 
   it("flag 去重：已持有的 flag 不重复入列", () => {
@@ -123,10 +141,10 @@ describe("applyChoice", () => {
       env: ENV,
       stageIndex: 3,
       dims: dimsOf(50, 50, 50, 50),
-      history: [{ eventId: "teen-001", option: 0, dimsAfter: dimsOf(50, 50, 50, 50) }],
+      history: historyOf((e) => e.stage === "teen" && e.id !== "teen-002"),
       flags: ["rebel"],
     };
-    // 待答事件 = teen-002（pre: rebel）；选项 1 带 flag rebel
+    // 待答事件 = teen-002（pre: rebel 已满足）；选项 1 带 flag rebel
     const after = applyChoice(state, 1);
     expect(after.flags).toEqual(["rebel"]);
   });
@@ -150,26 +168,45 @@ describe("pickEvent", () => {
     expect(pickEvent(createRun(ENV, 7))!.id).toBe("infant-001");
   });
 
-  it("main 消费后转入 context；全耗尽后 critical；耗尽返回 null", () => {
+  it("main 消费后转入 context；全耗尽后 critical；耗尽返回 null（密度无关，逐条走通 infant）", () => {
+    const infant = EVENTS.filter((e) => e.stage === "infant");
+    expect(infant.length).toBeGreaterThanOrEqual(6);
     let state = createRun(ENV, 7);
-    state = applyChoice(state, 0);
-    expect(pickEvent(state)!.id).toBe("infant-002");
-    state = applyChoice(state, 1);
+    for (const m of infant.filter((e) => e.type === "main")) {
+      expect(pickEvent(state)!.id, `main 应按库序出牌：${m.id}`).toBe(m.id);
+      state = applyChoice(state, 0);
+    }
+    const contextIds = new Set(infant.filter((e) => e.type === "context").map((e) => e.id));
+    expect(contextIds.size).toBeGreaterThanOrEqual(1);
+    for (let drawn = 0; drawn < contextIds.size; drawn++) {
+      const ev = pickEvent(state);
+      expect(ev!.type, `第 ${drawn + 1} 次抽取应为 context`).toBe("context");
+      expect(contextIds.has(ev!.id)).toBe(true);
+      state = applyChoice(state, 0);
+    }
+    for (const c of infant.filter((e) => e.type === "critical")) {
+      expect(pickEvent(state)!.id, `critical 应按库序出牌：${c.id}`).toBe(c.id);
+      state = applyChoice(state, 0);
+    }
     expect(pickEvent(state)).toBeNull();
     state = advanceStage(state);
     expect(pickEvent(state)!.id).toBe("toddler-001");
   });
 
   it("pre 不满足的事件被过滤（teen-002 需要 rebel）", () => {
+    // 消费 teen 除 teen-002 与最后一个 critical 外的全部事件：过滤发生时落到该 critical
+    const lastCritical = EVENTS.filter((e) => e.stage === "teen" && e.type === "critical").at(-1)!;
     const noRebel: RunState = {
       seed: 7,
       env: ENV,
       stageIndex: 3,
       dims: dimsOf(50, 50, 50, 50),
-      history: [{ eventId: "teen-001", option: 0, dimsAfter: dimsOf(50, 50, 50, 50) }],
+      history: historyOf(
+        (e) => e.stage === "teen" && e.id !== "teen-002" && e.id !== lastCritical.id,
+      ),
       flags: [],
     };
-    expect(pickEvent(noRebel)!.id).toBe("teen-003");
+    expect(pickEvent(noRebel)!.id).toBe(lastCritical.id);
     const withRebel = { ...noRebel, flags: ["rebel"] };
     expect(pickEvent(withRebel)!.id).toBe("teen-002");
   });
