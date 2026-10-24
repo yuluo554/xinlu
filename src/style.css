@@ -89,6 +89,7 @@ body {
   height: 8px;
   border-radius: 50%;
   background: var(--surface-2);
+  transition: background-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 .dot.done {
@@ -531,7 +532,8 @@ body {
   .btn,
   .option,
   .chip span,
-  .btn-ghost {
+  .btn-ghost,
+  .dot {
     transition: none;
   }
 }

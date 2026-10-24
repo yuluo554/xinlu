@@ -65,6 +65,8 @@ export function mountApp(el: HTMLElement): void {
 }
 
 function render(): void {
+  // 换屏一律回到页首：小结/终局是长页面，innerHTML 替换不会自动复位滚动
+  window.scrollTo(0, 0);
   switch (view) {
     case "start":
       renderStart();
@@ -234,7 +236,8 @@ function bindContinue(): void {
   });
 }
 
-/** 重开 = 显式 clear() 回开局屏。卡流中的重开做两步确认，防误触。 */
+/** 重开 = 显式 clear() 回开局屏。卡流中的重开做两步确认，防误触；确认态不驻留——
+ *  移开指针/焦点即复位，否则首次误触过后，之后的任何一次单击都会不经确认直接清档。 */
 function bindRestart(): void {
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-restart]")) {
     btn.addEventListener("click", () => {
@@ -247,6 +250,13 @@ function bindRestart(): void {
       }
       restart();
     });
+    const disarm = () => {
+      if (btn.dataset.armed !== "1") return;
+      delete btn.dataset.armed;
+      btn.textContent = "重开";
+    };
+    btn.addEventListener("pointerleave", disarm);
+    btn.addEventListener("blur", disarm);
   }
 }
 

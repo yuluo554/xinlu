@@ -35,6 +35,7 @@
 | 2026-10-23 | 部署 | GitHub Pages | Vercel：多一层账号与平台依赖，Pages 与仓库同源；本机直连 GitHub 不通的风险与对策见 04 §风险 |
 | 2026-10-23 | 开源许可 | MIT（仓库根 `LICENSE` 文件，`package.json` license 字段同值） | 无 LICENSE：GitHub 公开传播无授权基础；Apache-2.0：专利条款对本作无增益且文本更重 |
 | 2026-10-23 | 方法论装订 | `ai-tool-project-sprint`：AGENTS.md 锚点 + `tools/check-sprint-layout.mjs` 布局门 + `tools/check-desensitized.mjs` 脱敏门，进 CI layout job | 只靠对话记忆：实测会让交接漏写、状态副本漂移（skill 硬约束③） |
+| 2026-10-24 | 定名（M5 门面阶段决策） | **《心路》正式定名**（与 wordmark / 存档 key `xinlu.save.v1` / package name 一致，产品页随 M5 定稿） | 《人生演化论》《人格工厂》：M0 时已弃；改名将波及存档 key 与全量文档，无增益 |
 
 ## 招牌动词表（标题/定位宣言的能力名词 → 产出 → 断言；填不出即删词）
 
@@ -70,7 +71,7 @@
 | 多结局 ≥ 8（末态回填实际数） | plan/02 endings 设计 | 终局报告 | vitest 结局判定 | ✅（2026-10-24，实际 8 条件 + 1 兜底；实玩命中 3 类，可达性观察项见 backlog B1） |
 | 同种子两次通关结果全等 | 种子化 RNG 设计 | （引擎性质） | vitest 可复现断言 | ✅（2026-10-24） |
 | 双端响应式 | create-project/前端规范 | 全部界面 | 375/1280px 手动清单 | ✅（2026-10-24） |
-| 演示 GIF | 实玩录屏 | README | `git ls-files` | ⬜ 待 M5 录制 |
+| 演示 GIF | 实玩录屏 | README | `git ls-files` | ✅（2026-10-24，docs/assets/demo.gif，实玩流程 7 帧合成） |
 | 线上可玩（Pages） | M6 部署 | URL | 浏览器实开 | ⬜ 待 M6 部署 |
 
 ## 里程碑总表（DoD 列只能加不能减；要减必须在决策记录留行。状态列与 README 状态表是两处机读副本，改状态必须同步翻齐）
@@ -82,7 +83,7 @@
 | M2 | 演化引擎 + 存档 | `npx vitest run` 全绿；同种子两次通关终局四维全等；回滚任一钳制逻辑对应测试必须变红 | ✅（2026-10-24） |
 | M3 | 界面 + 可视化 + 双端响应式 | 375/768/1280px 手动清单全过并留痕；一周目可完整玩通 | ✅（2026-10-24） |
 | M4 | 完整内容：事件密度达标 + 多结局 + 画像文案 | `npm run validate` 全绿；≥3 条不同出生环境全通关实玩留痕；实际事件数回填本档台账 | ✅（2026-10-24） |
-| M5 | 打磨 + 门面（README 产品页 / DEVELOPMENT.md / GIF） | README 门清单（04 §M5）逐项过；全部实物表路径存在 | ⬜ 待 M5 |
+| M5 | 打磨 + 门面（README 产品页 / DEVELOPMENT.md / GIF） | README 门清单（04 §M5）逐项过；全部实物表路径存在 | ✅（2026-10-24） |
 | M6 | 发布：构建→干净环境验证→Pages→CHANGELOG→tag→Release→留档 | **三件套：tag + Release 附产物（dist.zip + sha256）+ plan/05 留档**；Release 说明含五部分；tag 在构建与验证之后 | ⬜ 待 M6 |
 
 ## 可选外部门禁
