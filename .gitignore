@@ -29,3 +29,4 @@ assets/upstream/deepseek-fat-fish-codex-pet/
 # 日志
 *.log
 npm-debug.log*
+assets/**/*.jpg

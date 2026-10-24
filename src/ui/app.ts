@@ -1,4 +1,5 @@
-// 四屏主控制器（vanilla TS，无 UI 框架）：路由 = start / card / aftermath / summary / ending / corrupt。
+// 主控制器（vanilla TS，无 UI 框架）：路由 = start / card / aftermath / summary / ending / corrupt / gallery。
+// v3-M2''：D4=B 时间轴画卷（卡屏 = 左八段轨道 + 右事件卡）；状态条常驻；后果微反馈为一次性非阻塞浮动层。
 // 存档纪律（plan/02 §六）：createRun 与每次 applyChoice / advanceStage 后 save；
 // 启动 load() 有档续局；load 为 null 但 key 在位 = 损坏 → 提示可重开，绝不静默清档。
 import {
@@ -12,7 +13,7 @@ import {
   pickEvent,
   resolveEnding,
 } from "../engine/engine";
-import { STAGES, type BirthEnv, type Dims, type Ending, type RunState, type Stage } from "../engine/model";
+import { STAGES, type BirthEnv, type Dims, type Ending, type ResKey, type RunState, type Stage } from "../engine/model";
 import { clear, hasSaveKey, load, save } from "../storage/storage";
 import { createFishParams, endingFrame, pickChoiceFrame, renderFish, stageFrame, type DeltaDir } from "../viz/fish";
 import { sceneBackdrop } from "../viz/scene";
@@ -25,6 +26,8 @@ import {
   stageDeltas,
   stageEntries,
 } from "./logic";
+import { timelineVM, choiceFloats, RES_KEYS } from "./timeline";
+import { EVENT_ICONS } from "./icons";
 import { exportShareCard } from "./share-card";
 import { GALLERY_TYPES, loadGallery, recordRun, representativeDims } from "./gallery";
 import portraits from "../data/portraits.json" with { type: "json" };
@@ -38,6 +41,8 @@ let view: View = "start";
 let pendingAftermath: { stage: Stage; ageHint: string; text: string } | null = null;
 // choice 类表情反馈帧(02 §二):表现态,不进存档(schema v1 冻结,刷新续局回待机态)。
 let choiceFeedback: string | null = null;
+// 后果微反馈(一次性):onChoose 时装配,下一次 card/aftermath 渲染消费并清空。
+let pendingFeedback: { floaters: ReturnType<typeof choiceFloats>; bump: ResKey[] } | null = null;
 // 本局刚解锁新型(图鉴提示用表现态;刷新续局到终局不重复喊「新解锁」)。
 let galleryJustUnlocked = false;
 // 图鉴格结局记录的 avatar 渲染参数(锁定帧已定,四维取中位代表值)。
@@ -80,15 +85,17 @@ export function mountApp(el: HTMLElement): void {
 function render(): void {
   // 换屏一律回到页首：小结/终局是长页面，innerHTML 替换不会自动复位滚动
   window.scrollTo(0, 0);
+  const feedback = pendingFeedback;
+  pendingFeedback = null;
   switch (view) {
     case "start":
       renderStart();
       break;
     case "card":
-      renderCard();
+      renderCard(feedback);
       break;
     case "aftermath":
-      renderAftermath();
+      renderAftermath(feedback);
       break;
     case "summary":
       renderSummary();
@@ -135,7 +142,7 @@ function renderStart(error?: string): void {
   });
 }
 
-function renderCard(): void {
+function renderCard(feedback: typeof pendingFeedback): void {
   if (!state) return;
   const event = pickEvent(state);
   if (!event) {
@@ -151,10 +158,15 @@ function renderCard(): void {
     text: event.text,
     options: event.options.map((o) => o.text),
     locks: optionLocks(state, event),
-    fishRadius: createFishParams(state.dims).orderliness.radius,
+    line: event.line,
+    critical: event.type === "critical",
+    iconName: EVENT_ICONS[event.id] ?? "",
     backdrop: sceneBackdrop(state.env),
+    timeline: timelineVM(state),
+    resources: state.resources,
+    bump: feedback?.bump ?? [],
+    floaters: feedback?.floaters ?? [],
   });
-  hydrateFish(choiceFeedback ?? undefined);
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-option]")) {
     btn.addEventListener("click", () => onChoose(Number(btn.dataset.option)));
   }
@@ -168,11 +180,17 @@ function onChoose(index: number): void {
     toNext();
     return;
   }
+  // 后果微反馈(v3/02 §三 浮动 + dogfooding 结论 1):按所选选项的三观/资源增量装配,下一屏消费
+  const option = event.options[index];
+  pendingFeedback = {
+    floaters: choiceFloats(option?.deltas3 ?? {}, option?.resourceDeltas ?? {}),
+    bump: RES_KEYS.filter((k) => (option?.resourceDeltas[k] ?? 0) !== 0),
+  };
   // choice 表情反馈(02 §二):按本次派生 tf 偏移方向 + 选择前 mood 抽帧,同种子可复现
   const tfDelta = optionDimsDelta(event, index).tf ?? 0;
   const dir: DeltaDir = tfDelta > 0 ? "pos" : tfDelta < 0 ? "neg" : "neutral";
   choiceFeedback = pickChoiceFrame(dir, createFishParams(state.dims).mood, state.seed + state.history.length);
-  const aftermath = event.options[index]?.aftermath;
+  const aftermath = option?.aftermath;
   state = applyChoice(state, index);
   persist();
   if (aftermath) {
@@ -184,7 +202,7 @@ function onChoose(index: number): void {
   }
 }
 
-function renderAftermath(): void {
+function renderAftermath(feedback: typeof pendingFeedback): void {
   if (!state || !pendingAftermath) {
     toNext();
     return;
@@ -195,6 +213,10 @@ function renderAftermath(): void {
     ageHint: pendingAftermath.ageHint,
     aftermath: pendingAftermath.text,
     backdrop: sceneBackdrop(state.env),
+    timeline: timelineVM(state),
+    resources: state.resources,
+    bump: feedback?.bump ?? [],
+    floaters: feedback?.floaters ?? [],
   });
   hydrateFish(choiceFeedback ?? undefined);
   bindContinue();
@@ -245,6 +267,7 @@ function renderSummary(): void {
     stage,
     count: stageEntries(state.history, stage).length,
     deltas: stageDeltas(state, stage),
+    resources: state.resources,
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
   });
@@ -266,6 +289,7 @@ function renderEnding(): void {
     retrospect: ending.retrospect,
     criticals: criticalChoices(state.history),
     seed: state.seed,
+    resources: state.resources,
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
     gallery: {
@@ -387,6 +411,7 @@ function restart(): void {
   }
   state = null;
   pendingAftermath = null;
+  pendingFeedback = null;
   choiceFeedback = null;
   galleryJustUnlocked = false;
   view = "start";

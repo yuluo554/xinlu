@@ -12,11 +12,13 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-// ── 白名单清单(D1 = B 档,2026-10-24 拍板;前缀目录级,单源 = assets/README.md 台账)──
+// ── 白名单清单(D1 = B 档,2026-10-24 拍板;v3-M2'' 2.1 增补 Game-Icons/CC0;前缀目录级,单源 = assets/README.md 台账)──
 const ALLOW_PREFIXES = [
   "assets/web-ready/",
   "assets/dafeiyu/fish/", // ⚠️ B 档:处理版 webp,已知限制声明随分发(assets/README.md / public/credits.md)
   "assets/cc-by/",
+  "assets/game-icons/", // v3:Game-Icons 事件图标层(CC-BY 3.0,逐张作者对照 docs/v3-M2-icons.md)
+  "assets/cc0/", // v3:CC0 场景底图/纹理(检索式与下载留痕 assets/README.md 增量节)
   "assets/dafeiyu/favicon.svg",
   "public/",
   "docs/assets/", // 项目自产截图留痕(非第三方素材)
@@ -37,6 +39,7 @@ const CREDIT_LINES = [
   "Ocean Animals by Jana Ochse",
   "YunYueSama/codex-deepseek-pet",
   "1190fasheqi/dafeiyu-pet",
+  "Icons made by Lorc, Delapouite and contributors (game-icons.net, CC-BY 3.0)", // v3 事件图标层;逐张作者对照 docs/v3-M2-icons.md
 ];
 
 const fails = [];
@@ -112,7 +115,7 @@ if (!existsSync(join(ROOT, CREDITS))) {
 const out = (s) => process.stdout.write(s + "\n");
 out("素材许可门 · 依据 plan/v2/02 §六(许可结论单源:assets/README.md)");
 out("=".repeat(56));
-out(`PASS  git 跟踪图像 ${trackedImages.length} 件 ⊆ 白名单(D1=B:web-ready + fish/ 处理版 + cc-by + favicon)`);
+out(`PASS  git 跟踪图像 ${trackedImages.length} 件 ⊆ 白名单(D1=B:web-ready + fish/ 处理版 + cc-by + game-icons + cc0 + favicon)`);
 if (existsSync(join(distDir, "index.html"))) out(`PASS  dist 图像 ${listImages(distDir, distDir).length} 件全部溯源到白名单源`);
 out("PASS  ❌ 层(梗图原图 / GIF 原件)未进入 git 跟踪与 dist");
 out(`PASS  credits ${CREDITS} 在位且署名行齐(Open Ocean / Ocean Animals / 大肥鱼双仓库)`);

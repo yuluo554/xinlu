@@ -1,22 +1,29 @@
-// 四屏 HTML 装配（字符串模板）。动态文本一律经 esc() 转义；
-// 出生四要素枚举由 engine.birthEnvOptions() 传入渲染，UI 不内联枚举清单（plan/03 §4）。
+// 屏幕装配（字符串模板，v3-M2'' D4=B 时间轴画卷重设计）。
+// 布局口径：桌面双栏（左八段轨道含线别色点 + 右事件卡），移动单列竖向时间轴（08 §四）；
+// mascot 沿 08 §四降级为三类出场（抉择反馈表情=aftermath / 阶段转场彩蛋=summary / 终局庆祝=ending），事件卡以图标承担叙事。
+// 动态文本一律经 esc() 转义；出生四要素枚举由 engine.birthEnvOptions() 传入渲染，UI 不内联枚举清单（plan/03 §4）。
 import {
   DIM_KEYS,
   STAGES,
   type BirthEnv,
   type DimKey,
   type Dims,
+  type LineKey,
+  type ResKey,
+  type Resources,
   type Stage,
 } from "../engine/model";
 import type { SceneBackdrop } from "../viz/scene";
 import { DIM_SHORT, STAGE_LABEL, type ChoiceReview } from "./logic";
 import { ENDING_META, GALLERY_TYPES, type GalleryData } from "./gallery";
+import { LINE_META, RES_META, RES_KEYS, type Floater, type TimelineSegment } from "./timeline";
+import { iconStyle } from "./icons";
 // 场景氛围素材 URL(vite 静态 import → dist hash 文件名;水面/云层 = CC-BY Open Ocean 组,图标 = Simple Worlds 提取件)
 import waterUrl from "../../assets/web-ready/open-ocean/Other/WikndWakerWater_Background.webp";
 import cloudsUrl from "../../assets/web-ready/open-ocean/Other/Clouds_Background.webp";
 import jellyfishSvg from "../../assets/cc-by/simple-worlds-ocean-animals/jellyfish.svg";
 
-/** 场景氛围层(3.3):水面纹理 + 云层,出生环境经 sceneBackdrop 驱动;装饰性,aria-hidden。 */
+/** 场景氛围层(v2-M3' 3.3):水面纹理 + 云层,出生环境经 sceneBackdrop 驱动;装饰性,aria-hidden。 */
 function sceneLayer(backdrop: SceneBackdrop): string {
   return `
     <div class="scene" data-scene aria-hidden="true">
@@ -43,7 +50,21 @@ const ELEMENT_META: Array<{ key: keyof BirthEnv; label: string }> = [
   { key: "style", label: "教养方式" },
 ];
 
-function topbar(stageIndex: number): string {
+/** 常驻状态条（v3/02 §三：图标+数值，无进度条堆砌）；bump = 本步有增损的资源键，渲染即触发数值弹跳。 */
+function statebar(resources: Resources | null, bump: readonly ResKey[]): string {
+  if (!resources) return "";
+  const items = RES_KEYS.map((key) => {
+    const meta = RES_META[key];
+    const bumpCls = bump.includes(key) ? " bump" : "";
+    return `<span class="res res-${key}${bumpCls}" data-res="${key}" title="${meta.label}">
+      <span class="res-icon" data-res-icon="${meta.icon}" style="${esc(iconStyle(meta.icon))}" aria-hidden="true"></span>
+      <span class="statebar-value">${resources[key]}</span>
+    </span>`;
+  }).join("");
+  return `<div class="statebar" role="status" aria-label="状态">${items}</div>`;
+}
+
+function topbar(stageIndex: number, resources: Resources | null = null, bump: readonly ResKey[] = []): string {
   const dots = STAGES.map((_, i) =>
     `<span class="dot${i < stageIndex ? " done" : i === stageIndex ? " now" : ""}"></span>`,
   ).join("");
@@ -51,8 +72,34 @@ function topbar(stageIndex: number): string {
     <header class="topbar">
       <span class="wordmark">心路</span>
       <div class="dots" aria-label="人生进度">${dots}</div>
+      ${statebar(resources, bump)}
       <button type="button" class="btn-ghost" data-restart>重开</button>
     </header>`;
+}
+
+/** 八段时间轴轨道（D4=B 左栏）：线别色点按发生序，critical 加环；done/now/future 三态。 */
+function timelineRail(segments: readonly TimelineSegment[]): string {
+  const rows = segments
+    .map((seg) => {
+      const dots = seg.nodes
+        .map((n) => `<span class="tl-dot ${LINE_META[n.line].cls}${n.critical ? " tl-critical" : ""}"></span>`)
+        .join("");
+      return `<div class="timeline-segment status-${seg.status}" data-stage="${seg.stage}">
+        <div class="tl-head"><span class="tl-node" aria-hidden="true"></span><span class="tl-label tl-full">${seg.label}</span><span class="tl-label tl-short" aria-hidden="true">${seg.short}</span></div>
+        <div class="tl-dots"${seg.nodes.length === 0 ? ' data-empty="1"' : ""}>${dots}</div>
+      </div>`;
+    })
+    .join("");
+  return `<nav class="timeline" aria-label="人生时间轴">${rows}</nav>`;
+}
+
+/** 后果微反馈浮动层（非阻塞，渲染即自播自灭；pointer-events:none 不拦截操作）。 */
+function floatLayer(floaters: readonly Floater[]): string {
+  if (floaters.length === 0) return "";
+  const items = floaters
+    .map((f, i) => `<span class="floater ${f.cls}" style="--fd:${i * 120}ms">${esc(f.text)}</span>`)
+    .join("");
+  return `<div class="float-layer" aria-hidden="true">${items}</div>`;
 }
 
 export function startScreen(options: Record<keyof BirthEnv, string[]>, error?: string): string {
@@ -90,28 +137,49 @@ export function cardAskScreen(vm: {
   text: string;
   options: string[];
   locks: boolean[];
-  fishRadius: number;
+  line: LineKey;
+  critical: boolean;
+  iconName: string;
   backdrop: SceneBackdrop;
+  timeline: readonly TimelineSegment[];
+  resources: Resources;
+  bump: readonly ResKey[];
+  floaters: readonly Floater[];
 }): string {
+  const line = LINE_META[vm.line];
+  const head = `
+    <header class="card-head">
+      ${vm.iconName ? `<span class="ev-icon ${line.cls}" data-icon="${esc(vm.iconName)}" style="${esc(iconStyle(vm.iconName))}" aria-hidden="true"></span>` : ""}
+      <div class="card-meta">
+        <span class="chip chip-line ${line.cls}">${line.label}</span>
+        <span class="chip chip-age">${esc(vm.ageHint)}</span>
+        ${vm.critical ? '<span class="critical-badge">重大抉择</span>' : ""}
+      </div>
+    </header>`;
   return `
-    <section class="screen screen-card">
+    <section class="screen screen-card layout-timeline">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex)}
-      <article class="card event-card" data-age-months="${vm.ageMonths}">
-        <p class="stage-tag">${STAGE_LABEL[vm.stage]} · ${esc(vm.ageHint)}</p>
-        <div class="fish-slot" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
-        <p class="event-text">${esc(vm.text)}</p>
-        <div class="options">
-          ${vm.options
-            .map(
-              (o, i) =>
-                vm.locks[i]
-                  ? `<button type="button" class="option" data-option="${i}">${esc(o)}</button>`
-                  : `<button type="button" class="option option-locked" data-option="${i}" disabled title="资源不足，此路暂不可选">${esc(o)}</button>`,
-            )
-            .join("")}
+      ${topbar(vm.stageIndex, vm.resources, vm.bump)}
+      ${floatLayer(vm.floaters)}
+      <div class="timeline-body">
+        ${timelineRail(vm.timeline)}
+        <div class="stage-main">
+          <article class="card event-card${vm.critical ? " critical" : ""}" data-age-months="${vm.ageMonths}">
+            ${head}
+            <p class="event-text">${esc(vm.text)}</p>
+            <div class="options">
+              ${vm.options
+                .map(
+                  (o, i) =>
+                    vm.locks[i]
+                      ? `<button type="button" class="option" data-option="${i}">${esc(o)}</button>`
+                      : `<button type="button" class="option option-locked" data-option="${i}" disabled title="资源不足，此路暂不可选">${esc(o)}</button>`,
+                )
+                .join("")}
+            </div>
+          </article>
         </div>
-      </article>
+      </div>
     </section>`;
 }
 
@@ -121,18 +189,29 @@ export function cardAftermathScreen(vm: {
   ageHint: string;
   aftermath: string;
   backdrop: SceneBackdrop;
+  timeline: readonly TimelineSegment[];
+  resources: Resources;
+  bump: readonly ResKey[];
+  floaters: readonly Floater[];
 }): string {
   return `
-    <section class="screen screen-card">
+    <section class="screen screen-card layout-timeline">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex)}
-      <article class="card event-card">
-        <p class="stage-tag">${STAGE_LABEL[vm.stage]} · ${esc(vm.ageHint)}</p>
-        <p class="aftermath">${esc(vm.aftermath)}</p>
-        <div class="options">
-          <button type="button" class="btn btn-primary" data-continue>继续</button>
+      ${topbar(vm.stageIndex, vm.resources, vm.bump)}
+      ${floatLayer(vm.floaters)}
+      <div class="timeline-body">
+        ${timelineRail(vm.timeline)}
+        <div class="stage-main">
+          <article class="card event-card">
+            <p class="stage-tag">${STAGE_LABEL[vm.stage]} · ${esc(vm.ageHint)}</p>
+            <div class="fish-slot" data-slot="fish"></div>
+            <p class="aftermath">${esc(vm.aftermath)}</p>
+            <div class="options">
+              <button type="button" class="btn btn-primary" data-continue>继续</button>
+            </div>
+          </article>
         </div>
-      </article>
+      </div>
     </section>`;
 }
 
@@ -141,6 +220,7 @@ export function summaryScreen(vm: {
   stage: Stage;
   count: number;
   deltas: Dims;
+  resources: Resources;
   fishRadius: number;
   backdrop: SceneBackdrop;
 }): string {
@@ -153,7 +233,7 @@ export function summaryScreen(vm: {
   return `
     <section class="screen screen-summary">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex)}
+      ${topbar(vm.stageIndex, vm.resources)}
       <h2>${STAGE_LABEL[vm.stage]} · 小结<img class="stage-icon" src="${jellyfishSvg}" alt="" aria-hidden="true"></h2>
       <p class="muted">本阶段经历了 ${vm.count} 次抉择，四维悄然挪动：</p>
       <div class="fish-slot fish-slot-stage" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
@@ -172,6 +252,7 @@ export function endingScreen(vm: {
   retrospect: string[];
   criticals: ChoiceReview[];
   seed: number;
+  resources: Resources;
   fishRadius: number;
   backdrop: SceneBackdrop;
   gallery: GalleryHint | null;
@@ -188,7 +269,7 @@ export function endingScreen(vm: {
   return `
     <section class="screen screen-ending">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(STAGES.length)}
+      ${topbar(STAGES.length, vm.resources)}
       <h2>${esc(vm.title)}</h2>
       <p class="ending-type">${esc(vm.letters)}</p>
       <div class="fish-slot fish-slot-ending" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>

@@ -6,6 +6,7 @@
 Open Ocean Game Art by Paul Kankiewicz (CC-BY 3.0/4.0)
 Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 大肥鱼素材：YunYueSama/codex-deepseek-pet（大肥鱼项目署名许可 1.0）；1190fasheqi/dafeiyu-pet（MIT）
+Icons made by Lorc, Delapouite and contributors (game-icons.net, CC-BY 3.0)
 ```
 
 ## 已知限制声明（D1 = B 档，2026-10-24）

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// ═══ E2E 双端一键通关冒烟（v2-M1' 1.1 · v2/03 §1 契约）═══
+// ═══ E2E 双端一键通关冒烟（v2-M1' 1.1 · v2/03 §1 契约；v3-M2'' 增时间轴/状态条/分级/浮动断言 + 768 中档截图）═══
 // 零新增依赖：node 24 内置 WebSocket 直连 CDP，驱动本机 Edge 无头实例。
 // 流程：vite build → vite preview（静态服务）→ Edge headless（CDP 9223）→
 //       375/1280 两档视口各完整通关一局（同步 evaluate 连点，套路 = plan/HANDOFF-M7 §五）→
-//       断言关键屏节点与终局类型非空 → 截图留痕（暖帧丢弃）→ 清杀子进程。
+//       断言关键屏节点与终局类型非空 → 截图留痕（暖帧丢弃）→ 768 中档布局断言 + 截图 → 清杀子进程。
 // 退出码：0 全绿 / 1 断言失败或环境异常 / 2 用法错误。
 // 纪律：本脚本不加任何 devDependencies（K2 零运行时依赖的测试侧延伸）。
 
@@ -247,17 +247,37 @@ async function main() {
         if (!switched) throw new Error(`${vp.width} 档:改选出生环境失败`);
       }
 
-      // v2-M2' 卡片流 mascot 断言:提交开局进入首卡,mascot 已挂载且表情帧 href 非空(待机态)
+      // v3-M2' 时间轴画卷断言:提交开局进入首卡——图标位/状态条/八段轨道在位,mascot 已按 08 §四降级(卡上无鱼)
       await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
-      const cardFish = await cdp.evaluate(`(() => {
-        const svg = document.querySelector(".screen-card .fish-mascot");
-        if (!svg) return null;
-        const frame = svg.querySelector(".fish-frame");
-        return { idle: !!svg.querySelector(".fish-idle"), href: frame ? frame.getAttribute("href") : "" };
+      const cardInfo = await cdp.evaluate(`(() => {
+        const card = document.querySelector(".screen-card .event-card[data-age-months]");
+        const icon = card?.querySelector(".ev-icon[data-icon]");
+        const res = [...document.querySelectorAll(".statebar .res")].map((r) => ({
+          key: r.dataset.res,
+          v: Number(r.querySelector(".statebar-value")?.textContent ?? NaN),
+        }));
+        return {
+          card: !!card,
+          iconName: icon?.dataset.icon ?? "",
+          iconMasked: icon ? (icon.style.getPropertyValue("--gi") || "").includes("url(") : false,
+          statebar: res,
+          railSegs: document.querySelectorAll(".timeline .timeline-segment").length,
+          railWidth: document.querySelector(".timeline")?.getBoundingClientRect().width ?? 0,
+          fishOnCard: !!document.querySelector(".screen-card .fish-mascot"),
+        };
       })()`);
-      if (!cardFish) throw new Error(`${vp.width} 档：卡片流 mascot 未渲染`);
-      if (!cardFish.idle) throw new Error(`${vp.width} 档：卡片流 mascot 不在待机态`);
-      if (!cardFish.href) throw new Error(`${vp.width} 档：mascot 表情帧 href 为空`);
+      if (!cardInfo.card) throw new Error(`${vp.width} 档：事件卡未渲染`);
+      if (!cardInfo.iconName) throw new Error(`${vp.width} 档：事件卡图标位缺失（icon-map 未接线）`);
+      if (!cardInfo.iconMasked) throw new Error(`${vp.width} 档：事件卡图标未挂 SVG mask URL`);
+      if (cardInfo.statebar.length !== 3) throw new Error(`${vp.width} 档：状态条非 3 项（实得 ${cardInfo.statebar.length}）`);
+      for (const r of cardInfo.statebar) {
+        if (!Number.isInteger(r.v) || r.v < 0 || r.v > 100) throw new Error(`${vp.width} 档：状态条 ${r.key} 值非法（${r.v}）`);
+      }
+      if (cardInfo.railSegs !== 8) throw new Error(`${vp.width} 档：时间轴轨道非 8 段（实得 ${cardInfo.railSegs}）`);
+      if (vp.width >= 768 ? cardInfo.railWidth < 200 : cardInfo.railWidth > 100) {
+        throw new Error(`${vp.width} 档：轨道宽度 ${cardInfo.railWidth.toFixed(0)}px 不符合${vp.width >= 768 ? "桌面双栏" : "移动窄轨"}口径`);
+      }
+      if (cardInfo.fishOnCard) throw new Error(`${vp.width} 档：事件卡上仍有 mascot（08 §四降级口径：三类出场，卡由图标承担）`);
 
       // v2-M3' 场景背景断言:水面滤镜与云层不透明度 = 出生环境映射值(scene.ts 口径)
       const scene = await cdp.evaluate(`(() => {
@@ -278,9 +298,14 @@ async function main() {
 
       // 同步 evaluate 连点：卡片点第 0 项 / 小结与 aftermath 继续 / 开局提交默认组合
       // v3-M1'':全程采集 data-age-months 序列与选项数（年龄不回退 + ≥3 选项断言）
+      // v3-M2'':增采状态条值域 / 图标覆盖 / critical 分级 / 轨道色点增长 / 浮动层
       const ageSeq = [];
       let minOptions = Infinity;
       let endingSeen = false;
+      let cardActions = 0;
+      let criticalSeen = 0;
+      let floatSeen = false;
+      let dotsGrew = false;
       for (let step = 0; step < MAX_STEPS; step++) {
         const acted = await cdp.evaluate(`(() => {
           if (document.querySelector(".screen-ending")) return "ending";
@@ -289,6 +314,10 @@ async function main() {
           if (card && opt) {
             window.__age = Number(card.dataset.ageMonths);
             window.__opts = document.querySelectorAll("[data-option]").length;
+            window.__card = {
+              critical: card.classList.contains("critical"),
+              icon: !!card.querySelector(".ev-icon[data-icon]"),
+            };
             opt.click();
             return "card";
           }
@@ -303,14 +332,32 @@ async function main() {
           break;
         }
         if (acted === "card") {
-          const sample = await cdp.evaluate("({ age: window.__age, opts: window.__opts })");
+          cardActions++;
+          const sample = await cdp.evaluate(`(() => ({
+            age: window.__age,
+            opts: window.__opts,
+            card: window.__card,
+            res: [...document.querySelectorAll(".statebar .statebar-value")].map((e) => Number(e.textContent)),
+            dots0: document.querySelectorAll(".timeline-segment")[0]?.querySelectorAll(".tl-dot").length ?? 0,
+            floats: !!document.querySelector(".float-layer"),
+          }))()`);
           ageSeq.push(sample.age);
           minOptions = Math.min(minOptions, sample.opts);
+          if (!sample.card.icon) throw new Error(`${vp.width} 档：第 ${cardActions} 张卡无图标位`);
+          if (sample.card.critical) criticalSeen++;
+          if (sample.floats) floatSeen = true;
+          for (const v of sample.res) {
+            if (!Number.isInteger(v) || v < 0 || v > 100) throw new Error(`${vp.width} 档：状态条值越界 ${v}（第 ${cardActions} 卡）`);
+          }
+          if (cardActions >= 2 && sample.dots0 >= 1) dotsGrew = true;
         }
         if (String(acted).startsWith("stuck:")) throw new Error(`页面卡在未知屏：${acted}`);
       }
       if (!endingSeen) throw new Error(`${vp.width} 档：${MAX_STEPS} 步内未到终局`);
       if (minOptions < 3) throw new Error(`${vp.width} 档：出现选项数 ${minOptions} < 3 的卡片（v3 口径 ≥3）`);
+      if (!floatSeen) throw new Error(`${vp.width} 档：全程未观察到后果浮动层（微反馈缺失）`);
+      if (!dotsGrew) throw new Error(`${vp.width} 档：时间轴轨道色点未随抉择增长`);
+      if (criticalSeen < 1) throw new Error(`${vp.width} 档：全程未出现 critical 分级卡`);
       for (let i = 1; i < ageSeq.length; i++) {
         if (ageSeq[i] < ageSeq[i - 1]) {
           throw new Error(`${vp.width} 档：年龄回退 ${ageSeq[i - 1]} → ${ageSeq[i]}（第 ${i} 张卡，v3 单调口径）`);
@@ -430,10 +477,44 @@ async function main() {
       out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄`);
     }
 
+    // ── v3-M2'' 768 中档（三档截图口径：375/768/1280）：桌面双栏布局断言 + 截图留痕，不重复全量通关 ──
+    out("[4.5/5] 768 中档截图 + 双栏布局断言 …");
+    await cdp.send("Emulation.setDeviceMetricsOverride", {
+      width: 768,
+      height: 900,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await cdp.evaluate("localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
+    await cdp.send("Page.navigate", { url: pageUrl });
+    await cdp.waitEvent("Page.loadEventFired");
+    await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
+    const mid = await cdp.evaluate(`(() => {
+      const rail = document.querySelector(".timeline");
+      const card = document.querySelector(".screen-card .event-card[data-age-months]");
+      return {
+        railWidth: rail?.getBoundingClientRect().width ?? 0,
+        railVisible: !!rail?.offsetParent,
+        card: !!card,
+        icon: !!card?.querySelector(".ev-icon[data-icon]"),
+        statebar: document.querySelectorAll(".statebar .res").length,
+      };
+    })()`);
+    if (!mid.card) throw new Error("768 档：事件卡未渲染");
+    if (!mid.icon) throw new Error("768 档：事件卡图标位缺失");
+    if (mid.statebar !== 3) throw new Error(`768 档：状态条非 3 项（实得 ${mid.statebar}）`);
+    if (!mid.railVisible || mid.railWidth < 200) {
+      throw new Error(`768 档：桌面双栏轨道未生效（宽 ${mid.railWidth.toFixed(0)}px）`);
+    }
+    await cdp.send("Page.captureScreenshot", { format: "png" });
+    const shot768 = await cdp.send("Page.captureScreenshot", { format: "png" });
+    writeFileSync(join(ROOT, "docs", "assets", "e2e-smoke-768.png"), Buffer.from(shot768.data, "base64"));
+    out(`      ✓ 768 档：双栏轨道 ${mid.railWidth.toFixed(0)}px + 图标 + 状态条，截图 e2e-smoke-768.png`);
+
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 选项≥3`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 选项≥3 图标全覆盖 critical分级/状态条/轨道色点/浮动层已断言`);
     }
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
     out("=".repeat(56));

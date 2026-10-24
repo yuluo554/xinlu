@@ -1,16 +1,25 @@
 /* 心路 · 设计规范落地（DESIGN.md / plan 04 §M3）：浅色纸面、大留白、单一强调色、圆角卡片、轻动效。
-   色板三角色：ground / ink / accent（玉青 #2f7d6d）；表面用音调步进区分，不用分隔线与投影。 */
+   v3-M2'' D4=B 时间轴画卷：暖纸底（CC0 parchment 纹理铺底）+ 六线别色 + 墨色描边分级。
+   色板三角色：ground / ink / accent（玉青 #2f7d6d）；线别色语义见 plan/v3/02 §四（枚举名，非新口径）。 */
 :root {
   color-scheme: light;
-  --ground: #fafaf7;
-  --surface: #ffffff;
-  --surface-2: #f1efe9;
-  --ink: #2b2b28;
-  --ink-2: #6f6f66;
-  --ink-3: #a6a69b;
+  --ground: #f2ecdd;
+  --surface: #fdfaf2;
+  --surface-2: #ece5d2;
+  --ink: #33302a;
+  --ink-2: #6e6a5f;
+  --ink-3: #a39d8d;
   --accent: #2f7d6d;
   --accent-deep: #26655a;
   --accent-soft: rgba(47, 125, 109, 0.12);
+  --line-fate: #955539;
+  --line-study: #47679e;
+  --line-career: #b0812a;
+  --line-love: #b5546a;
+  --line-friend: #57855c;
+  --line-health: #3d7f8a;
+  --up: #2e7d4f;
+  --down: #a54040;
   --radius: 16px;
   --radius-item: 12px;
   --radius-pill: 999px;
@@ -23,7 +32,11 @@
 
 body {
   margin: 0;
-  background: var(--ground);
+  background-color: var(--ground);
+  /* CC0 parchment 纹理铺底（assets/cc0/，soft-light 融入纸色，画卷质感） */
+  background-image: url("../assets/cc0/parchment/parchment-bg.webp");
+  background-size: 300px;
+  background-blend-mode: soft-light;
   color: var(--ink);
   font-size: 16px;
   line-height: 1.7;
@@ -36,7 +49,7 @@ body {
   flex-direction: column;
 }
 
-/* —— 屏骨架：移动单列，桌面加宽 —— */
+/* —— 屏骨架：移动单列，桌面加宽；时间轴屏放宽到画卷幅面 —— */
 .screen {
   width: 100%;
   max-width: 640px;
@@ -46,10 +59,20 @@ body {
   animation: rise 0.28s ease-out both;
 }
 
+.screen.layout-timeline {
+  max-width: 1120px;
+  padding-top: 14px;
+}
+
 @media (min-width: 768px) {
   .screen {
     max-width: 760px;
     padding-top: 40px;
+  }
+
+  .screen.layout-timeline {
+    max-width: 1120px;
+    padding-top: 22px;
   }
 }
 
@@ -64,12 +87,13 @@ body {
   }
 }
 
-/* —— 顶栏与进度点 —— */
+/* —— 顶栏、进度点与常驻状态条 —— */
 .topbar {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
 .wordmark {
@@ -99,6 +123,77 @@ body {
 .dot.now {
   background: var(--ground);
   box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* 状态条（v3/02 §三：图标+数值，无进度条堆砌）；bump = 本步有增损，数值弹跳一次 */
+.statebar {
+  display: flex;
+  gap: 6px;
+}
+
+.res {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid rgba(51, 48, 42, 0.12);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.res-icon {
+  width: 14px;
+  height: 14px;
+  -webkit-mask: var(--gi) center / contain no-repeat;
+  mask: var(--gi) center / contain no-repeat;
+  background-color: currentColor;
+}
+
+.res-mood .res-icon {
+  color: var(--line-love);
+}
+
+.res-money .res-icon {
+  color: var(--line-career);
+}
+
+.res-health .res-icon {
+  color: var(--line-health);
+}
+
+.res.bump .statebar-value {
+  display: inline-block;
+  animation: res-bump 0.6s ease-out;
+}
+
+@keyframes res-bump {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 767px) {
+  .topbar {
+    row-gap: 8px;
+  }
+
+  .wordmark {
+    margin-right: 0;
+  }
+
+  .statebar {
+    order: 5;
+    flex-basis: 100%;
+    justify-content: flex-end;
+  }
 }
 
 /* —— 按钮层级：主行动一色填充，次级静音 —— */
@@ -250,11 +345,299 @@ body {
   margin-top: 32px;
 }
 
-/* —— 卡片流 —— */
+/* —— 时间轴画卷（D4=B）：桌面双栏（左八段轨道+右事件卡），移动单列竖轴 —— */
+.timeline-body {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .timeline-body {
+    grid-template-columns: 236px minmax(0, 1fr);
+    gap: 32px;
+  }
+}
+
+.stage-main {
+  min-width: 0;
+}
+
+.stage-main .event-card {
+  max-width: 660px;
+  margin: 0 auto;
+}
+
+/* 左栏八段轨道：竖向连线 + 线别色点云（done/now/future 三态） */
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 20px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  bottom: 12px;
+  width: 2px;
+  border-radius: 1px;
+  background: rgba(51, 48, 42, 0.14);
+}
+
+.timeline-segment {
+  position: relative;
+  padding: 4px 0 10px;
+}
+
+.tl-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tl-node {
+  position: absolute;
+  left: -20px;
+  top: 9px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--ink-3);
+}
+
+.timeline-segment.status-now .tl-node {
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent-deep), 0 0 0 4px var(--accent-soft);
+}
+
+.timeline-segment.status-future {
+  opacity: 0.42;
+}
+
+.tl-label {
+  font-size: 0.82rem;
+  color: var(--ink-2);
+  letter-spacing: 0.06em;
+}
+
+.timeline-segment.status-now .tl-label {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.tl-full {
+  display: none;
+}
+
+.tl-dots {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.tl-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--dot, var(--ink-3));
+  animation: dot-in 0.32s ease-out both;
+}
+
+@keyframes dot-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.tl-dot.line-fate {
+  --dot: var(--line-fate);
+}
+
+.tl-dot.line-study {
+  --dot: var(--line-study);
+}
+
+.tl-dot.line-career {
+  --dot: var(--line-career);
+}
+
+.tl-dot.line-love {
+  --dot: var(--line-love);
+}
+
+.tl-dot.line-friend {
+  --dot: var(--line-friend);
+}
+
+.tl-dot.line-health {
+  --dot: var(--line-health);
+}
+
+.tl-dot.tl-critical {
+  width: 11px;
+  height: 11px;
+  box-shadow: 0 0 0 2.5px var(--ground), 0 0 0 4px var(--dot, var(--ink));
+}
+
+@media (min-width: 768px) {
+  .tl-full {
+    display: inline;
+  }
+
+  .tl-short {
+    display: none;
+  }
+
+  .tl-dots {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+}
+
+/* —— 事件卡：图标位 + 线别标签 + 年龄徽章 + 重量分级 —— */
 .card {
   background: var(--surface);
   border-radius: var(--radius);
   padding: 28px 24px;
+  border: 1px solid rgba(51, 48, 42, 0.1);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.ev-icon {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  padding: 10px;
+  border-radius: var(--radius-item);
+  background-color: rgba(51, 48, 42, 0.07);
+}
+
+.ev-icon.line-fate {
+  color: var(--line-fate);
+}
+
+.ev-icon.line-study {
+  color: var(--line-study);
+}
+
+.ev-icon.line-career {
+  color: var(--line-career);
+}
+
+.ev-icon.line-love {
+  color: var(--line-love);
+}
+
+.ev-icon.line-friend {
+  color: var(--line-friend);
+}
+
+.ev-icon.line-health {
+  color: var(--line-health);
+}
+
+/* mask 著色：外层持色（currentColor 由线别类给定），内层持纹理裁形 */
+.ev-icon::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  -webkit-mask: var(--gi) center / contain no-repeat;
+  mask: var(--gi) center / contain no-repeat;
+  background-color: currentColor;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-line,
+.chip-age {
+  display: inline-block;
+  padding: 2px 11px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  border: 1px solid currentColor;
+  line-height: 1.7;
+}
+
+.chip-age {
+  color: var(--ink-2);
+  border-color: rgba(51, 48, 42, 0.22);
+}
+
+.chip-line.line-fate {
+  color: var(--line-fate);
+}
+
+.chip-line.line-study {
+  color: var(--line-study);
+}
+
+.chip-line.line-career {
+  color: var(--line-career);
+}
+
+.chip-line.line-love {
+  color: var(--line-love);
+}
+
+.chip-line.line-friend {
+  color: var(--line-friend);
+}
+
+.chip-line.line-health {
+  color: var(--line-health);
+}
+
+/* 抉择重量分级（08 §四）：critical 深色描边 + 徽章 + 更重的入场 */
+.event-card.critical {
+  border: 2px solid var(--ink);
+  box-shadow: 0 12px 32px rgba(51, 48, 42, 0.14);
+  animation: rise-critical 0.42s ease-out both;
+}
+
+@keyframes rise-critical {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.critical-badge {
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
 }
 
 .stage-tag {
@@ -297,6 +680,14 @@ body {
   transform: scale(0.99);
 }
 
+.event-card.critical .option {
+  background: rgba(51, 48, 42, 0.05);
+}
+
+.event-card.critical .option:hover {
+  background: rgba(51, 48, 42, 0.1);
+}
+
 .option-locked {
   opacity: 0.55;
   cursor: not-allowed;
@@ -306,10 +697,69 @@ body {
   background: var(--surface-2);
 }
 
+.event-card.critical .option-locked:hover {
+  background: rgba(51, 48, 42, 0.05);
+}
+
 .aftermath {
   margin: 0 0 24px;
   color: var(--ink-2);
   line-height: 1.85;
+}
+
+/* —— 后果微反馈浮动层（非阻塞，自播自灭） —— */
+.float-layer {
+  position: fixed;
+  top: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.floater {
+  padding: 4px 13px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid rgba(51, 48, 42, 0.18);
+  box-shadow: 0 4px 14px rgba(51, 48, 42, 0.12);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  animation: float-up 2.2s ease-out both;
+  animation-delay: var(--fd, 0ms);
+}
+
+.floater.up {
+  color: var(--up);
+  border-color: rgba(46, 125, 79, 0.4);
+}
+
+.floater.down {
+  color: var(--down);
+  border-color: rgba(165, 64, 64, 0.4);
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  68% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
 }
 
 /* —— 阶段小结 / 终局 —— */
@@ -534,7 +984,9 @@ body {
 
 /* 轻动效兜底：偏好减弱动效时保留内容、去掉位移动画 */
 @media (prefers-reduced-motion: reduce) {
-  .screen {
+  .screen,
+  .event-card.critical,
+  .tl-dot {
     animation: none;
   }
 
@@ -544,6 +996,15 @@ body {
   .btn-ghost,
   .dot {
     transition: none;
+  }
+
+  .floater {
+    animation-duration: 0.01s;
+    animation-delay: 0s;
+  }
+
+  .res.bump .statebar-value {
+    animation: none;
   }
 }
 

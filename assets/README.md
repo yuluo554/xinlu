@@ -76,3 +76,28 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 - 中文文件名（sprites/侧面.png 等）在 git 输出显示为八进制转义属显示问题，`git -c core.quotepath=false status` 可读。
 - Open Ocean 保留原 zip 留底，解压件在同名子目录 `OpenOceanArt/` 并存。
 - 所有下载均校验过尺寸/魔数（PNG IEND、GIF 头），梗图曾因镜像截断，已断点续传补全至 1530733 字节。
+
+## v3 增量节（v3-M2'' 2.1 素材采集，2026-10-24）
+
+> 依据 plan/v3/02 §九（D3 拍板：CC0 底图/纹理 + Game-Icons 事件图标层）。许可门白名单扩展**先于**素材入库（plan/v3/03 模块 6 排序纪律），本节是新增素材的检索式与下载留痕。
+
+### Game-Icons 事件图标层（`game-icons/`）
+
+| 项 | 内容 |
+|---|---|
+| 来源 | game-icons.net 官方全量包 `https://game-icons.net/archives/000000/transparent/game-icons.net.svg.zip`（4,168,300 字节；直连一次成功，未走镜像） |
+| 许可证 | CC-BY 3.0（个别作者 CC0；本次 175 枚无 CC0 件）；`game-icons/LICENSE-game-icons.txt` 原文随附 |
+| 选取 | 175 枚（每事件 1 枚、零重复）；对照表单源 `src/data/icon-map.json`；逐张对文案清单 `docs/v3-M2-icons.md` |
+| 处理 | **原样入库**（官方包即最小化产物，实测无 metadata 可剥）；路径 `game-icons/icons/<作者>/<名>.svg`，作者目录即署名单位 |
+| 检索式 | 无需检索（全量包直接解取）；替代路径实测：gh-proxy/jdelivr raw 均 404（仓库路径不含裸 author/ 顶层），`all.svg.zip` 旧地址 301→404 |
+| 署名 | `Icons made by Lorc, Delapouite and contributors (game-icons.net, CC-BY 3.0)`（public/credits.md 已加，许可门 CREDIT_LINES 同步） |
+
+### CC0 场景底图/纹理（`cc0/parchment/`）
+
+| 素材 | 来源 | 许可证 | 检索式 | 处理 |
+|---|---|---|---|---|
+| `parchment-bg.webp`（1.9KB） | [OpenGameArt · Parchment background](https://opengameart.org/content/parchment-background)（FelisChaus_ParchmentBackground.jpg，380×421） | CC0（页面明示） | OGA 高级搜索 `keys=paper texture` + 类型=Texture + 许可=CC0，结果第 7 位 | ffmpeg libwebp q60 原尺寸直转 |
+| `parchment-fold.webp`（5.7KB） | [OpenGameArt · Old Parchment Paper](https://opengameart.org/content/old-parchment-paper)（parchment.jpg，640×480） | CC0（作者页明示） | 同上，结果第 3 位 | ffmpeg 中心裁剪 520×360 后 q60（去撕边留十字折痕，画卷质感） |
+| 上游 jpg 留底 | 同上两件原始件 | — | — | 留 `cc0/parchment/` 本地（.gitignore `assets/**/*.jpg` 扩展，原始位图不入 git 纪律延续） |
+
+跟踪策略：`assets/game-icons/`（SVG 原样 + 溯源文本）与 `assets/cc0/**/*.webp`（处理版）入 git；jpg 原始件不入。

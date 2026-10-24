@@ -11,7 +11,7 @@
 //            M4 出口必须以 --full 全绿，届时把 package.json 的 validate 命令加上 --flag（同提交）。
 // 退出码：0 全绿 / 1 有 FAIL / 2 用法错误。
 
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -556,6 +556,35 @@ if (moodMap && typeof moodMap === "object" && !Array.isArray(moodMap)) {
   moodStats = { covered: diskFrames.length - missing.length, total: diskFrames.length, locked: lockedLen };
 }
 
+// ── I、图标对照（plan/v3/02 §九：Game-Icons 每事件 1 枚主题图标，对照表入库）──
+const iconMap = readJson("icon-map.json");
+let iconStats = null;
+if (iconMap && events && Array.isArray(events)) {
+  const eventIds = events.map((e) => e.id);
+  const missingIds = eventIds.filter((id) => !(id in iconMap));
+  const extraIds = Object.keys(iconMap).filter((id) => !eventIds.includes(id));
+  if (missingIds.length) fail("I.COVER", `对照表缺 ${missingIds.length} 条事件：${missingIds.slice(0, 8).join(",")}${missingIds.length > 8 ? "…" : ""}`);
+  if (extraIds.length) fail("I.EXTRA", `对照表含 ${extraIds.length} 条不存在的事件 id：${extraIds.slice(0, 8).join(",")}`);
+  if (typeof iconMap !== "object" || Array.isArray(iconMap)) fail("I.SCHEMA", "icon-map.json 应为 {事件id: 图标名} 平面对象");
+  const badNames = Object.entries(iconMap).filter(([, v]) => typeof v !== "string" || !/^[a-z0-9-]+$/.test(v));
+  if (badNames.length) fail("I.NAME", `图标名非法（应小写 kebab-case）：${badNames.slice(0, 5).map(([k, v]) => `${k}→${JSON.stringify(v)}`).join("、")}`);
+  // 图标 SVG 实物存在性（assets/game-icons/icons/<作者>/<名>.svg 按 basename 对账）
+  const iconDir = join(ROOT, "assets", "game-icons", "icons");
+  const diskIcons = new Set();
+  const walkIcons = (dir) => {
+    if (!existsSync(dir)) return;
+    for (const name of readdirSync(dir)) {
+      const full = join(dir, name);
+      if (statSync(full).isDirectory()) walkIcons(full);
+      else if (name.endsWith(".svg")) diskIcons.add(name.slice(0, -4));
+    }
+  };
+  walkIcons(iconDir);
+  const noFile = [...new Set(Object.values(iconMap))].filter((n) => typeof n === "string" && !diskIcons.has(n));
+  if (noFile.length) fail("I.FILE", `对照表引用的图标无 SVG 实物：${noFile.slice(0, 8).join(",")}${noFile.length > 8 ? "…" : ""}`);
+  iconStats = { covered: eventIds.length - missingIds.length, total: eventIds.length, disk: diskIcons.size };
+}
+
 // ── 输出 ──
 const out = (s) => process.stdout.write(s + "\n");
 out("数据校验门 · 依据 plan/02（单一定义源）+ plan/v3/02 ▸ M1'' 增补");
@@ -563,7 +592,7 @@ out("=".repeat(56));
 
 const areaOk = (p) => !fails.some((f) => f.startsWith(`[${p}`));
 const lines = [
-  ["FILE", "数据文件 7 份可读且 JSON 合法"],
+  ["FILE", "数据文件 8 份可读且 JSON 合法"],
   ["E", `事件库 ${eventCount} 条：id 唯一 / 枚举合法 / 选项 ≥3 / 三观增量口径 / 资源口径 / pre 防死锁 / 月龄单调 / 骨架密度 ≥${SKELETON_MIN_PER_STAGE} / 文案去重`],
   ["L", `多线：line 枚举 / main=fate / rescue 每资源 2 条 / 支线密度 ${LINE_DENSITY_ON.join("+")} 每阶段 ≥${LINE_DENSITY_MIN}（分批口径，love/friend/health 随 M2''/M3'' 开启）`],
   ["B", `birth-map ${birthStats ? `${birthStats.combos}/${BIRTH_COMBOS}` : "—"} 组合覆盖 + 初始值全部落域 [0,100]`],
@@ -571,6 +600,7 @@ const lines = [
   ["P", `portraits ${portraitFilled}/${PORTRAIT_TYPES.length} 型封闭枚举${WANT_FULL ? " + 80–150 字" : ""}`],
   ["M", `fish-mood-map ${moodStats ? `覆盖 ${moodStats.covered}/${moodStats.total} 帧 + 终局锁 ${moodStats.locked} 张` : "—"}：19/19 全覆盖 / 类别枚举 / 终局不重复（v2/02 §二）`],
   ["V", `三观层：stage-drift ${driftOk}/24 格（8 阶段×3 轴，|值|≤2）+ monologues ${monoOk}/9 条（3 轴×3 区间）`],
+  ["I", `图标对照（v3/02 §九）：${iconStats ? `覆盖 ${iconStats.covered}/${iconStats.total} 条事件 + SVG 实物 ${iconStats.disk} 枚（Game-Icons CC-BY）` : "未完成校验"}`],
 ];
 for (const [p, label] of lines) out(`${areaOk(p) ? "PASS" : "FAIL"}  ${label}`);
 for (const f of fails) out(`FAIL  ${f}`);

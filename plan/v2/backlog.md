@@ -8,7 +8,7 @@
 
 | ID | 来源 | 对象 | 证据（命令+输出） | 影响 | 成本 | 状态 |
 |---|---|---|---|---|---|---|
-| V2-1 | 素材缺口（十类之「资产」） | `assets/upstream/dafeiyu-pet/sprites/正面_238.png`（web-ready 转换被剔除） | `ffmpeg -i 正面_238.png` → Invalid PNG signature；node chunk 解析 IDAT 声明 79327B 与实际 81134B 错位（镜像续传截断先例，v2/04 风险表）——单件损坏不阻塞（187/306 档完好），台账 assets/README.md 已登记 | 1（M2' avatar 若需 238px 正面档才受影响） | 0.5（镜像 raw 重下 + IEND 闭合校验） | ⬜ 待排期 |
+| V2-1 | 素材缺口（十类之「资产」） | `assets/upstream/dafeiyu-pet/sprites/正面_238.png`（web-ready 转换被剔除） | `ffmpeg -i 正面_238.png` → Invalid PNG signature；node chunk 解析 IDAT 声明 79327B 与实际 81134B 错位（镜像续传截断先例，v2/04 风险表）——单件损坏不阻塞（187/306 档完好），台账 assets/README.md 已登记 | 1（M2' avatar 若需 238px 正面档才受影响） | 0.5（镜像 raw 重下 + IEND 闭合校验） | ➡ 已转入 v3 队列（**V3-1**，2026-10-24 v3-M2'' 收尾按 v3/backlog 头部规则；v2 维持只读台账） |
 
 ## 观察区（不入队，无实施证据；进队须先补证据）
 
