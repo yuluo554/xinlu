@@ -82,6 +82,7 @@ npm run dev      # 浏览器打开 http://localhost:5173
 | v2-M2' 人格鱼 avatar（fish.ts + 常驻 mascot + 表情映射） | ✅（2026-10-24） |
 | v2-M3' 分享卡 + 场景氛围 + 双门禁 | ✅（2026-10-24） |
 | v2-M4' 图鉴 + 发布 v2.0.0 | ✅（2026-10-24，[tag v2.0.0](https://github.com/yuluo554/xinlu/releases/tag/v2.0.0)） |
+| v3-M1'' 引擎与数据 v3（年龄单调/三观层/多线/资源/选项≥3/存档 v2 迁移） | ✅（2026-10-24，[docs/v3-M1-gates.md](docs/v3-M1-gates.md)） |
 
 ## 许可
 

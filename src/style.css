@@ -297,6 +297,15 @@ body {
   transform: scale(0.99);
 }
 
+.option-locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.option-locked:hover {
+  background: var(--surface-2);
+}
+
 .aftermath {
   margin: 0 0 24px;
   color: var(--ink-2);

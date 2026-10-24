@@ -8,44 +8,82 @@
     "options": [
       {
         "text": "咿咿呀呀地大声回应，挥着小手要人抱",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "全家人都被逗笑了，你成了饭桌上的小主角。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "全家人都被逗笑了，你成了饭桌上的小主角。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "安静地盯着那只布偶铃，自己看得入神",
-        "deltas": {
-          "ei": -1,
-          "sn": 2
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "伸出小手，一把揪住垂下来的铃铛带子，拽得吱呀作响",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 12,
+    "line": "fate"
   },
   {
     "id": "infant-003",
     "stage": "infant",
     "type": "main",
-    "ageHint": "8个月",
+    "ageHint": "1岁2个月",
     "text": "你被扶着站在客厅中央，两条腿还在打颤。大人松开手退后半步，拍着手等你。",
     "options": [
       {
         "text": "摇摇晃晃扑向张开的手掌，摔了两次，第三次真的走过去了",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "aftermath": "全家为此多煮了一顿饭，庆祝你的第一次抵达。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "全家为此多煮了一顿饭，庆祝你的第一次抵达。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "一屁股坐回去，抓起脚边的积木慢慢啃",
-        "deltas": {
-          "jp": 2,
-          "sn": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "扶着沙发边缘自己横着挪，谁的手都不抓，挪一步回头看一眼",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "health": -1
+        },
+        "aftermath": "挪到沙发尽头，你得意地拍了拍扶手，像给自己的第一次探险盖章。"
       }
-    ]
+    ],
+    "ageMonths": 14,
+    "line": "fate"
   },
   {
     "id": "infant-004",
@@ -56,20 +94,38 @@
     "options": [
       {
         "text": "把点心高高举起来，塞进最亲的那个人嘴里",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "那一口被夸张地啊呜吃掉，你咯咯笑了很久。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "那一口被夸张地啊呜吃掉，你咯咯笑了很久。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "紧紧护住点心，扭过头去背对所有人",
-        "deltas": {
-          "ei": -1,
-          "tf": -1
+        "deltas3": {
+          "values": -3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "咬成两半，把大的那半举给全桌看，谁伸手就给谁",
+        "deltas3": {
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "最后点心没剩多少，但你收获了满屋子的笑声和一句「这孩子实诚」。"
       }
-    ]
+    ],
+    "ageMonths": 18,
+    "line": "fate"
   },
   {
     "id": "infant-005",
@@ -80,21 +136,38 @@
     "options": [
       {
         "text": "咬着被角哭了一场，哭着哭着在自己的小床上睡着了",
-        "deltas": {
-          "ei": -1,
-          "jp": 2
+        "aftermath": "第二天早上你骄傲地宣布：我自己睡的！虽然半夜确实溜回去过一次。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "第二天早上你骄傲地宣布：我自己睡的！虽然半夜确实溜回去过一次。"
+        "resourceDeltas": {
+          "mood": -1
+        }
       },
       {
         "text": "半夜抱着枕头溜回大床，一赖就是一个月",
-        "deltas": {
-          "ei": 1,
-          "jp": -2
+        "aftermath": "后来大人叹口气，把小床拆了。这件事成了家族笑话。",
+        "deltas3": {
+          "outlook": -3
         },
-        "aftermath": "后来大人叹口气，把小床拆了。这件事成了家族笑话。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "把最喜欢的布偶在床沿排成一排当守卫，和他们互相壮胆",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "布偶哨兵们在床沿站了一整年。你后来跟人说起，那是你的第一支队伍。"
       }
-    ]
+    ],
+    "ageMonths": 36,
+    "line": "fate"
   },
   {
     "id": "infant-002",
@@ -105,19 +178,36 @@
     "options": [
       {
         "text": "难受得大哭，只有被抱在怀里才能睡去",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       },
       {
         "text": "蔫蔫地不哭不闹，喂药就乖乖咽下去",
-        "deltas": {
-          "jp": 2,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "半梦半醒间数大人的脚步声，谁来了就把被子往谁那边拱一拱",
+        "deltas3": {
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 24,
+    "line": "fate"
   },
   {
     "id": "infant-011",
@@ -128,18 +218,35 @@
     "options": [
       {
         "text": "放声大哭，直到有人把转铃降到你够得着的高度",
-        "deltas": {
-          "ei": 2
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
       },
       {
         "text": "换个姿势，盯着床单上的花纹看出了神",
-        "deltas": {
-          "ei": -1,
-          "sn": 2
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "不哭了也不看了，把自己的脚丫搬过来，抱着研究脚趾头",
+        "deltas3": {
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 3,
+    "line": "fate"
   },
   {
     "id": "infant-012",
@@ -150,19 +257,37 @@
     "options": [
       {
         "text": "兴奋地拍打镜面，冲着那个小孩大喊",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "悄悄绕到镜子背后，想看看那个小孩藏在哪",
-        "deltas": {
-          "sn": -2,
-          "jp": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "冲镜子里的自己慢慢咧嘴笑，看对方也慢慢咧嘴笑",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 6,
+    "line": "fate"
   },
   {
     "id": "infant-013",
@@ -173,19 +298,37 @@
     "options": [
       {
         "text": "咧开没牙的嘴冲她笑，伸手去抓她的耳环",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "扁扁嘴，眼睛一路追着妈妈出门的方向",
-        "deltas": {
-          "ei": -2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "严肃地审了她三秒钟，然后决定赏她一个响亮的鼻涕泡",
+        "deltas3": {
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "阿姨笑得直不起腰，逢人就说你「面试」过她。"
       }
-    ]
+    ],
+    "ageMonths": 12,
+    "line": "fate"
   },
   {
     "id": "infant-014",
@@ -196,20 +339,38 @@
     "options": [
       {
         "text": "一把抓住皮球举过头顶，满屋子乱拍",
-        "deltas": {
-          "ei": 2,
-          "jp": -1
+        "aftermath": "姑姑说这孩子将来随运动员。没人信，但每年都拿出来讲。",
+        "deltas3": {
+          "outlook": -3
         },
-        "aftermath": "姑姑说这孩子将来随运动员。没人信，但每年都拿出来讲。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "在每样东西前都停一停，最后稳稳按住那支笔",
-        "deltas": {
-          "sn": -1,
-          "jp": 2
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "两只手一边抓皮球一边捞笔，谁也不撒手",
+        "deltas3": {
+          "outlook": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "大人们争论半天这算什么命，最后达成一致：这孩子贪心，但贪心得很讲道理。"
       }
-    ]
+    ],
+    "ageMonths": 12,
+    "line": "fate"
   },
   {
     "id": "infant-015",
@@ -220,21 +381,39 @@
     "options": [
       {
         "text": "挣脱大人的手，一屁股坐进雪地里",
-        "deltas": {
-          "ei": 2,
-          "sn": 2
+        "aftermath": "那天的照片里你笑得见牙不见眼，棉裤湿透了两条。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "那天的照片里你笑得见牙不见眼，棉裤湿透了两条。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "躲在大人怀里，伸出手指碰了碰就缩回来",
-        "deltas": {
-          "ei": -1,
-          "tf": 1,
-          "jp": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "先让大人把手伸进雪里试温度，然后郑重地把手按上去，按出手印",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 24,
+    "line": "fate"
   },
   {
     "id": "infant-016",
@@ -245,19 +424,37 @@
     "options": [
       {
         "text": "天不亮就爬起来，蹲在树下看蚂蚁搬家",
-        "deltas": {
-          "sn": 2,
-          "ei": -1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "每天搬个小板凳坐在大门口，等熟悉的声音出现",
-        "deltas": {
-          "ei": -2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "捡了满兜的落叶，说要带给妈妈看秋天",
+        "deltas3": {
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "一周后妈妈收到一兜碎成渣的叶子，和一颗认真的心。"
       }
-    ]
+    ],
+    "ageMonths": 30,
+    "line": "fate"
   },
   {
     "id": "infant-017",
@@ -268,46 +465,82 @@
     "options": [
       {
         "text": "越唱越大声，还自己编了新词",
-        "deltas": {
-          "ei": 2,
-          "sn": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "安安静静听完整首，第二天忽然一字不差地哼出来",
-        "deltas": {
-          "sn": 1,
-          "jp": 2
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "跟着调子拍手，拍得乱七八糟但特别卖力",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 36,
+    "line": "fate"
   },
   {
     "id": "infant-021",
     "stage": "infant",
     "type": "critical",
-    "ageHint": "2岁",
+    "ageHint": "3岁2个月",
     "text": "大人们收拾了整整一周的纸箱。你熟悉的摇篮、熟悉的院子、熟悉的邻居，都要被装进一辆卡车，换到很远的新地方去。没有人问你的意见——他们只是把你抱上了车。",
     "options": [
       {
         "text": "在新家的床上大哭大闹，一连哭了三天",
-        "deltas": {
-          "ei": -3,
-          "tf": 3,
-          "jp": -3
+        "aftermath": "第四天你指着窗外的一只猫，说了在新家说的第一句话。",
+        "deltas3": {
+          "values": 8,
+          "outlook": 8
         },
-        "aftermath": "第四天你指着窗外的一只猫，说了在新家说的第一句话。"
+        "resourceDeltas": {
+          "mood": -3,
+          "health": -2
+        }
       },
       {
         "text": "出奇地安静，睁着眼睛把新房间看了一圈又一圈",
-        "deltas": {
-          "sn": 3,
-          "jp": 2,
-          "ei": -2
+        "aftermath": "多年后你说起那次搬家，记得的是卡车斗里的星光。",
+        "deltas3": {
+          "worldview": 8,
+          "outlook": 5
         },
-        "aftermath": "多年后你说起那次搬家，记得的是卡车斗里的星光。"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "把旧家窗台的一颗小石子塞进兜里，到新家给它安个新家",
+        "deltas3": {
+          "worldview": 2,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "那颗石子在你窗台上住了很多年，比大多数家具都久。"
       }
-    ]
+    ],
+    "ageMonths": 38,
+    "line": "fate"
   },
   {
     "id": "infant-022",
@@ -318,22 +551,41 @@
     "options": [
       {
         "text": "站在原地放声大哭，哭到整个庙会都认识你",
-        "deltas": {
-          "ei": 3,
-          "tf": 2
+        "aftermath": "找到你时，你已经被一位卖糖画的奶奶抱在怀里。妈妈抱住你的那一刻，你哭得更凶了。",
+        "deltas3": {
+          "values": 5,
+          "outlook": -8
         },
-        "aftermath": "找到你时，你已经被一位卖糖画的奶奶抱在怀里。妈妈抱住你的那一刻，你哭得更凶了。"
+        "resourceDeltas": {
+          "mood": -3,
+          "health": -1
+        }
       },
       {
         "text": "不哭，沿着墙根一步不挪，死死记住那个位置",
-        "deltas": {
-          "ei": -3,
-          "jp": 3,
-          "sn": 2
+        "aftermath": "大人们后怕了整整一年。你只记得墙根很凉，但那里没有人群晃来晃去。",
+        "deltas3": {
+          "worldview": 5,
+          "outlook": 8
         },
-        "aftermath": "大人们后怕了整整一年。你只记得墙根很凉，但那里没有人群晃来晃去。"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "抱住离得最近的一件外套下摆，仰头大声说：我走丢了，你裤子上有个洞",
+        "deltas3": {
+          "outlook": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "health": -1
+        },
+        "aftermath": "那位叔叔先愣后笑，把你举起来喊家长。他说裤子上确实有个洞——你眼睛真尖。"
       }
-    ]
+    ],
+    "ageMonths": 36,
+    "line": "fate"
   },
   {
     "id": "toddler-001",
@@ -344,22 +596,42 @@
     "options": [
       {
         "text": "冲上去把铲子抢回来",
-        "deltas": {
-          "ei": 2,
-          "tf": -1
-        },
         "flag": "rebel",
-        "aftermath": "你俩扭作一团，老师把你们各批评了一顿——但铲子回到了你手里。"
+        "aftermath": "你俩扭作一团，老师把你们各批评了一顿——但铲子回到了你手里。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        }
       },
       {
         "text": "跑去告诉老师，请她评理",
-        "deltas": {
-          "jp": 2,
-          "tf": 1
+        "flag": "conform",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "flag": "conform"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "深吸一口气，用另一把铲子跟他换：「我这把更大」",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "对方研究了半天，还真换了。你从此明白：讲条件有时候比讲道理管用。"
       }
-    ]
+    ],
+    "ageMonths": 60,
+    "line": "fate"
   },
   {
     "id": "toddler-003",
@@ -370,44 +642,78 @@
     "options": [
       {
         "text": "我自己来！折腾了二十分钟，系出一个歪歪扭扭的死结",
-        "deltas": {
-          "jp": 2,
-          "ei": 1
+        "aftermath": "你顶着那个死结得意了一整天，解不开就再也没解开过。",
+        "deltas3": {
+          "outlook": -3
         },
-        "aftermath": "你顶着那个死结得意了一整天，解不开就再也没解开过。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "把脚推过去让奶奶系好，转身跑去玩了",
-        "deltas": {
-          "ei": 1,
-          "jp": -2
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "跟奶奶分工：她负责按住鞋，你负责穿——成功一半也算成功",
+        "deltas3": {
+          "values": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 60,
+    "line": "fate"
   },
   {
     "id": "toddler-004",
     "stage": "toddler",
     "type": "main",
-    "ageHint": "4岁",
+    "ageHint": "5岁半",
     "text": "幼儿园第一天，教室门在你身后关上。里面全是陌生的小椅子，和一股饭菜混着皂角的味道。",
     "options": [
       {
         "text": "拽着老师的手当小尾巴，走到哪儿跟到哪儿，第三天混熟了半个班",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "抱着自己的小书包坐在角落，把门的方向记在心里",
-        "deltas": {
-          "ei": -2,
-          "jp": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "把书包里的恐龙摆在小椅子上陪自己，介绍它认识同桌",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "恐龙很快成了全班的吉祥物。第三天，你是被老师哄着才肯放学的那个。"
       }
-    ]
+    ],
+    "ageMonths": 66,
+    "line": "fate"
   },
   {
     "id": "toddler-005",
@@ -418,21 +724,39 @@
     "options": [
       {
         "text": "深吸一口气，把积木一块块捡回来，从头再搭",
-        "deltas": {
-          "jp": 2,
-          "tf": -1
+        "aftermath": "第二座塔你给底部多围了一圈，稳稳当当。你给那座塔起了名字。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "第二座塔你给底部多围了一圈，稳稳当当。你给那座塔起了名字。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "一脚把积木踢散，跑去玩别的了",
-        "deltas": {
-          "ei": 1,
-          "jp": -2,
-          "sn": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "趴下来检查每一块积木，把最胖的三块任命为地基小队长，重搭",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "新塔比原来矮一半，但稳如泰山。你逢人就介绍你的三位小队长。"
       }
-    ]
+    ],
+    "ageMonths": 72,
+    "line": "fate"
   },
   {
     "id": "toddler-002",
@@ -443,20 +767,39 @@
     "options": [
       {
         "text": "踮着脚在墙上画满歪歪扭扭的太阳",
-        "deltas": {
-          "sn": 2,
-          "ei": 1
+        "aftermath": "这面墙后来被一张挂历遮住，成了家族相册里的著名景点。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "这面墙后来被一张挂历遮住，成了家族相册里的著名景点。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "摊开图画本，照着样子一笔一笔描",
-        "deltas": {
-          "jp": 2,
-          "sn": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "画在本子里，但最后一页留了一小格，「给墙的」",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "多年后翻到那页，谁都想起来那面著名的墙。"
       }
-    ]
+    ],
+    "ageMonths": 48,
+    "line": "fate"
   },
   {
     "id": "toddler-011",
@@ -467,20 +810,38 @@
     "options": [
       {
         "text": "爬到顶，闭着眼嗖地滑下来，落地时腿还是软的",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "aftermath": "那天你一共滑了十一次。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "那天你一共滑了十一次。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "转身去玩旁边的小秋千，跟自己说明年再来",
-        "deltas": {
-          "ei": -1,
-          "jp": 1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "先看别的小朋友滑了三轮，把每一步研究透了再上去",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 48,
+    "line": "fate"
   },
   {
     "id": "toddler-012",
@@ -491,19 +852,35 @@
     "options": [
       {
         "text": "翻来覆去，最后给左右两边的孩子各讲了一个悄悄故事",
-        "deltas": {
-          "ei": 2,
-          "sn": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "闭上眼装睡，把老师走过的每一步都在心里数出来",
-        "deltas": {
-          "jp": 2,
-          "ei": -1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "把被子拱成一座小山，自己当山里打盹的熊",
+        "deltas3": {
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 48,
+    "line": "fate"
   },
   {
     "id": "toddler-013",
@@ -514,20 +891,39 @@
     "options": [
       {
         "text": "每天按时喂它，还偷偷攒零花钱买胡萝卜",
-        "deltas": {
-          "tf": 2,
-          "jp": 1
+        "aftermath": "小兔子后来胖得钻不回笼子，全家一致认定是你的功劳。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "小兔子后来胖得钻不回笼子，全家一致认定是你的功劳。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1
+        }
       },
       {
         "text": "新鲜了三天，第四天忘了喂，被大人念叨着接了手",
-        "deltas": {
-          "ei": 1,
-          "jp": -2
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "给兔子起了名字，做了张值日表贴在笼子上，全家轮值",
+        "deltas3": {
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "兔子后来叫「大白」。值日表上你的名字画了最多小红花——虽然是你自己画的。"
       }
-    ]
+    ],
+    "ageMonths": 60,
+    "line": "fate"
   },
   {
     "id": "toddler-014",
@@ -538,20 +934,40 @@
     "options": [
       {
         "text": "大方地塞过去，转身拉他一起玩，两只恐龙一起打怪兽",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "把恐龙藏到身后，大声说不行",
-        "deltas": {
-          "jp": 1,
-          "tf": -1
+        "aftermath": "大人们尴尬了一阵。恐龙至今还在你的柜子里。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "大人们尴尬了一阵。恐龙至今还在你的柜子里。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "主动提议交换：「我的恐龙借你三天，你的小汽车借我三天」",
+        "deltas3": {
+          "outlook": -1,
+          "values": -1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "三天后双方如约换回，你还多赚了一个朋友。"
       }
-    ]
+    ],
+    "ageMonths": 60,
+    "line": "fate"
   },
   {
     "id": "toddler-015",
@@ -562,20 +978,39 @@
     "options": [
       {
         "text": "助跑，起跳，双脚落坑，水花溅到顶",
-        "deltas": {
-          "ei": 2,
-          "sn": 2
+        "aftermath": "裤子湿到膝盖。你在门口罚站的时候，还在回味那一声啪。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "裤子湿到膝盖。你在门口罚站的时候，还在回味那一声啪。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "绕着水坑走了三圈，伸出脚尖试了试，还是走了人行道",
-        "deltas": {
-          "jp": 2,
-          "sn": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "挽起裤脚，沿着坑边踩出一整圈「脚印花」，一点没湿",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       }
-    ]
+    ],
+    "ageMonths": 60,
+    "line": "fate"
   },
   {
     "id": "toddler-016",
@@ -586,20 +1021,39 @@
     "options": [
       {
         "text": "朝最近的收银台跑，大声说我找不到妈妈了",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "广播响了两遍，蓝色外套一路小跑出现。你扑过去的第一句话是：你走丢了！",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "广播响了两遍，蓝色外套一路小跑出现。你扑过去的第一句话是：你走丢了！"
+        "resourceDeltas": {
+          "mood": -1,
+          "health": -1
+        }
       },
       {
         "text": "原地不动靠着货架，把去过的地方挨个在心里想一遍",
-        "deltas": {
-          "jp": 2,
-          "ei": -1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "记着妈妈说过「找穿制服的人」，拉住一位保安叔叔，一字一句说清楚",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "health": -1
+        },
+        "aftermath": "广播第三遍时你已经喝上了叔叔给的温水。妈妈赶来时，你正跟他讲幼儿园的事。"
       }
-    ]
+    ],
+    "ageMonths": 72,
+    "line": "fate"
   },
   {
     "id": "toddler-017",
@@ -610,47 +1064,82 @@
     "options": [
       {
         "text": "大声报出要买的东西，还自己做主换了包装更好看的那个",
-        "deltas": {
-          "ei": 2,
-          "jp": -1
+        "aftermath": "找回来的零钱你数了两遍，一分不差。酱油瓶一路抱在怀里。",
+        "deltas3": {
+          "outlook": -3
         },
-        "aftermath": "找回来的零钱你数了两遍，一分不差。酱油瓶一路抱在怀里。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1
+        }
       },
       {
         "text": "在门口排练了五遍台词才进去，声音小得像蚊子",
-        "deltas": {
-          "ei": -1,
-          "jp": 2
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "把钱和纸条一起递过去，请老板念给自己听",
+        "deltas3": {
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "老板念得字正腔圆，还多给了你一颗糖。回家路上你走得特别神气。"
       }
-    ]
+    ],
+    "ageMonths": 72,
+    "line": "fate"
   },
   {
     "id": "toddler-021",
     "stage": "toddler",
     "type": "critical",
-    "ageHint": "5岁",
+    "ageHint": "6岁",
     "text": "医院里，大人把一个皱巴巴的小婴儿递到你面前：当哥哥姐姐了，高兴吗？那几天，家里所有大人的眼睛都长在了那个小家伙身上。",
     "options": [
       {
         "text": "抢着端水递尿布，宣布这是我的弟弟妹妹，我说了算",
-        "deltas": {
-          "ei": 3,
-          "tf": 3,
-          "jp": 2
+        "aftermath": "你成了家里最积极的小管家，虽然削苹果削得坑坑洼洼。",
+        "deltas3": {
+          "values": 8,
+          "outlook": -8
         },
-        "aftermath": "你成了家里最积极的小管家，虽然削苹果削得坑坑洼洼。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "把自己关进房间画了一下午画，饭都是端进去吃的",
-        "deltas": {
-          "ei": -3,
-          "sn": -2,
-          "tf": -2
+        "aftermath": "那张画上，小小的你牵着小小的婴儿。后来它被妈妈压在了玻璃桌板下面。",
+        "deltas3": {
+          "worldview": -5,
+          "values": -5,
+          "outlook": 8
         },
-        "aftermath": "那张画上，小小的你牵着小小的婴儿。后来它被妈妈压在了玻璃桌板下面。"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "趁大人不注意，把自己的旧毛巾叠成小被子塞进婴儿篮",
+        "deltas3": {
+          "outlook": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "小家伙睡着时正好攥着毛巾角。这张照片也进了家族相册。"
       }
-    ]
+    ],
+    "ageMonths": 72,
+    "line": "fate"
   },
   {
     "id": "toddler-022",
@@ -661,21 +1150,39 @@
     "options": [
       {
         "text": "深吸一口气走上台——聚光灯亮起的一瞬间，你把害怕忘在了幕布后面",
-        "deltas": {
-          "ei": 4,
-          "sn": 2
+        "aftermath": "台下有人喊你的名字。谢幕时你鞠了一个特别深的躬，差点栽下去。",
+        "deltas3": {
+          "worldview": 5,
+          "outlook": -8
         },
-        "aftermath": "台下有人喊你的名字。谢幕时你鞠了一个特别深的躬，差点栽下去。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "临阵退到幕后最黑的角落，把位置让给了替补",
-        "deltas": {
-          "ei": -4,
-          "jp": 2
+        "aftermath": "你在幕后看完了整场演出，把每一个动作都记了下来。第二年，你报了两个节目。",
+        "deltas3": {
+          "outlook": 8
         },
-        "aftermath": "你在幕后看完了整场演出，把每一个动作都记了下来。第二年，你报了两个节目。"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "跟老师商量能不能两个人一起上，拉上同样紧张的替补",
+        "deltas3": {
+          "outlook": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "报幕员临时加了「双人节目」。你们俩的手一直牵到谢幕。"
       }
-    ]
+    ],
+    "ageMonths": 72,
+    "line": "fate"
   },
   {
     "id": "childhood-001",
@@ -686,44 +1193,81 @@
     "options": [
       {
         "text": "第一个举手，上台把想说的话全说了",
-        "deltas": {
-          "ei": 3,
-          "jp": 1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "低着头在草稿纸上把竞选纲领列了一遍又一遍，最终没有上台",
-        "deltas": {
-          "ei": -2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "联合两个不敢上台的同学，把想改的事写成建议塞进班级信箱",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "班主任在班会上念了那封信，没问是谁写的。你们仨在课桌下悄悄击了掌。"
       }
-    ]
+    ],
+    "ageMonths": 120,
+    "line": "fate"
   },
   {
     "id": "childhood-003",
     "stage": "childhood",
     "type": "main",
-    "ageHint": "9岁",
+    "ageHint": "10岁",
     "text": "家里搬回一台电子琴，附赠一张周一到周日都排满的练习表。弹了两个月，你越来越想念楼下的空地。",
     "options": [
       {
         "text": "跟家里摊牌：琴可以练，但周日要留给自己",
-        "deltas": {
-          "ei": 1,
-          "tf": -1,
-          "jp": -1
+        "aftermath": "谈判进行了三轮。最终周日归你，周三加练半小时——你第一次体会到讨价还价的乐趣。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "谈判进行了三轮。最终周日归你，周三加练半小时——你第一次体会到讨价还价的乐趣。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "照着表练满一年，考级证书拿回来那天，琴盖再也没打开过",
-        "deltas": {
-          "jp": 2,
-          "sn": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "把练习表改成通关制：每首曲子是一关，攒星星换周日下午",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "家里人发现你练琴突然积极了——通关表贴在琴盖上，星星攒得比谁都快。"
       }
-    ]
+    ],
+    "ageMonths": 120,
+    "line": "fate"
   },
   {
     "id": "childhood-004",
@@ -734,20 +1278,38 @@
     "options": [
       {
         "text": "谁也不选，照旧和两个人都说话，哪怕被孤立半个月",
-        "deltas": {
-          "tf": 2,
-          "ei": -1
+        "aftermath": "半个月后他俩和好了，一致评价你够意思。你不明白这半个月算什么，但也没再想。",
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
         },
-        "aftermath": "半个月后他俩和好了，一致评价你够意思。你不明白这半个月算什么，但也没再想。"
+        "resourceDeltas": {
+          "mood": -1
+        }
       },
       {
         "text": "选了先来找你的那个，从此有了稳定的自己人",
-        "deltas": {
-          "ei": 1,
-          "jp": 2
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "把俩人约到小卖部，一人一根冰棍：「你们吵你们的，朋友我都处」",
+        "deltas3": {
+          "outlook": -1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "冰棍花了你一周零花钱。后来他俩和好，都说那天那根冰棍起了一点作用。"
       }
-    ]
+    ],
+    "ageMonths": 120,
+    "line": "fate"
   },
   {
     "id": "childhood-005",
@@ -758,22 +1320,41 @@
     "options": [
       {
         "text": "当晚就把卷子摊在饭桌上，红着耳朵等那一顿训",
-        "deltas": {
-          "jp": 1,
-          "tf": -1
+        "aftermath": "那晚没有训斥，只有一条条抄错题的安排。你抄到深夜，第二学期追回了前十。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "那晚没有训斥，只有一条条抄错题的安排。你抄到深夜，第二学期追回了前十。"
+        "resourceDeltas": {
+          "mood": -1
+        }
       },
       {
         "text": "卷子在书包夹层躺了一周，最后模仿签名，露馅了",
-        "deltas": {
-          "ei": -1,
-          "jp": -2,
-          "tf": 1
+        "aftermath": "露馅那天的谈话比任何一顿训都难受。你后来再没伪造过任何东西——签名除外，那个你练得炉火纯青。",
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
         },
-        "aftermath": "露馅那天的谈话比任何一顿训都难受。你后来再没伪造过任何东西——签名除外，那个你练得炉火纯青。"
+        "resourceDeltas": {
+          "mood": -2,
+          "health": -1
+        }
+      },
+      {
+        "text": "把卷子夹在作业里主动递过去，附字条：「这次大意，下次还你前十」",
+        "deltas3": {
+          "outlook": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": -1
+        },
+        "aftermath": "妈妈把字条夹进了相册。她说不是为分数，是为那句「还你前十」。"
       }
-    ]
+    ],
+    "ageMonths": 144,
+    "line": "fate"
   },
   {
     "id": "childhood-002",
@@ -784,19 +1365,37 @@
     "options": [
       {
         "text": "一路小跑进家门，卷子举得比头还高",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "把卷子对折夹进课本，想等吃晚饭时再顺便让它被发现",
-        "deltas": {
-          "ei": -1,
-          "jp": 1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "在卷子背面画了个奖杯，把自己填在第一名，贴上床头",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "那张自制奖状贴了一学期，褪色了也没舍得撕。"
       }
-    ]
+    ],
+    "ageMonths": 96,
+    "line": "fate"
   },
   {
     "id": "childhood-011",
@@ -807,19 +1406,37 @@
     "options": [
       {
         "text": "每天最早起床去摘最新鲜的叶子，蚕破茧那天你哭了一场又笑了一场",
-        "deltas": {
-          "tf": 2,
-          "jp": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "养到一半送给了同桌——桑树实在太远了",
-        "deltas": {
-          "ei": 1,
-          "jp": -1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "和同桌合伙养：他管一三五摘叶，你管二四六，蚕茧归两人共有",
+        "deltas3": {
+          "outlook": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "蚕破茧那天，你俩蹲在铅笔盒前看了整整一节课——被老师没收后，课间接着看。"
       }
-    ]
+    ],
+    "ageMonths": 84,
+    "line": "fate"
   },
   {
     "id": "childhood-012",
@@ -830,23 +1447,42 @@
     "options": [
       {
         "text": "整个下午守在床边：盖被子、倒水、把电视调成静音",
-        "deltas": {
-          "tf": 2,
-          "jp": 2
-        },
         "flag": "caretaker",
-        "aftermath": "妈妈第二天退烧，跟邻居说了整整一周那杯水的事。"
+        "aftermath": "妈妈第二天退烧，跟邻居说了整整一周那杯水的事。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "给自己泡了碗面，把妈妈那份也泡了，端进屋里",
-        "deltas": {
-          "ei": 1,
-          "tf": 1
-        },
         "flag": "caretaker",
-        "aftermath": "那碗面咸得发苦，妈妈全吃完了。"
+        "aftermath": "那碗面咸得发苦，妈妈全吃完了。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "蹑手蹑脚把电视搬到门口，下午就一个人在门口安安静静写作业",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "妈妈睡醒推开门，看见你抱着作业本靠在门口睡着了。"
       }
-    ]
+    ],
+    "ageMonths": 96,
+    "line": "fate"
   },
   {
     "id": "childhood-013",
@@ -857,21 +1493,41 @@
     "options": [
       {
         "text": "对着零件研究了两天，居然装了回去，多出来的螺丝收进铁盒",
-        "deltas": {
-          "sn": 2,
-          "jp": -1
-        },
         "flag": "craftsman",
-        "aftermath": "闹钟从此每晚快五分钟。爸爸一直没发现，你保守了这个秘密很多年。"
+        "aftermath": "闹钟从此每晚快五分钟。爸爸一直没发现，你保守了这个秘密很多年。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "主动坦白，用零花钱赔了一只新闹钟",
-        "deltas": {
-          "jp": 2,
-          "tf": -1
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1,
+          "money": -2
         }
+      },
+      {
+        "text": "装不回去，就把零件排成一排，向全家宣布这是你的钟表博物馆",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "博物馆展出了半年。爸爸偶尔指着「展品」说：这颗螺丝我找了三天。"
       }
-    ]
+    ],
+    "ageMonths": 108,
+    "line": "fate"
   },
   {
     "id": "childhood-014",
@@ -882,20 +1538,42 @@
     "options": [
       {
         "text": "一半存起来，一半买下惦记了很久的那盒彩铅",
-        "deltas": {
-          "sn": 2,
-          "jp": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 1
         }
       },
       {
         "text": "全部存进存折，看着数字变成三位数",
-        "deltas": {
-          "jp": 2,
-          "tf": 1
+        "aftermath": "那本存折你存到初中。利息只有几块钱，你翻来覆去看了很久。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "那本存折你存到初中。利息只有几块钱，你翻来覆去看了很久。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
+        }
+      },
+      {
+        "text": "全买彩铅，但立字据「下次压岁钱存一半还债」——债主是自己",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 1
+        },
+        "aftermath": "字据压在储蓄罐下。第二年你真的还了——虽然债主和你都糊里糊涂。"
       }
-    ]
+    ],
+    "ageMonths": 120,
+    "line": "fate"
   },
   {
     "id": "childhood-015",
@@ -906,19 +1584,37 @@
     "options": [
       {
         "text": "天天对着镜子抠动作，比赛那天做得比广播里还标准",
-        "deltas": {
-          "jp": 2,
-          "ei": 1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       },
       {
         "text": "跟老师申请换到最后一排：我想好好做操，不想做标本",
-        "deltas": {
-          "ei": -1,
-          "tf": -1
+        "deltas3": {
+          "values": -3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "接下领操位，但跟老师约定：喊错算我错，喊对功劳归全班",
+        "deltas3": {
+          "outlook": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "比赛那天你喊得特别响。名次一般，但你发现自己挺喜欢那个位置。"
       }
-    ]
+    ],
+    "ageMonths": 132,
+    "line": "fate"
   },
   {
     "id": "childhood-016",
@@ -929,19 +1625,38 @@
     "options": [
       {
         "text": "办了借书证按索书号一本本啃，管理员偶尔把新书压在柜台下留给你",
-        "deltas": {
-          "ei": -1,
-          "jp": 2
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       },
       {
         "text": "只借一眼看中的，看不完也照借，书页里夹满没画完的画",
-        "deltas": {
-          "sn": -2,
-          "jp": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
+      },
+      {
+        "text": "立规矩：每本书先读三十页再决定处对象还是分手，分手要写理由",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "那年你分手了二十七本书，处了九本——管理员说你的借书单是她见过最生动的。"
       }
-    ]
+    ],
+    "ageMonths": 132,
+    "line": "fate"
   },
   {
     "id": "childhood-017",
@@ -952,45 +1667,82 @@
     "options": [
       {
         "text": "把字条折成小方块收进笔袋，放学时晃了晃手里的橡皮",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
       },
       {
         "text": "假装没看见，第二天照常一个人走",
-        "deltas": {
-          "ei": -2,
-          "jp": 1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "在字条背面画一只举着「好」字牌的小猫还回去",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "第二天你课桌里多了一只画得更一般的小狗，举着「明天下楼梯口见」。"
       }
-    ]
+    ],
+    "ageMonths": 144,
+    "line": "fate"
   },
   {
     "id": "childhood-021",
     "stage": "childhood",
     "type": "critical",
-    "ageHint": "11岁",
+    "ageHint": "12岁",
     "text": "数学竞赛开考前，同桌把写着答案的小纸条推到了你卷子旁边。这道题你恰恰不会，而它是压轴题，占了三十分。",
     "options": [
       {
         "text": "把纸条推了回去，那道题空着交卷",
-        "deltas": {
-          "jp": 3,
-          "tf": -3,
-          "sn": 2
+        "aftermath": "你拿了二等奖，差一名没有一等奖。老师后来在班上讲了这张被推回去的纸条，没点名。",
+        "deltas3": {
+          "worldview": 5,
+          "values": -8,
+          "outlook": -8
         },
-        "aftermath": "你拿了二等奖，差一名没有一等奖。老师后来在班上讲了这张被推回去的纸条，没点名。"
+        "resourceDeltas": {
+          "mood": -1
+        }
       },
       {
         "text": "答案抄了，觉也没睡好——那团纸条最后被你揉进了口袋",
-        "deltas": {
-          "ei": -2,
-          "jp": -3
+        "aftermath": "奖状贴在墙上，你总觉得它在看你。第二学期你把这类题刷了几十遍，再没怕过。",
+        "deltas3": {
+          "outlook": 8
         },
-        "aftermath": "奖状贴在墙上，你总觉得它在看你。第二学期你把这类题刷了几十遍，再没怕过。"
+        "resourceDeltas": {
+          "mood": -2,
+          "health": -1
+        }
+      },
+      {
+        "text": "推回纸条，考完把那道题原原本本讲给同桌：「下次讲别的给我听」",
+        "deltas3": {
+          "worldview": -1,
+          "values": -2
+        },
+        "resourceDeltas": {
+          "health": -1
+        },
+        "aftermath": "同桌愣了很久，后来真成了你的讲题搭子——只是再没递过纸条。"
       }
-    ]
+    ],
+    "ageMonths": 144,
+    "line": "fate"
   },
   {
     "id": "childhood-022",
@@ -1001,22 +1753,41 @@
     "options": [
       {
         "text": "揣着信封一夜没睡踏实，天亮第一个到校，分文不少",
-        "deltas": {
-          "jp": 4,
-          "tf": 2,
-          "sn": 2
+        "aftermath": "财务阿姨数了两遍，夸了一句好孩子。你挺了一天的胸脯。",
+        "deltas3": {
+          "worldview": 5,
+          "values": 5,
+          "outlook": -8
         },
-        "aftermath": "财务阿姨数了两遍，夸了一句好孩子。你挺了一天的胸脯。"
+        "resourceDeltas": {
+          "mood": -1,
+          "health": -1
+        }
       },
       {
         "text": "把信封藏进字典夹层，藏完又不放心，翻出来检查了八遍",
-        "deltas": {
-          "jp": 2,
-          "ei": -3
+        "aftermath": "后来你学会了记账和复查——八遍里有八遍的用处。",
+        "deltas3": {
+          "outlook": 8
         },
-        "aftermath": "后来你学会了记账和复查——八遍里有八遍的用处。"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "把信封交给妈妈保管，睡前立字据：「明早六点半我来取，我签收」",
+        "deltas3": {
+          "worldview": -1,
+          "values": -2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "第二天你六点半取了信封，还让妈妈签了「已归还」。财务阿姨听说了，笑了好久。"
       }
-    ]
+    ],
+    "ageMonths": 144,
+    "line": "fate"
   },
   {
     "id": "teen-001",
@@ -1027,46 +1798,83 @@
     "options": [
       {
         "text": "背着家人把文科填在了第一栏",
-        "deltas": {
-          "sn": -1,
-          "tf": 1
-        },
         "flag": "rebel",
-        "aftermath": "交表那天你在走廊里靠了很久——那是你第一次自己拿大主意。"
+        "aftermath": "交表那天你在走廊里靠了很久——那是你第一次自己拿大主意。",
+        "deltas3": {
+          "worldview": -3,
+          "values": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "听了家里的安排",
-        "deltas": {
-          "jp": 1,
-          "sn": 1
+        "flag": "conform",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "flag": "conform"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "把两栏利弊写满一张纸贴床头，一周后按星星数填",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "health": -1
+        },
+        "aftermath": "交表前你数了三遍星星。理科多两颗——你填了理科，但语文课本里的故事一个没少读。"
       }
-    ]
+    ],
+    "ageMonths": 192,
+    "line": "fate"
   },
   {
     "id": "teen-004",
     "stage": "teen",
     "type": "main",
-    "ageHint": "15岁",
+    "ageHint": "16岁",
     "text": "你的日记本从书包夹层消失了一天，晚饭时原样放回了原处。你一页页对过——少了一根头发丝的位置。",
     "options": [
       {
         "text": "晚饭后把日记摊在客厅茶几上：想看就明说",
-        "deltas": {
-          "ei": 2,
-          "tf": -1
+        "aftermath": "那天之后，家里有了一条不成文的约定：抽屉不上锁，但进门要敲门。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "那天之后，家里有了一条不成文的约定：抽屉不上锁，但进门要敲门。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "换了带锁的日记本，从那天起有些话只写给自己",
-        "deltas": {
-          "ei": -2,
-          "jp": 2
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "在日记第一页写参观须知：本子可参观，评论请写在夹页",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "夹页里后来真的出现了留言，字迹是妈妈的。你们谁都没提，但都看了。"
       }
-    ]
+    ],
+    "ageMonths": 192,
+    "line": "fate"
   },
   {
     "id": "teen-005",
@@ -1077,45 +1885,84 @@
     "options": [
       {
         "text": "报名，练到晚自习踩点进门",
-        "deltas": {
-          "ei": 2,
-          "jp": -1,
-          "sn": 1
+        "aftermath": "月考你掉了十一名。半年后校庆舞台的追光打在你身上，值不值，你心里有自己的账。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "月考你掉了十一名。半年后校庆舞台的追光打在你身上，值不值，你心里有自己的账。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        }
       },
       {
         "text": "站着看完整场招新，把节拍记在心里，回家画在草稿本上",
-        "deltas": {
-          "ei": -1,
-          "sn": -2
+        "deltas3": {
+          "worldview": -3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "报名，但跟班主任立成绩军令状：掉出前二十自动退社",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        },
+        "aftermath": "你没掉出去。社里人后来都管你叫「军令状哥」。"
       }
-    ]
+    ],
+    "ageMonths": 192,
+    "line": "fate"
   },
   {
     "id": "teen-006",
     "stage": "teen",
     "type": "main",
-    "ageHint": "18岁",
+    "ageHint": "17岁",
     "text": "学校后街的旧书摊上，你淘到一本三十年前的旅行笔记，扉页写着一行字：致三十年后的你——走了吗？那天晚上你第一次认真想到三十年这三个字。",
     "options": [
       {
         "text": "在扉页下面写：走着呢。把书塞回摊位，留给下一个翻到的人",
-        "deltas": {
-          "ei": 1,
-          "sn": -2,
-          "jp": -2
+        "aftermath": "老板娘多看了你一眼，少收了你五块钱。",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "老板娘多看了你一眼，少收了你五块钱。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "买下它放在书架最顺手的位置——等我考完再说",
-        "deltas": {
-          "jp": 2
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "买下来，在扉页续写：「替你先走到省城，剩下的路你接着写」",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "三十年后搬家，这本书还在你箱子最上面。"
       }
-    ]
+    ],
+    "ageMonths": 204,
+    "line": "fate"
   },
   {
     "id": "teen-002",
@@ -1129,20 +1976,39 @@
     "options": [
       {
         "text": "低头认错，心里却把那套道理又过了一遍，一句也没改",
-        "deltas": {
-          "tf": -1,
-          "jp": 2
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
       },
       {
         "text": "把顶撞的理由原原本本再说一遍",
-        "deltas": {
-          "tf": -2,
-          "ei": 1
+        "flag": "rebel",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "flag": "rebel"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "认错，但附一份手写改进方案——三条，条条对着那套道理",
+        "deltas3": {
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": -1
+        },
+        "aftermath": "母亲看完方案没说话，第二天把你写的那页压在了玻璃桌板下。"
       }
-    ]
+    ],
+    "ageMonths": 204,
+    "line": "fate"
   },
   {
     "id": "teen-011",
@@ -1153,21 +2019,41 @@
     "options": [
       {
         "text": "接龙冲，顺便把明天的补习班调了课",
-        "deltas": {
-          "ei": 2,
-          "jp": -1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -2
         }
       },
       {
         "text": "回下次一定，把攒了半个月的模型拼完",
-        "deltas": {
-          "ei": -2,
-          "jp": 1
-        },
         "flag": "homebody",
-        "aftermath": "那晚你一个人在台灯下拼到十一点，零件咔哒入位的最后一声特别响。群里发来三十张合影，你看了看，挺热闹。"
+        "aftermath": "那晚你一个人在台灯下拼到十一点，零件咔哒入位的最后一声特别响。群里发来三十张合影，你看了看，挺热闹。",
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "去，但立规矩：只玩一小时的预算，赢的币留着下周",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        },
+        "aftermath": "那一小时你玩得格外尽兴。赢的币后来真撑起了下一次。"
       }
-    ]
+    ],
+    "ageMonths": 156,
+    "line": "fate"
   },
   {
     "id": "teen-012",
@@ -1178,20 +2064,38 @@
     "options": [
       {
         "text": "索性在旁边补了一幅涂鸦，把整件衣服画成限定款",
-        "deltas": {
-          "sn": 2,
-          "ei": 1
+        "aftermath": "限定款在校服日被三个班围观，教导主任的照片存进了年级相册。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "限定款在校服日被三个班围观，教导主任的照片存进了年级相册。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "反过来穿了两周，直到换季",
-        "deltas": {
-          "ei": -1,
-          "jp": -1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": -1
         }
+      },
+      {
+        "text": "用同色笔在那行字上描了一朵云，远看像校服本来的花纹",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "只有你知道那朵云在哪。每次低头看见它，都像拥有一个秘密基地。"
       }
-    ]
+    ],
+    "ageMonths": 168,
+    "line": "fate"
   },
   {
     "id": "teen-013",
@@ -1202,19 +2106,38 @@
     "options": [
       {
         "text": "吹了蜡烛去操场看星星，第一次发现教学楼顶上有那么多",
-        "deltas": {
-          "ei": 1,
-          "sn": -2
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
         }
       },
       {
         "text": "借着烛光把最后两道题做完，来电时正好合上笔盖",
-        "deltas": {
-          "jp": 2,
-          "ei": -1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "组织走廊暗夜故事会——每人一句接龙，讲到来电为止",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "故事讲到「然后一只会发电的鲸鱼出现」，灯亮了。全班遗憾了整整一周。"
       }
-    ]
+    ],
+    "ageMonths": 168,
+    "line": "fate"
   },
   {
     "id": "teen-014",
@@ -1225,20 +2148,41 @@
     "options": [
       {
         "text": "接棒，跑出了这辈子最快的四百米",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "aftermath": "没拿到名次，但你摔了一跤又爬起来跑完。那天的照片里全班都在喊。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "没拿到名次，但你摔了一跤又爬起来跑完。那天的照片里全班都在喊。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "如实说了我跑不快，推荐了体育委员的备选",
-        "deltas": {
-          "jp": 2,
-          "tf": -1
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "接棒，但跟班长说好：跑完这届就去练——下届我还来",
+        "deltas3": {
+          "outlook": -2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        },
+        "aftermath": "下届运动会你真站上了第三棒——成绩还是中游，但没人再犹豫要不要找你。"
       }
-    ]
+    ],
+    "ageMonths": 180,
+    "line": "fate"
   },
   {
     "id": "teen-015",
@@ -1249,20 +2193,40 @@
     "options": [
       {
         "text": "写了三年的信，从考试聊到宇宙，毕业那年约了见面",
-        "deltas": {
-          "sn": -2,
-          "ei": 1
+        "aftermath": "见面那天你在车站举了半小时的信纸。后来你们每年还互寄一张明信片。",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "见面那天你在车站举了半小时的信纸。后来你们每年还互寄一张明信片。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1
+        }
       },
       {
         "text": "写了两封就断了——笔太慢，你更想念完就回的消息",
-        "deltas": {
-          "ei": 1,
-          "jp": 1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "写信，但改成慢邮件：每封只写一件事，写完封蜡，攒着节日寄",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        },
+        "aftermath": "三年攒了十二封。对方回信说：这是我收过最奢侈的慢。"
       }
-    ]
+    ],
+    "ageMonths": 192,
+    "line": "fate"
   },
   {
     "id": "teen-016",
@@ -1273,20 +2237,40 @@
     "options": [
       {
         "text": "自创了一套递传单舞，一周后整条街都知道了这个小孩",
-        "deltas": {
-          "ei": 2,
-          "sn": -1
+        "aftermath": "那周你发的传单是别人的两倍。老板娘结钱时多包了个红包。",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "那周你发的传单是别人的两倍。老板娘结钱时多包了个红包。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "严格按点位发放，把人流高峰的规律摸得明明白白",
-        "deltas": {
-          "jp": 2,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "把传单折成会跳的小青蛙，接的人大人小孩都笑了",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "那周你折了两百只青蛙，回收的笑比传单多。老板娘结钱时多包了个红包。"
       }
-    ]
+    ],
+    "ageMonths": 204,
+    "line": "fate"
   },
   {
     "id": "teen-017",
@@ -1297,21 +2281,39 @@
     "options": [
       {
         "text": "当面把话说开，说完一起去吃了碗面",
-        "deltas": {
-          "ei": 2,
-          "tf": -1
+        "aftermath": "那碗面吃得又咸又痛快。秘密还是传出去了，但朋友还是朋友——只是从此你学会了一些话只说一半。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "那碗面吃得又咸又痛快。秘密还是传出去了，但朋友还是朋友——只是从此你学会了一些话只说一半。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "没有质问，慢慢淡了",
-        "deltas": {
-          "ei": -2,
-          "jp": 1
+        "aftermath": "毕业照上你们站得很远。多年后同学聚会碰见，你们聊起那件谁也说不清的秘密，都笑了。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "毕业照上你们站得很远。多年后同学聚会碰见，你们聊起那件谁也说不清的秘密，都笑了。"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "不质问也不淡，只把最重要的那件事换了个人讲——重新分配信任",
+        "deltas3": {
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": -1
+        },
+        "aftermath": "多年后你才承认，那招又幼稚又管用。朋友的字典里从此多了一条：他的秘密比金子贵。"
       }
-    ]
+    ],
+    "ageMonths": 204,
+    "line": "fate"
   },
   {
     "id": "teen-003",
@@ -1322,22 +2324,41 @@
     "options": [
       {
         "text": "填下那所远方学校，行李箱当晚就拖出来试了试轮子",
-        "deltas": {
-          "ei": 3,
-          "sn": -2,
-          "jp": -2
+        "flag": "wanderlust",
+        "deltas3": {
+          "worldview": -4,
+          "outlook": -6,
+          "values": 2
         },
-        "flag": "wanderlust"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "选了省内那所，母亲连夜给你缝了床新被子",
-        "deltas": {
-          "jp": 3,
-          "tf": -1
+        "flag": "conform",
+        "deltas3": {
+          "values": -3,
+          "outlook": -8
         },
-        "flag": "conform"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "第一栏省内第二栏远方：「先替家里守两年，两年后我带着学费去远方」",
+        "deltas3": {
+          "outlook": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "两年后你真转学去了那座城市。转学手续那天，母亲把那床被子又拆洗了一遍。"
       }
-    ]
+    ],
+    "ageMonths": 216,
+    "line": "fate"
   },
   {
     "id": "teen-022",
@@ -1348,23 +2369,43 @@
     "options": [
       {
         "text": "把打工攒的钱拍在桌上，选了继续读——窟窿我们一起填",
-        "deltas": {
-          "ei": 3,
-          "tf": 3,
-          "jp": 2
+        "aftermath": "那晚你算了人生第一笔家庭账。后来的每个假期你都在打工，成绩单和工资条轮流拿回家。",
+        "deltas3": {
+          "values": 8,
+          "outlook": -8
         },
-        "aftermath": "那晚你算了人生第一笔家庭账。后来的每个假期你都在打工，成绩单和工资条轮流拿回家。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -2
+        }
       },
       {
         "text": "选了早点工作，把课本留在床头——路不止一条",
-        "deltas": {
-          "jp": -3,
-          "sn": 3,
-          "ei": 2
+        "aftermath": "你成了家里最早领工资的人。第一份工资给全家买了鞋，自己那双最大。",
+        "deltas3": {
+          "worldview": 8,
+          "outlook": 8
         },
-        "aftermath": "你成了家里最早领工资的人。第一份工资给全家买了鞋，自己那双最大。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 3
+        }
+      },
+      {
+        "text": "提三步方案：休学半年打工堵窟窿、明年助学金复学、家里账本季度公开",
+        "deltas3": {
+          "worldview": -2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "money": 2,
+          "health": -1
+        },
+        "aftermath": "方案讨论到半夜。最终没全按你的来，但「账本公开」那条执行了很多年。"
       }
-    ]
+    ],
+    "ageMonths": 216,
+    "line": "fate"
   },
   {
     "id": "youth-001",
@@ -1375,20 +2416,41 @@
     "options": [
       {
         "text": "拖着一个行李箱去了大城市，合租房的窗户正对着一堵墙",
-        "deltas": {
-          "ei": 2,
-          "sn": -1,
-          "jp": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
         }
       },
       {
         "text": "回老家报到，工位、食堂、宿舍三点一线",
-        "deltas": {
-          "jp": 3,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
         }
+      },
+      {
+        "text": "选大城市，但先跟老家公司谈好两年后可回聘——退路也写成合同",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        },
+        "aftermath": "两年后你带着一线城市的履历回聘进老家公司，成了部门里最「见过世面」的那个。"
       }
-    ]
+    ],
+    "ageMonths": 264,
+    "line": "fate"
   },
   {
     "id": "youth-003",
@@ -1399,22 +2461,43 @@
     "options": [
       {
         "text": "收拾行李搬了过去——工作可以再找，这个人你认",
-        "deltas": {
-          "ei": 2,
-          "sn": -1,
-          "jp": -2
+        "aftermath": "合租屋的墙很薄，邻居都认识你们的笑声。",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "合租屋的墙很薄，邻居都认识你们的笑声。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -2
+        }
       },
       {
         "text": "认真谈了一次，两个人体面地把手放开",
-        "deltas": {
-          "ei": -1,
-          "tf": 1
+        "aftermath": "分手那天你们去吃了初遇那家店。后来路过那条街，你还是会慢下来。",
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
         },
-        "aftermath": "分手那天你们去吃了初遇那家店。后来路过那条街，你还是会慢下来。"
+        "resourceDeltas": {
+          "mood": -2,
+          "health": -1
+        }
+      },
+      {
+        "text": "谈三个月「周末列车」计划，把异地变通勤——谁有空谁跑",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -2
+        },
+        "aftermath": "十二个月后，两张月票换成了同一串钥匙。列车坐成了背景，人留了下来。"
       }
-    ]
+    ],
+    "ageMonths": 288,
+    "line": "fate"
   },
   {
     "id": "youth-004",
@@ -1425,23 +2508,44 @@
     "options": [
       {
         "text": "交接完最后一个版本才走，新东家听说后当场给了个更大的项目",
-        "deltas": {
-          "jp": 2,
-          "ei": 1,
-          "tf": 1
+        "aftermath": "老东家的欢送饭局上，领导说了句：以后还是朋友。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "老东家的欢送饭局上，领导说了句：以后还是朋友。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
+        }
       },
       {
         "text": "裸辞，休整一个月，背个包去了趟西北",
-        "deltas": {
-          "ei": 1,
-          "sn": -2,
-          "jp": -2
+        "aftermath": "面试被问空窗期，你把戈壁的照片往前一推。面试官看了很久。",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "面试被问空窗期，你把戈壁的照片往前一推。面试官看了很久。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -3,
+          "health": 1
+        }
+      },
+      {
+        "text": "接 offer，同时把项目交接期谈进合同——两边体面，只是慢一个月",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
+        },
+        "aftermath": "新东家等了那一个月。入职时领导说：守摊子的人，守得住摊子上的事。"
       }
-    ]
+    ],
+    "ageMonths": 312,
+    "line": "fate"
   },
   {
     "id": "youth-005",
@@ -1452,23 +2556,43 @@
     "options": [
       {
         "text": "听了家里的，选了近的——近的是烟火气",
-        "deltas": {
-          "jp": 3,
-          "ei": -1,
-          "sn": 1
+        "aftermath": "周末的饭桌，永远有你一双碗筷。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
         },
-        "aftermath": "周末的饭桌，永远有你一双碗筷。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        }
       },
       {
         "text": "咬牙自己凑差价，选了自己选的——远的是我的",
-        "deltas": {
-          "ei": 1,
-          "jp": -2,
-          "sn": -2
+        "aftermath": "搬家那天，你在新阳台看了一个小时的晚霞。",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "搬家那天，你在新阳台看了一个小时的晚霞。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -3,
+          "health": -1
+        }
+      },
+      {
+        "text": "选中间站：离老家三站地铁，离城里三站地铁，两头通勤四十分钟",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "后来两家聚会，都说这个位置是你「谈判谈出来的人生中点」。"
       }
-    ]
+    ],
+    "ageMonths": 336,
+    "line": "fate"
   },
   {
     "id": "youth-002",
@@ -1482,19 +2606,40 @@
     "options": [
       {
         "text": "当天就回愿意，收拾行李的速度比领导批流程还快",
-        "deltas": {
-          "ei": 2,
-          "sn": -2
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 2
         }
       },
       {
         "text": "犹豫了一晚，还是推掉了——你想先把日子过安稳",
-        "deltas": {
-          "jp": 2,
-          "ei": -1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "回愿意，但要半个月准备期——转租、寄猫、保险，列清单一条条办",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        },
+        "aftermath": "出发那天，清单上每一项都打了勾。外派半年，家里的事一件没乱。"
       }
-    ]
+    ],
+    "ageMonths": 300,
+    "line": "fate"
   },
   {
     "id": "youth-011",
@@ -1505,18 +2650,37 @@
     "options": [
       {
         "text": "主动约了一顿火锅，把冰箱按左右重新划了线",
-        "deltas": {
-          "ei": 2,
-          "jp": 1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1
         }
       },
       {
         "text": "各过各的，只在冰箱门上贴便利贴",
-        "deltas": {
-          "ei": -2
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "冰箱划成左右两半，中间一格「公共区」，谁都能动",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "公共区后来放着室友煮的粥和你带的酱菜。搬家那天你们交换了钥匙——以防谁忘带。"
       }
-    ]
+    ],
+    "ageMonths": 240,
+    "line": "fate"
   },
   {
     "id": "youth-012",
@@ -1527,19 +2691,40 @@
     "options": [
       {
         "text": "发了个朋友圈：第七版，求过。收到全组三十个赞",
-        "deltas": {
-          "ei": 2,
-          "sn": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       },
       {
         "text": "关灯下楼，在便利店坐了半小时，把再看看翻译成三条修改逻辑",
-        "deltas": {
-          "jp": 2,
-          "tf": -1
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1,
+          "health": -1
         }
+      },
+      {
+        "text": "把七版叠成一本改动史，当面问甲方：「您要的看看，是往哪边看？」",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -2,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "health": -1
+        },
+        "aftermath": "甲方翻着那本改动史，第一次给了明确方向。那一版，过了。"
       }
-    ]
+    ],
+    "ageMonths": 264,
+    "line": "fate"
   },
   {
     "id": "youth-013",
@@ -1550,19 +2735,39 @@
     "options": [
       {
         "text": "哭得比新人还凶，敬酒时被灌了三杯",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
         }
       },
       {
         "text": "全程帮新人盯流程，把忘带戒指的插曲处理得神不知鬼不觉",
-        "deltas": {
-          "jp": 2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "把新人的十年聊天记录做成语录本，敬酒时念了三段",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "那本语录后来被新人裱起来一页，挂在玄关。"
       }
-    ]
+    ],
+    "ageMonths": 276,
+    "line": "fate"
   },
   {
     "id": "youth-014",
@@ -1573,19 +2778,43 @@
     "options": [
       {
         "text": "找了个搭子互相打卡，一年后俩人都能跑十公里",
-        "deltas": {
-          "ei": 2,
-          "jp": 1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 2
         }
       },
       {
         "text": "退了卡，把通勤改成步行六公里——这也算练",
-        "deltas": {
-          "jp": -1,
-          "sn": 2
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1,
+          "health": 1
         }
+      },
+      {
+        "text": "把卡转给一个想练的学生，自己跟着视频在客厅练",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1,
+          "health": 1
+        },
+        "aftermath": "学生练成了体育特长生，逢年过节都给你发成绩。你的客厅视频课也坚持了三年。"
       }
-    ]
+    ],
+    "ageMonths": 300,
+    "line": "fate"
   },
   {
     "id": "youth-015",
@@ -1596,19 +2825,38 @@
     "options": [
       {
         "text": "起来煮了碗面，加了两个蛋。吃完，天就亮了",
-        "deltas": {
-          "ei": 1,
-          "sn": 2
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
         }
       },
       {
         "text": "起来把下周的日程排了三遍，排到困",
-        "deltas": {
-          "jp": 2,
-          "ei": -1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "把睡不着的念头写进备忘录，命名「凌晨收容所」，写完锁屏睡觉",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "收容所后来积了几百条。半年后翻回去一看——大部分烦恼根本没发生。"
       }
-    ]
+    ],
+    "ageMonths": 312,
+    "line": "fate"
   },
   {
     "id": "youth-016",
@@ -1622,22 +2870,41 @@
     "options": [
       {
         "text": "第一个交，但把日报写成了段子，成了全组每天的快乐源泉",
-        "deltas": {
-          "ei": 2,
-          "sn": -1,
-          "jp": -1
+        "aftermath": "三个月后领导把你调去做对外宣传：你很懂怎么让人看下去。",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "三个月后领导把你调去做对外宣传：你很懂怎么让人看下去。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "照模板交了一个月，然后递上三页纸的流程优化建议",
-        "deltas": {
-          "jp": 2,
-          "tf": -1
+        "aftermath": "建议被采纳了一半，日报改成了周报。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "建议被采纳了一半，日报改成了周报。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "交三天模板日报，第四天起附一栏「今日日报耗时统计」，坚持一个月",
+        "deltas3": {
+          "worldview": -2,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "月底那张统计表被领导贴进会议室——日报改周报那天，全组请了你一杯奶茶。"
       }
-    ]
+    ],
+    "ageMonths": 324,
+    "line": "fate"
   },
   {
     "id": "youth-017",
@@ -1651,21 +2918,42 @@
     "options": [
       {
         "text": "把那笔钱转了过去，只说了一句：孩子读书要紧",
-        "deltas": {
-          "tf": 2,
-          "ei": 1
+        "aftermath": "那年年夜饭，你被安排坐到了主桌。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "那年年夜饭，你被安排坐到了主桌。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -3
+        }
       },
       {
         "text": "把借改成了合伙，拉表哥进了你的副业群",
-        "deltas": {
-          "jp": 2,
-          "tf": -1
+        "aftermath": "三年后表哥的副业收入超过了正职，逢人就说你是他的贵人。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "三年后表哥的副业收入超过了正职，逢人就说你是他的贵人。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        }
+      },
+      {
+        "text": "转一半，另一半约还款计划加利息，白纸黑字——账清了情才长",
+        "deltas3": {
+          "worldview": -1,
+          "values": -2
+        },
+        "resourceDeltas": {
+          "money": -2
+        },
+        "aftermath": "表哥把钱和利息一起还了，还多了两瓶酒。两家后来处得比从前更踏实。"
       }
-    ]
+    ],
+    "ageMonths": 348,
+    "line": "fate"
   },
   {
     "id": "youth-021",
@@ -1676,48 +2964,88 @@
     "options": [
       {
         "text": "求婚——戒指是半年前就买好的",
-        "deltas": {
-          "ei": 4,
-          "jp": 4
+        "aftermath": "婚礼很小，两桌人。对方穿着便装来的，说这才是我们。",
+        "deltas3": {
+          "outlook": -8
         },
-        "aftermath": "婚礼很小，两桌人。对方穿着便装来的，说这才是我们。"
+        "resourceDeltas": {
+          "mood": 3,
+          "money": -3
+        }
       },
       {
         "text": "认真说了再想想。两个人都哭了",
-        "deltas": {
-          "ei": -3,
-          "tf": 3,
-          "jp": -2
+        "aftermath": "那晚你们在江边走了很久，把手放开了，把话留下了。",
+        "deltas3": {
+          "values": 8,
+          "outlook": 8
         },
-        "aftermath": "那晚你们在江边走了很久，把手放开了，把话留下了。"
+        "resourceDeltas": {
+          "mood": -2,
+          "health": -1
+        }
+      },
+      {
+        "text": "提一年之约：各自搬来同城试住半年，年底再答这道题",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        },
+        "aftermath": "试住第四个月，两把牙刷出现在同一个杯子里。年底的答案，没人再问。"
       }
-    ]
+    ],
+    "ageMonths": 360,
+    "line": "fate"
   },
   {
     "id": "youth-022",
     "stage": "youth",
     "type": "critical",
-    "ageHint": "27岁",
+    "ageHint": "30岁",
     "text": "大学最野的那个同学找到你，拍着一份商业计划书：我出创意，你管账。成了我们是合伙人，败了我们还是兄弟。",
     "options": [
       {
         "text": "入伙，把积蓄划了一半进对公账户",
-        "deltas": {
-          "ei": 4,
-          "jp": -4,
-          "sn": -3
+        "aftermath": "第一年赔得底儿掉，第三年账上第一次转正。庆功宴就在当年说还是兄弟的那家烧烤摊。",
+        "deltas3": {
+          "worldview": -8,
+          "outlook": -8
         },
-        "aftermath": "第一年赔得底儿掉，第三年账上第一次转正。庆功宴就在当年说还是兄弟的那家烧烤摊。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -5
+        }
       },
       {
         "text": "婉拒出钱，帮着把计划书改了三稿——钱我不出，命我帮你把关",
-        "deltas": {
-          "jp": 4,
-          "tf": -3
+        "aftermath": "你三稿里的两条建议，后来成了那家公司的两条红线。",
+        "deltas3": {
+          "values": -8,
+          "outlook": -8
         },
-        "aftermath": "你三稿里的两条建议，后来成了那家公司的两条红线。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "入一小股，定死三条规矩：账目月结、亏损线、退出条款——章程归章程",
+        "deltas3": {
+          "worldview": -2,
+          "values": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -3
+        },
+        "aftermath": "三年后公司转正，你那一小股翻了五倍。烧烤摊庆功宴上，同学举杯敬那三条规矩。"
       }
-    ]
+    ],
+    "ageMonths": 360,
+    "line": "fate"
   },
   {
     "id": "adult-001",
@@ -1728,20 +3056,39 @@
     "options": [
       {
         "text": "接下驻外，把家里的钥匙托付给邻居",
-        "deltas": {
-          "ei": 2,
-          "sn": -1,
-          "jp": -1
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1,
+          "money": 2
         }
       },
       {
         "text": "留在原岗，推掉了这次机会",
-        "deltas": {
-          "jp": 2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "谈成驻外一年半加远程半年的折中——待遇谈不满就谈时间",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "money": 2
+        },
+        "aftermath": "公司第一次批了这种条件。你驻外那一年半，视频里的孩子没认生。"
       }
-    ]
+    ],
+    "ageMonths": 396,
+    "line": "fate"
   },
   {
     "id": "adult-003",
@@ -1752,22 +3099,43 @@
     "options": [
       {
         "text": "敲开孩子的门，把选择权递过去——班你挑，账我付",
-        "deltas": {
-          "ei": 1,
-          "tf": 2,
-          "jp": -1
+        "aftermath": "孩子挑了个冷门的机器人班，两年后拿了个市里的奖。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "孩子挑了个冷门的机器人班，两年后拿了个市里的奖。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -2
+        }
       },
       {
         "text": "拍板报班，把课表贴在冰箱上",
-        "deltas": {
-          "jp": 3,
-          "tf": -1
+        "aftermath": "成绩上去了，孩子的话少了。冰箱上的课表，你后来偷偷揭下来过，又贴了回去。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "成绩上去了，孩子的话少了。冰箱上的课表，你后来偷偷揭下来过，又贴了回去。"
+        "resourceDeltas": {
+          "mood": -1,
+          "money": -2
+        }
+      },
+      {
+        "text": "跟孩子签试读两周协议：喜欢就续，不喜欢全家吃饭时说理由",
+        "deltas3": {
+          "values": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        },
+        "aftermath": "两周后孩子续了机器人班——理由写了半页纸，第一条是「老师不凶」。"
       }
-    ]
+    ],
+    "ageMonths": 420,
+    "line": "fate"
   },
   {
     "id": "adult-004",
@@ -1778,23 +3146,43 @@
     "options": [
       {
         "text": "把年假全清了，白天在医院搭行军床改方案",
-        "deltas": {
-          "ei": -1,
-          "tf": 2,
-          "jp": 1
+        "aftermath": "父亲出院那天，你在走廊睡了半小时。护士提醒你别着凉。",
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
         },
-        "aftermath": "父亲出院那天，你在走廊睡了半小时。护士提醒你别着凉。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -2
+        }
       },
       {
         "text": "请了护工，自己夜里守住上线，天亮再去查房",
-        "deltas": {
-          "jp": 2,
-          "tf": -1,
-          "ei": 1
+        "aftermath": "上线零故障，父亲恢复得也好。两个战场你都没垮，就是瘦了八斤。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "上线零故障，父亲恢复得也好。两个战场你都没垮，就是瘦了八斤。"
+        "resourceDeltas": {
+          "mood": -1,
+          "health": -2
+        }
+      },
+      {
+        "text": "请三天假加护工白天顶，自己夜里守上线——两头都到，先认不满分",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": -1,
+          "health": -1
+        },
+        "aftermath": "父亲出院时说：那几天你眼里有血丝，但心里稳。上线也稳。"
       }
-    ]
+    ],
+    "ageMonths": 456,
+    "line": "fate"
   },
   {
     "id": "adult-005",
@@ -1805,23 +3193,42 @@
     "options": [
       {
         "text": "把压箱底的坑位清单整理了一份给他——省得你把坑再踩一遍",
-        "deltas": {
-          "ei": 1,
-          "tf": 2,
-          "sn": 1
+        "aftermath": "两年后他升了组长，第一个电话打给你：老师儿，来我这儿当军师。",
+        "deltas3": {
+          "worldview": 3,
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "两年后他升了组长，第一个电话打给你：老师儿，来我这儿当军师。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "闷头苦学新框架，三个月后用新技术重写了核心模块",
-        "deltas": {
-          "jp": 2,
-          "ei": -1,
-          "sn": 1
+        "aftermath": "评审会上你讲了四十分钟，台下那个年轻人记了四十分钟笔记。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
         },
-        "aftermath": "评审会上你讲了四十分钟，台下那个年轻人记了四十分钟笔记。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        }
+      },
+      {
+        "text": "拉他组互为师徒：你教业务的坑，他教新框架，每周互换一小时",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "半年后组里多了个传统：新人老人结对子。你们那对，是第一对。"
       }
-    ]
+    ],
+    "ageMonths": 504,
+    "line": "fate"
   },
   {
     "id": "adult-002",
@@ -1832,18 +3239,39 @@
     "options": [
       {
         "text": "把上线盯现场的担子交给副手，坐进了学校礼堂第三排",
-        "deltas": {
-          "tf": 3
+        "deltas3": {
+          "values": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
       },
       {
         "text": "守在机房直到凌晨，演出是第二天看的录像",
-        "deltas": {
-          "jp": 2,
-          "tf": -2
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1,
+          "health": -1
         }
+      },
+      {
+        "text": "上线改夜里分批跑，礼堂机房两头跑——耳机盯日志，眼睛看演出",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "谢幕时日志全绿。孩子的照片里，你站在第三排鼓掌，耳机还挂在脖子上。"
       }
-    ]
+    ],
+    "ageMonths": 456,
+    "line": "fate"
   },
   {
     "id": "adult-011",
@@ -1854,20 +3282,41 @@
     "options": [
       {
         "text": "拉了个十年之约群，约定不聊收入只聊近况",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "那个群后来成了最活跃的同学群，比班群还热闹。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "那个群后来成了最活跃的同学群，比班群还热闹。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "提前离席，回家路上给孩子买了一串糖葫芦",
-        "deltas": {
-          "ei": -2,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "挨桌敬酒只说一句话：「你当年帮我那件事，我还记着」",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        },
+        "aftermath": "散场时三拨人加了你微信。有人说：下次同学会，冲你这句话来。"
       }
-    ]
+    ],
+    "ageMonths": 396,
+    "line": "fate"
   },
   {
     "id": "adult-012",
@@ -1878,20 +3327,41 @@
     "options": [
       {
         "text": "画了三张图一条条谈，最后各让一步",
-        "deltas": {
-          "jp": 2,
-          "tf": 1
+        "aftermath": "飘窗保住了。后来全家最爱待的地方就是那儿。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "飘窗保住了。后来全家最爱待的地方就是那儿。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        }
       },
       {
         "text": "全权交给装修公司——专业的事交给专业的人",
-        "deltas": {
-          "jp": -1,
-          "ei": 1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -2
         }
+      },
+      {
+        "text": "三处让两处，飘窗自己动手打——周末跑了两个月木工房",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "飘窗最后比图纸歪了两度。全家都说，歪的那两度最好坐。"
       }
-    ]
+    ],
+    "ageMonths": 408,
+    "line": "fate"
   },
   {
     "id": "adult-013",
@@ -1902,21 +3372,39 @@
     "options": [
       {
         "text": "埋在小区的老槐树下，立了块小石头：想它就来看看",
-        "deltas": {
-          "tf": 2,
-          "sn": 1
+        "aftermath": "孩子每周去浇一次树。那棵树的年轮里，从那年起多了一圈温柔。",
+        "deltas3": {
+          "worldview": 3,
+          "values": 3
         },
-        "aftermath": "孩子每周去浇一次树。那棵树的年轮里，从那年起多了一圈温柔。"
+        "resourceDeltas": {
+          "mood": -1
+        }
       },
       {
         "text": "说它去很远的地方旅行了，把狗窝收进了储藏室",
-        "deltas": {
-          "ei": -1,
-          "jp": -1
+        "aftermath": "孩子信了三年。第四年他在书上查到答案，回来抱了抱你，什么也没说。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "孩子信了三年。第四年他在书上查到答案，回来抱了抱你，什么也没说。"
+        "resourceDeltas": {
+          "mood": -1
+        }
+      },
+      {
+        "text": "把狗碗洗干净收好：「想它的时候，我们给小区流浪猫盛一勺」",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "health": 1
+        },
+        "aftermath": "那只碗后来在楼道口放了三年。猫来了很多只，孩子记住的名字比你的多。"
       }
-    ]
+    ],
+    "ageMonths": 432,
+    "line": "fate"
   },
   {
     "id": "adult-014",
@@ -1930,20 +3418,40 @@
     "options": [
       {
         "text": "连熬三个周末做了件大的。展上被陌生人摸了又摸",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "aftermath": "那件文具最后没卖。你把它送给了当年带你入行的老师傅。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "那件文具最后没卖。你把它送给了当年带你入行的老师傅。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "帮着办展没参展——做东西是给自己安静的",
-        "deltas": {
-          "ei": -1,
-          "jp": 1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "参展，但展品是半成品——旁边立牌：这件等你来一起做完",
+        "deltas3": {
+          "worldview": 2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "展会最后一天，真有位姑娘坐下来和你合完了那件文具。她后来成了你工坊的常客。"
       }
-    ]
+    ],
+    "ageMonths": 444,
+    "line": "fate"
   },
   {
     "id": "adult-015",
@@ -1957,22 +3465,42 @@
     "options": [
       {
         "text": "稳住，照常上班，把交接文档写得比谁都全",
-        "deltas": {
-          "jp": 2,
-          "tf": 1
-        },
         "flag": "conform",
-        "aftermath": "裁员名单下来，你的名字不在上面。领导私下说：全组我就没担心过你。"
+        "aftermath": "裁员名单下来，你的名字不在上面。领导私下说：全组我就没担心过你。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": -1
+        }
       },
       {
         "text": "接了猎头的橄榄枝，先把薪资谈起来",
-        "deltas": {
-          "ei": 1,
-          "jp": -2
+        "aftermath": "offer谈成了两倍薪资。搬家那天，你把显示器上那张写着稳字的便利贴揭了下来。",
+        "deltas3": {
+          "outlook": -3
         },
-        "aftermath": "offer谈成了两倍薪资。搬家那天，你把显示器上那张写着稳字的便利贴揭了下来。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
+        }
+      },
+      {
+        "text": "留任和面试双线走，把两条路的成本收益做成一页纸给家人看",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        },
+        "aftermath": "一个月后你选了留——不是图稳，是那页纸让你看清：你想守的东西在这边。"
       }
-    ]
+    ],
+    "ageMonths": 468,
+    "line": "fate"
   },
   {
     "id": "adult-016",
@@ -1986,20 +3514,42 @@
     "options": [
       {
         "text": "扩建到六个箱子，开始研究堆肥，邻居都来取经",
-        "deltas": {
-          "ei": 1,
-          "sn": 2
+        "aftermath": "你家的阳台成了小区景点，黄瓜管够。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "你家的阳台成了小区景点，黄瓜管够。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1,
+          "health": 1
+        }
       },
       {
         "text": "保持两个箱子，只种葱和辣椒——够吃就好",
-        "deltas": {
-          "ei": -1,
-          "jp": -2
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
         }
+      },
+      {
+        "text": "六个箱子全种可送人的菜，楼道立牌「自取，帮浇一次水抵一斤」",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        },
+        "aftermath": "牌子上的字被雨水洗淡了三次，浇水账却记满了一本。邻居换了两茬，牌子还在。"
       }
-    ]
+    ],
+    "ageMonths": 480,
+    "line": "fate"
   },
   {
     "id": "adult-017",
@@ -2010,48 +3560,91 @@
     "options": [
       {
         "text": "敲开楼上的门，带着孩子画的请轻一点，谈出了一张午休时段表",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "装修结束那天，楼上送来一篮橘子。两家后来处成了电梯熟人。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "装修结束那天，楼上送来一篮橘子。两家后来处成了电梯熟人。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
       },
       {
         "text": "直接投诉到街道，装修队被约谈",
-        "deltas": {
-          "jp": 2,
-          "tf": -1
+        "aftermath": "墙是安静了，电梯里碰见总有点尴尬。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "墙是安静了，电梯里碰见总有点尴尬。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "给孩子买降噪耳罩，午觉挪到图书馆——改变不了别人，先安排自己",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        },
+        "aftermath": "一个月后装修结束，孩子已经爱上图书馆的午睡专座。耳罩成了他的收藏。"
       }
-    ]
+    ],
+    "ageMonths": 492,
+    "line": "fate"
   },
   {
     "id": "adult-021",
     "stage": "adult",
     "type": "critical",
-    "ageHint": "36岁",
+    "ageHint": "42岁",
     "text": "升职答辩和预产期排在同一个月。领导的原话：岗位只空一次，人生可以再来一次。家里人的意见分成了两派。",
     "options": [
       {
         "text": "如期答辩。孩子出生那天，你正在做最后一轮汇报",
-        "deltas": {
-          "ei": 3,
-          "jp": 4,
-          "tf": -3
+        "aftermath": "你举着手机在产房外走廊里答辩完最后一页。那年你收了两个红本本：升职文件和出生证明。",
+        "deltas3": {
+          "values": -8,
+          "outlook": -8
         },
-        "aftermath": "你举着手机在产房外走廊里答辩完最后一页。那年你收了两个红本本：升职文件和出生证明。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2,
+          "health": -2
+        }
       },
       {
         "text": "退出答辩——岗位年年有，这一个月只有一次",
-        "deltas": {
-          "ei": -2,
-          "tf": 4,
-          "jp": -3
+        "aftermath": "你全程陪了产检的最后一段。第二年岗位再开，你答辩讲的第一个案例，就是那一个月。",
+        "deltas3": {
+          "values": 8,
+          "outlook": 8
         },
-        "aftermath": "你全程陪了产检的最后一段。第二年岗位再开，你答辩讲的第一个案例，就是那一个月。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        }
+      },
+      {
+        "text": "答辩调到最后一个出场，产检上午答辩下午——两头都到场",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "money": 1,
+          "health": -2
+        },
+        "aftermath": "答辩通过那天你在医院走廊，举着手机讲了最后一页。两个红本本，一个都没少。"
       }
-    ]
+    ],
+    "ageMonths": 504,
+    "line": "fate"
   },
   {
     "id": "adult-022",
@@ -2062,22 +3655,43 @@
     "options": [
       {
         "text": "烟酒停了，晨跑打上卡。复查指标全绿",
-        "deltas": {
-          "ei": 3,
-          "jp": 4,
-          "sn": 1
+        "aftermath": "半年后你跑了第一个五公里，配速感人，全家助威。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -8
         },
-        "aftermath": "半年后你跑了第一个五公里，配速感人，全家助威。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1,
+          "health": 3
+        }
       },
       {
         "text": "复查完该干嘛干嘛，只是把加班悄悄分给了年轻人",
-        "deltas": {
-          "jp": -2,
-          "ei": -3
+        "aftermath": "一年后指标降了一半。你把功劳记在少操心上——办公室的风波，你确实少掺和了。",
+        "deltas3": {
+          "outlook": 8
         },
-        "aftermath": "一年后指标降了一半。你把功劳记在少操心上——办公室的风波，你确实少掺和了。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
+      },
+      {
+        "text": "跟医生要了可执行清单贴冰箱：全家散步、外卖减半、十一点前睡",
+        "deltas3": {
+          "worldview": -1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 2
+        },
+        "aftermath": "清单执行了一年。复查那天医生笑：这家人，是把体检报告当家规用的。"
       }
-    ]
+    ],
+    "ageMonths": 528,
+    "line": "fate"
   },
   {
     "id": "midlife-001",
@@ -2088,45 +3702,86 @@
     "options": [
       {
         "text": "办了内退，拿着积蓄去折腾想了半辈子的小生意",
-        "deltas": {
-          "sn": -2,
-          "ei": 1,
-          "jp": -2
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -2,
+          "health": -1
         }
       },
       {
         "text": "接受转岗，守着资历安稳过渡到退休",
-        "deltas": {
-          "jp": 3,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
         }
+      },
+      {
+        "text": "接转岗但谈成顾问加每季度一门新人课——资历变现，人不下场",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        },
+        "aftermath": "你那门课成了新员工的老传统。三年后返聘函来的时候，听课的人都成了给你投票的人。"
       }
-    ]
+    ],
+    "ageMonths": 600,
+    "line": "fate"
   },
   {
     "id": "midlife-003",
     "stage": "midlife",
     "type": "main",
-    "ageHint": "48岁",
+    "ageHint": "50岁",
     "text": "孩子的录取通知书到了，学校在两千公里外。你嘴上说好事，手却把行李箱的轮子检查了三遍。",
     "options": [
       {
         "text": "去送站，在检票口把塞了一路的吃的又塞了一遍",
-        "deltas": {
-          "ei": -1,
-          "tf": 2
+        "aftermath": "站台上你挥手挥到看不见人。回程的车上，你睡了孩子十八年来的第一个午觉。",
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
         },
-        "aftermath": "站台上你挥手挥到看不见人。回程的车上，你睡了孩子十八年来的第一个午觉。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        }
       },
       {
         "text": "没去送站，只是当晚做了孩子最爱吃的三道菜",
-        "deltas": {
-          "ei": 1,
-          "jp": 1
+        "aftermath": "视频接通时孩子在那头哭。你说：行李箱轮子我换过了，别拖太重。",
+        "deltas3": {
+          "outlook": -3
         },
-        "aftermath": "视频接通时孩子在那头哭。你说：行李箱轮子我换过了，别拖太重。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "送站，另写一张应急联系卡：车次、换乘、卡号——缺钱别硬扛",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "那张卡孩子贴在宿舍书桌前。毕业那年他把卡带回了家：没用上，但天天看见。"
       }
-    ]
+    ],
+    "ageMonths": 600,
+    "line": "fate"
   },
   {
     "id": "midlife-004",
@@ -2137,21 +3792,43 @@
     "options": [
       {
         "text": "把三个月没联系的旧友挨个约了一遍饭",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "那三个月你见了十七个人。有人问你怎么突然热络，你只说：该聚聚了。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "那三个月你见了十七个人。有人问你怎么突然热络，你只说：该聚聚了。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -2,
+          "health": -1
+        }
       },
       {
         "text": "翻完通讯录，把想说的话一条条写进了备忘录",
-        "deltas": {
-          "ei": -2,
-          "sn": 1
+        "aftermath": "备忘录写了四十多条。半年后你开始一条一条发出去——按最想见的那位排的序。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
         },
-        "aftermath": "备忘录写了四十多条。半年后你开始一条一条发出去——按最想见的那位排的序。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "约饭改成「一饭一旧事」：每次只约一人，聊一件当年他帮过你的事",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        },
+        "aftermath": "十七顿饭吃下来，你攒了一本人情账——全是别人对你的好。有人看完红了眼眶。"
       }
-    ]
+    ],
+    "ageMonths": 600,
+    "line": "fate"
   },
   {
     "id": "midlife-005",
@@ -2162,20 +3839,40 @@
     "options": [
       {
         "text": "换了弦，每天晚饭后弹半小时，手指磨回了茧",
-        "deltas": {
-          "ei": 1,
-          "sn": 2
+        "aftermath": "家庭聚会你弹了一首老歌。孩子举着手机录：我爸还有这一手？",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "家庭聚会你弹了一首老歌。孩子举着手机录：我爸还有这一手？"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1,
+          "health": 1
+        }
       },
       {
         "text": "把吉他擦干净挂上墙——挂在那儿看着就好",
-        "deltas": {
-          "jp": 2,
-          "ei": -1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "换弦，但只在心情最好的那天弹——把琴留给好日子",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "一年你弹了二十几天。孩子说：我爸的琴声是天气预报，一响准是家里有喜。"
       }
-    ]
+    ],
+    "ageMonths": 660,
+    "line": "fate"
   },
   {
     "id": "midlife-002",
@@ -2186,19 +3883,39 @@
     "options": [
       {
         "text": "不但去了，还主动张罗了全场签到和合影",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1
         }
       },
       {
         "text": "去了，坐在靠边的位置，和老同桌聊了一整晚",
-        "deltas": {
-          "ei": -2,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 2
         }
+      },
+      {
+        "text": "带着三十年前的毕业照去，谁来了就在照片上找到谁，让他签名",
+        "deltas3": {
+          "worldview": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "那张照片签满了名字，你拿去裱了。班长说这是三十周年最有分量的展品。"
       }
-    ]
+    ],
+    "ageMonths": 660,
+    "line": "fate"
   },
   {
     "id": "midlife-011",
@@ -2209,21 +3926,43 @@
     "options": [
       {
         "text": "当场把烟盒拍在诊桌上，回家把火锅群昵称改成了清汤侠",
-        "deltas": {
-          "ei": 2,
-          "jp": 1
+        "aftermath": "三个月后复查，医生笑着把那两行的圈画掉了。",
+        "deltas3": {
+          "outlook": -3
         },
-        "aftermath": "三个月后复查，医生笑着把那两行的圈画掉了。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1,
+          "health": 2
+        }
       },
       {
         "text": "说争取吧——转头去查了适量一词的学术定义",
-        "deltas": {
-          "jp": -1,
-          "sn": 2
+        "aftermath": "你成了朋友圈里最懂膳食指南的人，指标稳中有降。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
         },
-        "aftermath": "你成了朋友圈里最懂膳食指南的人，指标稳中有降。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
+      },
+      {
+        "text": "跟老伴签互相监督协议：他管你的酒，你管他的盐，违约洗碗一周",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 2
+        },
+        "aftermath": "协议执行一年，两人都瘦了。洗碗的次数打平——你们把这当成了另一种下棋。"
       }
-    ]
+    ],
+    "ageMonths": 564,
+    "line": "fate"
   },
   {
     "id": "midlife-012",
@@ -2234,19 +3973,39 @@
     "options": [
       {
         "text": "入团，三个月后成了领队，旗帜都是你印的",
-        "deltas": {
-          "ei": 2,
-          "jp": 1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
         }
       },
       {
         "text": "独行路线：绕湖一圈四公里，风雨无阻",
-        "deltas": {
-          "ei": -2,
-          "jp": 2
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
         }
+      },
+      {
+        "text": "独走，但每周给暴走团当一次队尾安全员——陪你们慢的那一段",
+        "deltas3": {
+          "outlook": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        },
+        "aftermath": "队尾的位置你守了两年。新人都认得你：跟着那个慢悠悠的，摔不了。"
       }
-    ]
+    ],
+    "ageMonths": 588,
+    "line": "fate"
   },
   {
     "id": "midlife-013",
@@ -2257,21 +4016,39 @@
     "options": [
       {
         "text": "定三条底线，其余全放开，跟孩子玩成了忘年交",
-        "deltas": {
-          "ei": 2,
-          "jp": -1
+        "aftermath": "暑假结束孩子赖着不走：这里比游乐园好玩。",
+        "deltas3": {
+          "outlook": -3
         },
-        "aftermath": "暑假结束孩子赖着不走：这里比游乐园好玩。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "规矩一条不让。孩子哭了两场，最后抱着你的枕头睡着",
-        "deltas": {
-          "jp": 2,
-          "tf": -1
+        "aftermath": "孩子后来跟你最亲。他说：这儿说话算数，说九点睡就九点睡。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "孩子后来跟你最亲。他说：这儿说话算数，说九点睡就九点睡。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "让孩子定规矩，自己来违反——犯规的人贴条",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "墙上贴满了控诉爷爷的小纸条，最厚的一张写：爷爷偷吃我的冰棍，罚他讲三个故事。"
       }
-    ]
+    ],
+    "ageMonths": 612,
+    "line": "fate"
   },
   {
     "id": "midlife-014",
@@ -2282,21 +4059,39 @@
     "options": [
       {
         "text": "奖状留一张，磁带转成数字版，作业本挑了两页有画送的",
-        "deltas": {
-          "jp": 2,
-          "sn": 1
+        "aftermath": "清出来的三箱书捐给了乡镇中学。搬走那天，收书的老师说：正好。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "清出来的三箱书捐给了乡镇中学。搬走那天，收书的老师说：正好。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "一箱没动，原样封好贴上标签，放回阁楼",
-        "deltas": {
-          "jp": -1,
-          "ei": -1
+        "aftermath": "标签上写着以后再整理。这四个字，你写过很多次了。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "标签上写着以后再整理。这四个字，你写过很多次了。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "办家庭博物馆日：三箱全摆出来，孩子孙子每人认领一件讲一件事",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "博物馆日办成了家训。每件东西有了主人和故事，阁楼再没堆过「以后再整理」。"
       }
-    ]
+    ],
+    "ageMonths": 636,
+    "line": "fate"
   },
   {
     "id": "midlife-015",
@@ -2310,20 +4105,39 @@
     "options": [
       {
         "text": "接了。建账公示，一分一笔都晒在公告栏",
-        "deltas": {
-          "jp": 2,
-          "tf": 2
+        "aftermath": "两年后基金里多了电梯维护金，你没拿过一分跑腿费。楼上楼下见你就递烟，你摆手：账要干净，烟就免了。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "两年后基金里多了电梯维护金，你没拿过一分跑腿费。楼上楼下见你就递烟，你摆手：账要干净，烟就免了。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "推了——我有我的活要干。帮忙介绍了位会计",
-        "deltas": {
-          "ei": -1
+        "aftermath": "后来那位会计当选了组长，逢年过节还给你送米。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "后来那位会计当选了组长，逢年过节还给你送米。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "只管对账不管账：钱走银行共管户，你每周核对公示——管钱的不碰钱",
+        "deltas3": {
+          "worldview": -2,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "三百户没人再吵过账。你的对账日成了小区公开课，物业撤了两年，信任没撤。"
       }
-    ]
+    ],
+    "ageMonths": 672,
+    "line": "fate"
   },
   {
     "id": "midlife-016",
@@ -2337,22 +4151,43 @@
     "options": [
       {
         "text": "收了两个徒弟——一个退下来的同事，一个想学手艺的年轻人",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "木工房成了你们的茶馆，木屑里聊的全是人生。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "木工房成了你们的茶馆，木屑里聊的全是人生。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1
+        }
       },
       {
         "text": "独自去，独自回，一年做了十六把椅子",
-        "deltas": {
-          "ei": -2,
-          "sn": 2,
-          "jp": -1
+        "aftermath": "来家里的每个客人都坐过你的椅子。没人知道是哪一把。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
         },
-        "aftermath": "来家里的每个客人都坐过你的椅子。没人知道是哪一把。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
+      },
+      {
+        "text": "独自做，但每把椅子腿上刻一行小字，攒够十条发「椅语」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        },
+        "aftermath": "椅语后来被邻居打印装订。有人想买你的椅子，你说：椅子不卖，句子白送。"
       }
-    ]
+    ],
+    "ageMonths": 684,
+    "line": "fate"
   },
   {
     "id": "midlife-017",
@@ -2363,48 +4198,86 @@
     "options": [
       {
         "text": "起身翻出婚礼录像。放完你们笑完，又聊到了十二点",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "录像里你俩青涩得认不出。对方说：那时候你可瘦了。你说：明天开始减肥。这话，你也说过很多次了。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "录像里你俩青涩得认不出。对方说：那时候你可瘦了。你说：明天开始减肥。这话，你也说过很多次了。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "饭后各自散步，一个向东一个向西，在小区门口碰头",
-        "deltas": {
-          "ei": -1,
-          "jp": 1
+        "aftermath": "碰头时对方手里拎着两串糖葫芦——跟你的是同一个摊位。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "碰头时对方手里拎着两串糖葫芦——跟你的是同一个摊位。"
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "各写三件对方不知道的事，饭桌上交换",
+        "deltas3": {
+          "worldview": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "第六件事念完，两个人笑出了眼泪。那三张纸你收在结婚证里。"
       }
-    ]
+    ],
+    "ageMonths": 696,
+    "line": "fate"
   },
   {
     "id": "midlife-021",
     "stage": "midlife",
     "type": "critical",
-    "ageHint": "52岁",
+    "ageHint": "58岁",
     "text": "病房里，医生把选择递到你手上：保守治疗回家休养，或者再进一次手术室。父亲拉着你的手不说话，母亲在走廊抹眼泪。",
     "options": [
       {
         "text": "问了父亲本人的意见，按他说的办——回家",
-        "deltas": {
-          "tf": 4,
-          "jp": 3,
-          "ei": -2
+        "aftermath": "父亲在家度过了最后四个月，每天晒两小时太阳。走的时候很安详，床边放着他年轻时的照片。",
+        "deltas3": {
+          "values": 8,
+          "outlook": -8
         },
-        "aftermath": "父亲在家度过了最后四个月，每天晒两小时太阳。走的时候很安详，床边放着他年轻时的照片。"
+        "resourceDeltas": {
+          "mood": -1
+        }
       },
       {
         "text": "签了手术同意书——还有一线希望就不放弃",
-        "deltas": {
-          "ei": 2,
-          "tf": -4,
-          "jp": 2
+        "aftermath": "手术成功了，父亲多活了六年。那六年他常念叨：值。你是全家做决定最不后悔的人。",
+        "deltas3": {
+          "values": -8,
+          "outlook": -8
         },
-        "aftermath": "手术成功了，父亲多活了六年。那六年他常念叨：值。你是全家做决定最不后悔的人。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -3,
+          "health": -1
+        }
+      },
+      {
+        "text": "带两套方案的数据陪父亲回趟老屋再决定——把想看的地方看完，再选路",
+        "deltas3": {
+          "worldview": 2,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": -1,
+          "health": -1
+        },
+        "aftermath": "从老屋回来那天，父亲说：回家养着吧，这屋子看够了。全家没人有异议。"
       }
-    ]
+    ],
+    "ageMonths": 696,
+    "line": "fate"
   },
   {
     "id": "midlife-022",
@@ -2415,23 +4288,44 @@
     "options": [
       {
         "text": "转了首付——房比远方要紧",
-        "deltas": {
-          "ei": -3,
-          "tf": 4,
-          "jp": 2
+        "aftermath": "孩子的新房里，你出了一间书房。钥匙留了一把在你这儿。你说：我常去扫地。",
+        "deltas3": {
+          "values": 8,
+          "outlook": 8
         },
-        "aftermath": "孩子的新房里，你出了一间书房。钥匙留了一把在你这儿。你说：我常去扫地。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -4
+        }
       },
       {
         "text": "留一半给孩子，另一半——出发",
-        "deltas": {
-          "ei": 3,
-          "sn": -4,
-          "jp": -3
+        "aftermath": "你在独库公路上过了五十九岁生日。视频里孩子举着钥匙晃：书房收拾好了，等你回来讲路上的事。",
+        "deltas3": {
+          "worldview": -8,
+          "outlook": -8
         },
-        "aftermath": "你在独库公路上过了五十九岁生日。视频里孩子举着钥匙晃：书房收拾好了，等你回来讲路上的事。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -3,
+          "health": 1
+        }
+      },
+      {
+        "text": "转「借款」打借条，利息是每周一顿饭——钱帮到底，账算到底，饭吃到老",
+        "deltas3": {
+          "worldview": -1,
+          "values": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -4
+        },
+        "aftermath": "借条贴在孩子新房冰箱上。每周那顿饭你去了十几年，利息饭桌越来越大。"
       }
-    ]
+    ],
+    "ageMonths": 708,
+    "line": "fate"
   },
   {
     "id": "elder-001",
@@ -2442,69 +4336,128 @@
     "options": [
       {
         "text": "报了两门课，又偷偷在徒步报名表上添了名字",
-        "deltas": {
-          "sn": 2,
-          "ei": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1,
+          "health": 1
         }
       },
       {
         "text": "什么班也没报，把阳台改成了小花园",
-        "deltas": {
-          "jp": 2,
-          "ei": -1
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
         }
+      },
+      {
+        "text": "报摄影课，命题作业拍「小区的早晨」——拍着拍着成了小区编年史作者",
+        "deltas3": {
+          "worldview": 2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        },
+        "aftermath": "你的小区早晨拍了三年，物业打印了一辑贴在公告栏。标题是你起的：都还在。"
       }
-    ]
+    ],
+    "ageMonths": 840,
+    "line": "fate"
   },
   {
     "id": "elder-003",
     "stage": "elder",
     "type": "main",
-    "ageHint": "63岁",
+    "ageHint": "70岁",
     "text": "搬进电梯房之前，你要给老屋做最后一次清点：五十年攒下的物件，一件一件过手。",
     "options": [
       {
         "text": "每件东西都拍了照、编了号，写了三页纸的它们是谁",
-        "deltas": {
-          "jp": 2,
-          "sn": 2
+        "aftermath": "三页纸后来传给了孩子。孩子说：比我记得的全。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "三页纸后来传给了孩子。孩子说：比我记得的全。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "快刀斩乱麻，最后留下的不到一车",
-        "deltas": {
-          "jp": 3,
-          "ei": -1
+        "aftermath": "搬家车开动时你回头看了一眼。老屋在窗户里越来越小，你朝它挥了挥手。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "搬家车开动时你回头看了一眼。老屋在窗户里越来越小，你朝它挥了挥手。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "只带三样走，其余全拍进一段视频——东西留下，念想带走",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "视频里你给每件东西说了句告别。孩子看完说：比三页纸还重。"
       }
-    ]
+    ],
+    "ageMonths": 840,
+    "line": "fate"
   },
   {
     "id": "elder-004",
     "stage": "elder",
     "type": "main",
-    "ageHint": "68岁",
+    "ageHint": "71岁",
     "text": "小孙子趴在你膝盖上写作文，题目是我的家庭。他仰头问：你年轻的时候是什么样的？",
     "options": [
       {
         "text": "从抽屉翻出老相册，讲了一下午，讲了三个时代",
-        "deltas": {
-          "ei": 2,
-          "sn": 2
+        "aftermath": "作文得了个优，老师批语：材料翔实，人物鲜活。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "作文得了个优，老师批语：材料翔实，人物鲜活。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "说跟你一样——上课、挨骂、疯跑。然后把这个问题记在了心里",
-        "deltas": {
-          "ei": -1,
-          "jp": 1
+        "aftermath": "那天夜里你翻出了压箱底的日记。第一页的字，比小孙子现在的还丑。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "那天夜里你翻出了压箱底的日记。第一页的字，比小孙子现在的还丑。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "反问小孙子「先讲讲你的家庭」，把他讲的每个字记在相册后",
+        "deltas3": {
+          "worldview": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "相册最后多了一本孙言录。他十八岁那年翻到，笑说：原来我的童年有人记账。"
       }
-    ]
+    ],
+    "ageMonths": 852,
+    "line": "fate"
   },
   {
     "id": "elder-005",
@@ -2515,21 +4468,40 @@
     "options": [
       {
         "text": "报名。对着话筒讲了四十分钟，没打一个磕巴",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "aftermath": "录音被刻成了光盘，你给每个孩子寄了一张。小孙女说，比有声书好听。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "录音被刻成了光盘，你给每个孩子寄了一张。小孙女说，比有声书好听。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        }
       },
       {
         "text": "没报名，回家自己写了三千字，只给家里人看",
-        "deltas": {
-          "ei": -2,
-          "jp": 2
+        "aftermath": "三千字你改了七遍。最后一行写：此生无大功，但每一步都数。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "三千字你改了七遍。最后一行写：此生无大功，但每一步都数。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "报名，但要求两个人一起讲——拉上三十年的老邻居，你上半场他下半场",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "那期口述史成了活动最火的录音。光盘你寄了两张——一张给孩子，一张给老邻居。"
       }
-    ]
+    ],
+    "ageMonths": 864,
+    "line": "fate"
   },
   {
     "id": "elder-011",
@@ -2540,20 +4512,40 @@
     "options": [
       {
         "text": "入伙，三个月后你成了喊口号的那个",
-        "deltas": {
-          "ei": 2,
-          "jp": 1
+        "deltas3": {
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
         }
       },
       {
         "text": "独自沿河快走，耳机里放着年轻时没听完的评书",
-        "deltas": {
-          "ei": -2,
-          "sn": 2,
-          "jp": -1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
         }
+      },
+      {
+        "text": "入伙，但带了台小收音机——口号配评书，你们场子成了公园一景",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        },
+        "aftermath": "评书讲到关键处全场自动停下。别的队伍后来也学，公园音响大战上了社区报。"
       }
-    ]
+    ],
+    "ageMonths": 744,
+    "line": "fate"
   },
   {
     "id": "elder-012",
@@ -2564,21 +4556,39 @@
     "options": [
       {
         "text": "回头从老家捎了两瓶自己腌的酱菜，一来二去处成了对等邦交",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "你家腌菜方子在菜场传阅，署名：三号摊常客。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "你家腌菜方子在菜场传阅，署名：三号摊常客。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "精确找零，从不欠人情",
-        "deltas": {
-          "jp": 2,
-          "ei": -1
+        "aftermath": "王婶评价你：账比谁都清，心比谁都热——就是不说。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "王婶评价你：账比谁都清，心比谁都热——就是不说。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "多收一把葱就往摊边零钱罐塞一块，月底让王婶给环卫工买水",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "零钱罐后来立了个小牌：三号摊的葱基金。环卫师傅们夏天都认得那个罐子。"
       }
-    ]
+    ],
+    "ageMonths": 768,
+    "line": "fate"
   },
   {
     "id": "elder-013",
@@ -2589,21 +4599,40 @@
     "options": [
       {
         "text": "赴局。赢了就高声宣读战绩，输了就约明天",
-        "deltas": {
-          "ei": 2,
-          "tf": -1
+        "aftermath": "烟盒纸背面添了新的一行。孙子问那是什么，你说：那是我的战绩史。",
+        "deltas3": {
+          "values": -3,
+          "outlook": -3
         },
-        "aftermath": "烟盒纸背面添了新的一行。孙子问那是什么，你说：那是我的战绩史。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "在旁边看了几盘没下场——让他两天，他前天输了三盘",
-        "deltas": {
-          "ei": -1,
-          "tf": 1
+        "aftermath": "第二天老张找上门：让我，是对我的侮辱。你们下了一下午，你赢了四盘。",
+        "deltas3": {
+          "values": 3,
+          "outlook": 3
         },
-        "aftermath": "第二天老张找上门：让我，是对我的侮辱。你们下了一下午，你赢了四盘。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "赴局，把烟盒纸升级成双栏账——胜负一栏，悔棋一栏，悔棋多的请茶",
+        "deltas3": {
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "悔棋栏你的名字遥遥领先。老张逢人就晒那页纸：看见没，这就是三十年的交情。"
       }
-    ]
+    ],
+    "ageMonths": 792,
+    "line": "fate"
   },
   {
     "id": "elder-014",
@@ -2614,20 +4643,38 @@
     "options": [
       {
         "text": "学完给全家拉了个群，天天发养生文章和美景照",
-        "deltas": {
-          "ei": 2,
-          "sn": -1
+        "aftermath": "群名是你起的：一家人。置顶消息是你录的第一条视频：都能听见吗？",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "群名是你起的：一家人。置顶消息是你录的第一条视频：都能听见吗？"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "只学了挂号——手机嘛，够用就行",
-        "deltas": {
-          "ei": -1,
-          "jp": -2
+        "deltas3": {
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "学完给楼里老人开小灶班——一周一次教到会为止，学费是讲一件新鲜事",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "小灶班开了两年，学费故事攒了一本。居委会发了个银龄讲师的牌子，你挂在收音机上。"
       }
-    ]
+    ],
+    "ageMonths": 828,
+    "line": "fate"
   },
   {
     "id": "elder-015",
@@ -2641,21 +4688,42 @@
     "options": [
       {
         "text": "当天报了名，背着相机出了门",
-        "deltas": {
-          "ei": 2,
-          "sn": -2
+        "aftermath": "你在目的地寄出三张明信片，其中一张给自己：到此一游，兑现。",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
         },
-        "aftermath": "你在目的地寄出三张明信片，其中一张给自己：到此一游，兑现。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -2,
+          "health": -1
+        }
       },
       {
         "text": "收藏了行程单——明年开春去，现在人多",
-        "deltas": {
-          "ei": -1,
-          "jp": -1
+        "aftermath": "行程单夹在台历里，翻到了明年四月。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "行程单夹在台历里，翻到了明年四月。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "改春秋各一趟：春天一个人去，秋天带全家——念想分两次兑，利息翻倍",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -2
+        },
+        "aftermath": "秋天那趟，你在三十岁想去的城市给全家当导游。台词是排练过的：这条路我认得，三十年了。"
       }
-    ]
+    ],
+    "ageMonths": 852,
+    "line": "fate"
   },
   {
     "id": "elder-016",
@@ -2669,21 +4737,41 @@
     "options": [
       {
         "text": "给每盆花拍了定妆照发到家庭群，配文：我家后花园",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "aftermath": "小孙女视频里的第一个要求，永远是：看花。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "小孙女视频里的第一个要求，永远是：看花。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "不拍照不发群，每天清晨自己浇一遍，薄荷掐两片泡水",
-        "deltas": {
-          "ei": -2,
-          "jp": 1
+        "aftermath": "那杯薄荷茶你喝了整个夏天，谁来了都分一杯。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "那杯薄荷茶你喝了整个夏天，谁来了都分一杯。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
+      },
+      {
+        "text": "挑一盆月季当传家——每年来的小孙女负责浇水，走时合影存档",
+        "deltas3": {
+          "worldview": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        },
+        "aftermath": "那盆月季的照片攒了七张。小孙女说：等我长大，花搬去我家，合影继续拍。"
       }
-    ]
+    ],
+    "ageMonths": 888,
+    "line": "fate"
   },
   {
     "id": "elder-017",
@@ -2694,21 +4782,41 @@
     "options": [
       {
         "text": "报了合唱团——一个人在家唱，容易跑调",
-        "deltas": {
-          "ei": 2,
-          "tf": 1
+        "aftermath": "合唱团年末演出，家人都来了。你站在第二排，唱得特别稳。",
+        "deltas3": {
+          "values": 3,
+          "outlook": -3
         },
-        "aftermath": "合唱团年末演出，家人都来了。你站在第二排，唱得特别稳。"
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        }
       },
       {
         "text": "把两人的老照片做成一本相册——想说话的时候，翻一翻",
-        "deltas": {
-          "ei": -2,
-          "sn": 2
+        "aftermath": "相册第一页你写了一行字：老伙计，猫很好，我也好。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
         },
-        "aftermath": "相册第一页你写了一行字：老伙计，猫很好，我也好。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "饭量减一人量，但桌上多摆一副碗筷——给随时敲门的邻居留个位",
+        "deltas3": {
+          "outlook": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "敲门的真来了三回。第四回你自己端着饭去了对门老周家——他家的碗，也多摆了一副。"
       }
-    ]
+    ],
+    "ageMonths": 936,
+    "line": "fate"
   },
   {
     "id": "elder-018",
@@ -2719,21 +4827,39 @@
     "options": [
       {
         "text": "对着镜头说了很久，末了加一句：就这些，都作数",
-        "deltas": {
-          "ei": 2,
-          "sn": 1
+        "aftermath": "采访登在社区报上。剪报你压在玻璃桌板下——就是压着孩子小时候画的那块。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
         },
-        "aftermath": "采访登在社区报上。剪报你压在玻璃桌板下——就是压着孩子小时候画的那块。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "想了一晚上，第二天只回了四个字：早点睡觉",
-        "deltas": {
-          "ei": -1,
-          "jp": 1
+        "aftermath": "记者愣了三秒，写下：幽默，且活得明白。",
+        "deltas3": {
+          "outlook": 3
         },
-        "aftermath": "记者愣了三秒，写下：幽默，且活得明白。"
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "说一句：「让他别怕选错——我走错了三次，三次都走出了新地方」",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "那期报道被剪成社区宣传牌。你最得意的是记者加的注释：受访时全程带笑。"
       }
-    ]
+    ],
+    "ageMonths": 984,
+    "line": "fate"
   },
   {
     "id": "elder-002",
@@ -2744,20 +4870,40 @@
     "options": [
       {
         "text": "守着自己的老房子，把钥匙多配了一把给邻居",
-        "deltas": {
-          "ei": -1,
-          "jp": 3,
-          "tf": 1
+        "deltas3": {
+          "values": 3,
+          "outlook": -8
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
         }
       },
       {
         "text": "答应了，把老照片一张一张收进随身的箱子",
-        "deltas": {
-          "ei": 2,
-          "tf": 2
+        "deltas3": {
+          "values": 5,
+          "outlook": -5
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "卖房，但选同小区的老年公寓——门对门不同门，一碗汤的距离",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
+        },
+        "aftermath": "搬进去那天你在新窗台摆了老房子的钥匙——看得见老朋友，守得住老日子。"
       }
-    ]
+    ],
+    "ageMonths": 1020,
+    "line": "fate"
   },
   {
     "id": "elder-022",
@@ -2768,23 +4914,44 @@
     "options": [
       {
         "text": "签了字——我还有两个春天想看",
-        "deltas": {
-          "ei": 3,
-          "jp": 4,
-          "sn": 1
+        "aftermath": "手术很成功。第二年春天，你在花市挑了一盆最贵的杜鹃，讲价讲了一刻钟，一分没讲下来。",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -8
         },
-        "aftermath": "手术很成功。第二年春天，你在花市挑了一盆最贵的杜鹃，讲价讲了一刻钟，一分没讲下来。"
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -2,
+          "health": 2
+        }
       },
       {
         "text": "把笔推了回去——顺其自然，不给儿女添难",
-        "deltas": {
-          "ei": -2,
-          "tf": 3,
-          "jp": 2
+        "aftermath": "你把每天的散步改成了两短一长。身体确实慢了，心里倒是从来没这么定过。",
+        "deltas3": {
+          "values": 8,
+          "outlook": 5
         },
-        "aftermath": "你把每天的散步改成了两短一长。身体确实慢了，心里倒是从来没这么定过。"
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        }
+      },
+      {
+        "text": "签字，但约法三章：先试三个月康复治疗，指标有起色就不开刀",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "money": -1,
+          "health": 1
+        },
+        "aftermath": "三个月后指标好转，手术取消了。医生在病历上写：患者自主管理能力强。"
       }
-    ]
+    ],
+    "ageMonths": 1056,
+    "line": "fate"
   },
   {
     "id": "infant-019",
@@ -2795,21 +4962,40 @@
     "options": [
       {
         "text": "扔下卡片，扭头追着那片晃动的树影看了一整个下午",
-        "deltas": {
-          "sn": -2,
-          "tf": -2,
-          "jp": -3
+        "aftermath": "傍晚你睡着了，梦里墙上还在晃那片绿的影子。",
+        "deltas3": {
+          "worldview": -3,
+          "values": -3,
+          "outlook": 3
         },
-        "aftermath": "傍晚你睡着了，梦里墙上还在晃那片绿的影子。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "跟着卡片一张张认，认对一张就拍手，等人夸",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "把三张卡片按自己的规矩重排——黄的放最上，「因为像太阳的国王」",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "大人没看懂，但你讲得斩钉截铁。国王的故事后来编了整整一个冬天。"
       }
-    ]
+    ],
+    "ageMonths": 18,
+    "line": "fate"
   },
   {
     "id": "toddler-019",
@@ -2820,21 +5006,40 @@
     "options": [
       {
         "text": "折到第四步把纸摊开，撕开重拼了一只谁也没见过的四不像",
-        "deltas": {
-          "sn": -2,
-          "tf": -2,
-          "jp": -3
+        "aftermath": "老师没给小红花，但它能浮在水盆里，比图纸那只久。",
+        "deltas3": {
+          "worldview": -3,
+          "values": -3,
+          "outlook": 3
         },
-        "aftermath": "老师没给小红花，但它能浮在水盆里，比图纸那只久。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "一笔一划照图纸折完，举起来等老师发小红花",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "和同桌合作——他管折，你管装饰，船名写两个人的名字",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "那只船浮得不久，但下水仪式特别隆重。"
       }
-    ]
+    ],
+    "ageMonths": 66,
+    "line": "fate"
   },
   {
     "id": "childhood-019",
@@ -2845,21 +5050,40 @@
     "options": [
       {
         "text": "你指着走廊尽头没挂招牌的房间——里面有个叔叔在拆一只旧闹钟",
-        "deltas": {
-          "sn": -2,
-          "tf": -2,
-          "jp": -3
+        "aftermath": "那个春天你认识了一堆齿轮的名字，围棋和奥数都替你说了不去。",
+        "deltas3": {
+          "worldview": -3,
+          "values": -3,
+          "outlook": 3
         },
-        "aftermath": "那个春天你认识了一堆齿轮的名字，围棋和奥数都替你说了不去。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "报了奥数班：同小区的伙伴都在那儿，下课能一起回家",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "「能不能都试一节课？不好玩的我第一个跑」",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "你真的两节都试了。最后选了棋——因为围棋老师说：输了可以马上再来一局。"
       }
-    ]
+    ],
+    "ageMonths": 114,
+    "line": "fate"
   },
   {
     "id": "teen-019",
@@ -2870,21 +5094,40 @@
     "options": [
       {
         "text": "你写理想是「想知道云为什么不会掉下来」，被判了三类卷",
-        "deltas": {
-          "sn": -2,
-          "tf": -2,
-          "jp": -3
+        "aftermath": "语文老师把你叫去谈话，谈到最后自己也在想云的问题。",
+        "deltas3": {
+          "worldview": -3,
+          "values": -3,
+          "outlook": 3
         },
-        "aftermath": "语文老师把你叫去谈话，谈到最后自己也在想云的问题。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "套着范文的骨架端正写完，分数不低，也没人记住",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "范文骨架里夹一句真话：「我的理想是先考上大学，再想理想」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "语文老师在那句下面画了条线，批注：诚实，加分。"
       }
-    ]
+    ],
+    "ageMonths": 192,
+    "line": "fate"
   },
   {
     "id": "youth-019",
@@ -2895,21 +5138,40 @@
     "options": [
       {
         "text": "你交了一页空白时间轴，只有一行字：先把变化过明白，再谈计划",
-        "deltas": {
-          "sn": -2,
-          "tf": -2,
-          "jp": -3
+        "aftermath": "讲师愣了几秒，说这是他收到的第一份「反规划」。",
+        "deltas3": {
+          "worldview": -3,
+          "values": -3,
+          "outlook": 3
         },
-        "aftermath": "讲师愣了几秒，说这是他收到的第一份「反规划」。"
+        "resourceDeltas": {
+          "mood": 1
+        }
       },
       {
         "text": "照着模板把季度目标填满，网格工整，和所有人的那份一样",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "交半页纸：三年只锚三件事——吃饭的手艺、说话的人、喘气的爱好",
+        "deltas3": {
+          "values": 1,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "讲师把那半页复印件留了很多年。三年后同学聚会，你三件全中。"
       }
-    ]
+    ],
+    "ageMonths": 288,
+    "line": "fate"
   },
   {
     "id": "adult-019",
@@ -2920,21 +5182,40 @@
     "options": [
       {
         "text": "你端着咖啡坐到了隔壁桌，笔记越记越多，最后记在了餐巾纸上",
-        "deltas": {
-          "sn": -2,
-          "tf": -2,
-          "jp": -3
+        "aftermath": "那张餐巾纸你留了很多年——后来的事，就是从它开始的。",
+        "deltas3": {
+          "worldview": -3,
+          "values": -3,
+          "outlook": 3
         },
-        "aftermath": "那张餐巾纸你留了很多年——后来的事，就是从它开始的。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "报了名，把教材按章节排出三个月的学习表贴在床头",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "两边都沾：证书报名表填了，餐巾纸也收了——稳妥垫底，好奇上路",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "一年后证书到手，餐巾纸上那个方向成了你的副业题。两条腿走路，走得慢，摔不着。"
       }
-    ]
+    ],
+    "ageMonths": 420,
+    "line": "fate"
   },
   {
     "id": "midlife-019",
@@ -2945,21 +5226,43 @@
     "options": [
       {
         "text": "你把路书拍了下来，第二天一早就递了年假条",
-        "deltas": {
-          "sn": -2,
-          "tf": -2,
-          "jp": -3
+        "aftermath": "回来时你晒脱了一层皮，同事说你瘦了，也精神了。",
+        "deltas3": {
+          "worldview": -3,
+          "values": -3,
+          "outlook": 3
         },
-        "aftermath": "回来时你晒脱了一层皮，同事说你瘦了，也精神了。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -2,
+          "health": 1
+        }
       },
       {
         "text": "你加入成绩单的话题，聊到饭店打烊，交换了两个补习班的电话",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "路书和补习班电话都要——孩子妈带队补课，你负责开学前带全家走一趟短的",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1
+        },
+        "aftermath": "短线走了四天，全家晒脱一层皮。开学那天孩子作文写的不是补习班，是那四天。"
       }
-    ]
+    ],
+    "ageMonths": 624,
+    "line": "fate"
   },
   {
     "id": "elder-019",
@@ -2970,43 +5273,2481 @@
     "options": [
       {
         "text": "你说随便挂，歪一点更有味道，顺手把最端正的那幅挪斜了",
-        "deltas": {
-          "sn": -2,
-          "tf": -2,
-          "jp": -3
+        "aftermath": "来看展的老伙计在那幅歪字前站了很久，说这才是你。",
+        "deltas3": {
+          "worldview": -3,
+          "values": -3,
+          "outlook": 3
         },
-        "aftermath": "来看展的老伙计在那幅歪字前站了很久，说这才是你。"
+        "resourceDeltas": {
+          "mood": 2
+        }
       },
       {
         "text": "你按落款年月排好，横平竖直，还找来细线吊了水平",
-        "deltas": {
-          "ei": 1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "挂正，但在旁边加一幅歪的——这是我练的，那是我写的，各归各位",
+        "deltas3": {
+          "worldview": 1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "两幅字一起成了结业展的对照展品。老师题了四个字：由正入斜。"
       }
-    ]
+    ],
+    "ageMonths": 816,
+    "line": "fate"
   },
   {
     "id": "elder-023",
     "stage": "elder",
     "type": "critical",
-    "ageHint": "75岁",
+    "ageHint": "89岁",
     "text": "老宅拆迁在即。儿女把两份安置方案放到桌上：A 套朝南带电梯，一切稳妥；B 套在老街区顶层，窗外是你看了七十年的那条河。没人催你，笔就搁在桌上。",
     "options": [
       {
         "text": "签 B。你给的书面理由是「免得日后反悔再折腾」，其实你想每天看河",
-        "deltas": {
-          "jp": -6,
-          "tf": -2
+        "aftermath": "搬家那天你没让任何人帮忙，一个人把藤椅先搬了过去，正对河。",
+        "deltas3": {
+          "values": -5,
+          "outlook": 8
         },
-        "aftermath": "搬家那天你没让任何人帮忙，一个人把藤椅先搬了过去，正对河。"
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1
+        }
       },
       {
         "text": "签 A。把存折、房产证按顺序收进文件袋，踏实，也省心",
-        "deltas": {
-          "ei": -1,
-          "sn": 1
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 3
+        },
+        "resourceDeltas": {
+          "mood": 1
         }
+      },
+      {
+        "text": "签A，但把窗台布置成河边角——望远镜加水草，看河的习惯搬得动",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        },
+        "aftermath": "搬进A套那年，你在望远镜里认出了三个老邻居。他们后来常上来借河——茶管够。"
+      }
+    ],
+    "ageMonths": 1068,
+    "line": "fate"
+  },
+  {
+    "id": "infant-101",
+    "stage": "infant",
+    "type": "context",
+    "line": "study",
+    "ageHint": "1岁3个月",
+    "ageMonths": 15,
+    "text": "妈妈把一本布书递到你面前，翻开一页是红苹果。她指一下念一个字，你的手比耳朵快。",
+    "options": [
+      {
+        "text": "一把抓住书页，塞进嘴里啃——苹果是甜的吗？",
+        "deltas3": {
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "那本布书后来洗了三次。你最先认识的不是字，是书可以吃。"
+      },
+      {
+        "text": "跟着念出一个谁也听不懂的音，全家认定那就是「苹果」",
+        "deltas3": {
+          "outlook": -2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "那个音被录了下来。十八年后它在你的成人礼上响起，全场笑作一团。"
+      },
+      {
+        "text": "把书推开，去够旁边那只铃——书不会响，铃会",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "infant-102",
+    "stage": "infant",
+    "type": "context",
+    "line": "study",
+    "ageHint": "1岁8个月",
+    "ageMonths": 20,
+    "text": "爷爷用粉笔在院子里画了一个大圈，说是你的「地盘」，圈里的东西都归你研究。",
+    "options": [
+      {
+        "text": "把地盘里的落叶、石子、树枝分门别类排成一排",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "爷爷说你有当账房先生的潜质。那个粉笔圈每天都要重新画一遍。"
+      },
+      {
+        "text": "一屁股坐在圈中央，把所有的东西一股脑抱在怀里",
+        "deltas3": {
+          "outlook": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "踩着粉笔线走出去，又踩回来——地盘的边界要亲自试过才算数",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "infant-103",
+    "stage": "infant",
+    "type": "context",
+    "line": "study",
+    "ageHint": "2岁4个月",
+    "ageMonths": 28,
+    "text": "睡前故事讲到关键处，妈妈打了个哈欠。你还想听，眼睛却已经开始打架。",
+    "options": [
+      {
+        "text": "揪着书角不肯放：再一个，就一个",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        }
+      },
+      {
+        "text": "安心合眼——故事明天接着讲，这是一种信任",
+        "deltas3": {
+          "outlook": 2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        },
+        "aftermath": "第二天妈妈果然接着讲了。你从此知道：答应过的事，妈妈会算数。"
+      },
+      {
+        "text": "要求换一个「听过的」——旧故事不会失望",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "infant-201",
+    "stage": "infant",
+    "type": "context",
+    "line": "career",
+    "ageHint": "1岁6个月",
+    "ageMonths": 18,
+    "text": "爸爸换鞋出门上班。你摇摇晃晃把他的公文包推过去，包比你半个人还高。",
+    "options": [
+      {
+        "text": "把包推到门口，拍两下——像给自己盖章",
+        "deltas3": {
+          "outlook": -2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "爸爸每天出门都让你盖一次章。这个仪式持续到你上幼儿园。"
+      },
+      {
+        "text": "干脆自己也拎起来走两步，摔了，包比人先到",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        }
+      },
+      {
+        "text": "把包推回去，把自己的小背包递给他：「你背这个上班」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "infant-202",
+    "stage": "infant",
+    "type": "context",
+    "line": "career",
+    "ageHint": "2岁2个月",
+    "ageMonths": 26,
+    "text": "收玩具的时间到了。你把积木一块块扔回箱子，忽然停住——最大那块想留在手里。",
+    "options": [
+      {
+        "text": "讲条件：留一块，其他全收——谈判从两岁开始",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "妈妈同意了，条件是明晚你先收。第二天你果然先收——谈判双方都讲信用。"
+      },
+      {
+        "text": "全部倒进箱子，呼——干干净净睡觉",
+        "deltas3": {
+          "outlook": -2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "把最大那块藏在枕头下，明早再玩",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "infant-203",
+    "stage": "infant",
+    "type": "context",
+    "line": "career",
+    "ageHint": "2岁9个月",
+    "ageMonths": 33,
+    "text": "奶奶择豆角，你搬着小板凳坐过去，学着她的样子拿起一根。",
+    "options": [
+      {
+        "text": "有样学样，择断一根举起来——成功的第一课",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "那盘豆角里有你的三根「作品」。全家吃的时候都特意找过。"
+      },
+      {
+        "text": "择了两根就跑去玩，豆角在你手里变成了电话",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "干脆负责递豆角——一根一根，摆得整整齐齐",
+        "deltas3": {
+          "values": 1,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "toddler-101",
+    "stage": "toddler",
+    "type": "context",
+    "line": "study",
+    "ageHint": "4岁4个月",
+    "ageMonths": 52,
+    "text": "幼儿园教写数字。你写的「8」总是躺着，老师扶了一次，下次它又躺下了。",
+    "options": [
+      {
+        "text": "不写了，给它画了一条被子：「8 在睡觉」",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "老师笑着给了你一颗星。那页作业后来被家长会传阅，标题是「想象力的一课」。"
+      },
+      {
+        "text": "擦掉重写，一遍一遍，直到它站起来",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "干脆连着画一排躺着的 8——躺着的看起来像一列小火车",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "toddler-102",
+    "stage": "toddler",
+    "type": "context",
+    "line": "study",
+    "ageHint": "4岁10个月",
+    "ageMonths": 58,
+    "text": "街口的拼图摊前围了一圈人。老板说拼完这副有奖，图是整条街的鸟瞰。",
+    "options": [
+      {
+        "text": "蹲下来从边角拼起——奶奶说过，先找边",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "你拼了一个下午，最后一块是街口的邮筒。老板兑现的奖品是一支雪糕，你俩分着吃。"
+      },
+      {
+        "text": "从中间那家包子铺拼起——那是你最爱吃的",
+        "deltas3": {
+          "worldview": 2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "拼了一会儿，发现看别人拼比自己拼有意思",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "toddler-103",
+    "stage": "toddler",
+    "type": "context",
+    "line": "study",
+    "ageHint": "5岁8个月",
+    "ageMonths": 68,
+    "text": "爸爸的旧课本里夹着一张地图，边缘都磨毛了。你按着地图在客厅里「行军」。",
+    "options": [
+      {
+        "text": "严格按图行军：先过「黄河」沙发，再翻「大山」靠垫",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        },
+        "aftermath": "那次行军后来发展成固定项目。周末的客厅，是全网最热闹的战区。"
+      },
+      {
+        "text": "行军到一半，自己划了条新路线——地图是死的，兵是活的",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "把地图叠成纸飞机，飞出去——行军哪有飞机快",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "toddler-201",
+    "stage": "toddler",
+    "type": "context",
+    "line": "career",
+    "ageHint": "4岁2个月",
+    "ageMonths": 50,
+    "text": "幼儿园设了个「值日生」牌子，今天的任务是给每桌发餐巾纸。轮到你了。",
+    "options": [
+      {
+        "text": "数着人数发，一桌一张，绝不发错",
+        "deltas3": {
+          "worldview": -2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "老师说你发得比她准。那天你走路都带风——这是你第一份「正式工作」。"
+      },
+      {
+        "text": "发完该发的，多留一张折成小扇子送好朋友",
+        "deltas3": {
+          "outlook": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "发到一半发现餐巾纸可以抽成一条长龙，玩嗨了",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "toddler-202",
+    "stage": "toddler",
+    "type": "context",
+    "line": "career",
+    "ageHint": "5岁3个月",
+    "ageMonths": 63,
+    "text": "楼下小花园，几个大孩子用一把小铲子挖「地道」。他们也给你分了一小块地。",
+    "options": [
+      {
+        "text": "埋头苦挖，挖通了自己那段的进口和出口",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        },
+        "aftermath": "地道全线贯通那天，五个孩子在地道边合影。你负责的那段被评「最直」。"
+      },
+      {
+        "text": "先观察他们怎么挖，再动手——你的那段后来最省力",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "提议给地道装一盏「灯」——其实是把你口袋里的荧光贴纸贴了上去",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "toddler-203",
+    "stage": "toddler",
+    "type": "context",
+    "line": "career",
+    "ageHint": "5岁10个月",
+    "ageMonths": 70,
+    "text": "妈妈让你把洗净的小袜子配对收好。你发现有两只花纹不一样。",
+    "options": [
+      {
+        "text": "如实上报：这一对不一样，是不是谁拿错了",
+        "deltas3": {
+          "values": -2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "妈妈翻了半天，承认是你丢了另一只。你获得「火眼金睛」称号一枚。"
+      },
+      {
+        "text": "把不一样的两只强行配对——差不多就行了",
+        "deltas3": {
+          "outlook": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "按大小重新分了三摞，比配对更整齐",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "childhood-101",
+    "stage": "childhood",
+    "type": "context",
+    "line": "study",
+    "ageHint": "7岁6个月",
+    "ageMonths": 90,
+    "text": "开学发新书，你把每本的书皮都包上了。数学书的书皮纸剩下一条，你叠了只小船。",
+    "options": [
+      {
+        "text": "在每本书扉页写上名字和一句开学宣言",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "数学书里那句「这学期数学要上九十」被期末的你看到——差三分，但你看完笑了。"
+      },
+      {
+        "text": "小船夹进数学书——学累了看看船",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "书皮包得平平整整，一条纸也不留——整装待发",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "childhood-102",
+    "stage": "childhood",
+    "type": "context",
+    "line": "study",
+    "ageHint": "8岁9个月",
+    "ageMonths": 105,
+    "text": "班主任宣布：下周班会课由同学轮流上台讲「我知道的一件事」，讲了才发小红花。",
+    "options": [
+      {
+        "text": "报名讲恐龙灭绝——你攒了一柜子的恐龙知识终于有用了",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "你讲了八分钟，超时被提醒两次。下课有三个同学找你借恐龙书。"
+      },
+      {
+        "text": "讲怎么叠纸飞机飞得远——现场演示，飞机撞上吊扇",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "把名额换给别人，回家把这件事写进日记——也算讲了",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "childhood-103",
+    "stage": "childhood",
+    "type": "critical",
+    "line": "study",
+    "ageHint": "12岁1个月",
+    "ageMonths": 145,
+    "text": "区里的奥数集训队来班里选人，条件：每周六全天加练。你的自行车刚学会，正好骑去。",
+    "options": [
+      {
+        "text": "报名——周六全天换一道更难的题，值",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "集训第一年你没进过前二十。第三年你拿了区一等奖，奖状底下压着那张考砸的名单。"
+      },
+      {
+        "text": "没报名，但跟教练要了套题回家自学——不在队里，不在局外",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "放弃了——周六属于楼下的空地和那群伙伴",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "childhood-201",
+    "stage": "childhood",
+    "type": "context",
+    "line": "career",
+    "ageHint": "8岁",
+    "ageMonths": 96,
+    "text": "班里组织跳蚤市场，你翻箱倒柜凑了一批不要的玩具。定价是门新学问。",
+    "options": [
+      {
+        "text": "全部定价两元——简单粗暴，先卖完再说",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 2
+        },
+        "aftermath": "你的摊位第一个清空。两元店老板的经营哲学，你八岁就实践过了。"
+      },
+      {
+        "text": "按「舍不得程度」定价——越舍不得的越贵，最后一件自己买回",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        }
+      },
+      {
+        "text": "推出「买一送一」组合装，把滞销的和热门的绑着卖",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 3
+        }
+      }
+    ]
+  },
+  {
+    "id": "childhood-202",
+    "stage": "childhood",
+    "type": "context",
+    "line": "career",
+    "ageHint": "9岁2个月",
+    "ageMonths": 110,
+    "text": "爸爸公司发不出去一批宣传扇，你自告奋勇：楼下的棋摊，人多。",
+    "options": [
+      {
+        "text": "守在棋摊边，扇子先借观棋的人扇——用着好，自然来拿",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "一下午发了四十把。爸爸的同事问秘诀，你说：让他们先赢一步。"
+      },
+      {
+        "text": "挨家挨户敲门送——敲门五次，送出三把",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
+      },
+      {
+        "text": "在扇面上画了画再送——画过的扇子没人舍得扔",
+        "deltas3": {
+          "worldview": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "childhood-203",
+    "stage": "childhood",
+    "type": "context",
+    "line": "career",
+    "ageHint": "11岁3个月",
+    "ageMonths": 135,
+    "text": "妈妈把每月的零花钱改成「月薪」制，条件是你要管一本小账：花了什么，剩多少。",
+    "options": [
+      {
+        "text": "认真记账，月底还做了饼状图——虽小，五脏俱全",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
+        },
+        "aftermath": "饼状图显示零食占七成。你把零食砍到五成，给自己发了年终奖——一包新的彩铅。"
+      },
+      {
+        "text": "记了三天就断了——账本的生命和决心一样长",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "只记大项不记小项——「花小钱的快乐不配被审计」",
+        "deltas3": {
+          "values": -1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "teen-101",
+    "stage": "teen",
+    "type": "context",
+    "line": "study",
+    "ageHint": "13岁6个月",
+    "ageMonths": 162,
+    "text": "社团招新。文学社的桌子冷清，辩论社的桌子吵翻天，两个社长都在看你。",
+    "options": [
+      {
+        "text": "报文学社——安静的人有自己的火力",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "你第一篇社刊文章写了教室后排的风景，被语文老师复印了贴在年级栏。"
+      },
+      {
+        "text": "报辩论社——把心里的道理拿出来晒晒",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "两个都蹭——文学社写作，辩论社吵架，分工明确",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "teen-102",
+    "stage": "teen",
+    "type": "context",
+    "line": "study",
+    "ageHint": "15岁",
+    "ageMonths": 180,
+    "text": "中考前最后一节自习课，教室安静得能听见笔尖。你的错题本已经翻得起了毛边。",
+    "options": [
+      {
+        "text": "按计划过完最后一遍错题本——把准备的功夫做满",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "考场上遇到三道原题变式。出考场时你心里有底——毛边的错题本没白翻。"
+      },
+      {
+        "text": "放下笔，去操场走了两圈——状态比刷题重要",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        }
+      },
+      {
+        "text": "帮同桌讲他不会的那道题——讲一遍，胜过自己刷十遍",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "teen-103",
+    "stage": "teen",
+    "type": "critical",
+    "line": "study",
+    "ageHint": "17岁1个月",
+    "ageMonths": 205,
+    "text": "省实验班的选拔名额落在你头上：转到隔壁重点班，跟着更快的进度冲一年。老班的原话：去了，可能考得更好；不去，你现在这班也挺好。",
+    "options": [
+      {
+        "text": "去——更快的跑道值得一试，哪怕从头适应",
+        "deltas3": {
+          "outlook": -4,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "头两个月你排名垫底。半年后你追进了中游，比原来班里任何一个名次都硬。"
+      },
+      {
+        "text": "不去——这里的进度是我的节奏，快慢我自己说了算",
+        "deltas3": {
+          "outlook": 3,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "高考你考得不错。多年后你复盘：留下来的那一年，你反而把基础打穿了一层。"
+      },
+      {
+        "text": "去找老师要了实验班的课表和试卷——人不过去，题过去",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "你按着那张课表自学了一年。两边的老师后来都知道：隔壁班有个人在远程听课。"
+      }
+    ]
+  },
+  {
+    "id": "teen-201",
+    "stage": "teen",
+    "type": "context",
+    "line": "career",
+    "ageHint": "13岁9个月",
+    "ageMonths": 165,
+    "text": "学校门口的文具店招周末小时工，条件：会算账、嘴甜、站得住。你三项全占。",
+    "options": [
+      {
+        "text": "去干了一个月——第一笔自己挣的钱，先给爸妈一人买了双袜子",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 3,
+          "health": -1
+        },
+        "aftermath": "那双袜子爸妈舍不得穿，收在柜子里。你的工牌倒是留了下来。"
+      },
+      {
+        "text": "打听清楚工时和工钱再答应——第一份工也要谈条件",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
+        }
+      },
+      {
+        "text": "没去——周末的补习和休息都金贵",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "teen-202",
+    "stage": "teen",
+    "type": "context",
+    "line": "career",
+    "ageHint": "15岁6个月",
+    "ageMonths": 186,
+    "text": "暑假同学组队摆摊卖冰粉，你负责原料采购和定价。第一天卖剩一半。",
+    "options": [
+      {
+        "text": "连夜复盘：降价、换摆位、加赠品——生意是改出来的",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1,
+          "health": -1
+        },
+        "aftermath": "第三天收摊时只剩三碗。分账你拿得最少——采购和定价的锅你认了，团队服气。"
+      },
+      {
+        "text": "第二天原价照旧——「好东西不怕慢，诚信经营」",
+        "deltas3": {
+          "values": 2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "把剩余冰粉免费送给环卫工——亏了钱，赚了口碑",
+        "deltas3": {
+          "values": 3,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -1
+        }
+      }
+    ]
+  },
+  {
+    "id": "teen-203",
+    "stage": "teen",
+    "type": "critical",
+    "line": "career",
+    "ageHint": "17岁1个月",
+    "ageMonths": 205,
+    "text": "父亲的老朋友开了家小型加工厂，提出让你暑假去「管半个月仓库」，工钱照给，规矩自己定。这是你第一次被人当「负责人」。",
+    "options": [
+      {
+        "text": "接下，先花两天摸清仓库台账再动工——负责人不做糊涂账",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 3
+        },
+        "aftermath": "半个月后你交出的台账比老员工记得还清。厂里的会计说：这孩子，账比人稳。"
+      },
+      {
+        "text": "接下，但只按父亲教的老办法办——稳字当头，不出错就是满分",
+        "deltas3": {
+          "values": 2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2
+        }
+      },
+      {
+        "text": "婉拒了——暑假属于游泳和补觉，赚钱不急于这一年",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "youth-101",
+    "stage": "youth",
+    "type": "context",
+    "line": "study",
+    "ageHint": "20岁5个月",
+    "ageMonths": 245,
+    "text": "宿舍熄灯后，室友在床头支起了台灯。桌上摞着两摞书：考研的和考公的。",
+    "options": [
+      {
+        "text": "加入考研的台灯——再读三年，把想研究的方向读透",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1,
+          "health": -1
+        },
+        "aftermath": "那盏台灯亮了一年。放榜那天你们宿舍四盏台灯，亮了三盏。"
+      },
+      {
+        "text": "加入考公的台灯——稳定也是一种志向",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        }
+      },
+      {
+        "text": "什么班也不进，把专业书按兴趣重读一遍——为热爱自由学习",
+        "deltas3": {
+          "worldview": 3,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "youth-102",
+    "stage": "youth",
+    "type": "context",
+    "line": "study",
+    "ageHint": "22岁6个月",
+    "ageMonths": 270,
+    "text": "公司新人培训的结业考试，你发现监考很松——答案就在前桌的屏幕上。",
+    "options": [
+      {
+        "text": "挪开视线，按自己的理解答完——考的不是分数是底子",
+        "deltas3": {
+          "values": -3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "成绩中等。三个月后实际业务比拼，你排第一——底子这东西，考场上看不出来。"
+      },
+      {
+        "text": "瞟了，但只瞟了不确定的那道——在规则的边缘试探",
+        "deltas3": {
+          "values": -2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "低声提醒前桌把屏幕转过去——顺手守了一次规矩",
+        "deltas3": {
+          "values": -2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "youth-103",
+    "stage": "youth",
+    "type": "context",
+    "line": "study",
+    "ageHint": "27岁6个月",
+    "ageMonths": 330,
+    "text": "公司报销了一门职业认证的考试费，书到了，塑封没拆。报名截止还有五天。",
+    "options": [
+      {
+        "text": "拆书报名——工作再忙，五天总能挤出报名的时间",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "那门认证你考了两回。第二回通过时，塑封的书已经被翻散了架。"
+      },
+      {
+        "text": "过了截止——「明年公司还报销，急什么」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "和同事组了个学习小组，人多是坚持的一半理由",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": -2,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "youth-201",
+    "stage": "youth",
+    "type": "context",
+    "line": "career",
+    "ageHint": "20岁10个月",
+    "ageMonths": 250,
+    "text": "实习第一周，师傅把一沓过期的项目档案丢给你：看完，讲讲你看到了什么。",
+    "options": [
+      {
+        "text": "看完，用一页纸写了三个规律和两个疑问——疑问比规律多",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        },
+        "aftermath": "师傅看完那页纸，把你的两个疑问带进了周会。其中一个，后来成了项目的立项理由。"
+      },
+      {
+        "text": "看完，按时间线做了份摘要——工整，全面，零疑问",
+        "deltas3": {
+          "worldview": -2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "翻了个开头就搁下了——「过期档案，看了也白看」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "youth-202",
+    "stage": "youth",
+    "type": "context",
+    "line": "career",
+    "ageHint": "24岁7个月",
+    "ageMonths": 295,
+    "text": "工位对面来了个新人，笨手笨脚，把你上周教他的事又问了一遍。",
+    "options": [
+      {
+        "text": "再讲一遍，顺手画了张流程图贴他工位——教会一个是一个",
+        "deltas3": {
+          "values": 2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "半年后那张流程图被打印成了组里的「新人指南」第一页。署名是你的名字。"
+      },
+      {
+        "text": "把上次讲的话原样再说一遍，一个字不多——学习是自己的事",
+        "deltas3": {
+          "worldview": -2,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "推荐他去问文档，顺便把文档缺的部分补上——授人以渔还要先修渔网",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "youth-203",
+    "stage": "youth",
+    "type": "critical",
+    "line": "career",
+    "ageHint": "29岁",
+    "ageMonths": 348,
+    "text": "你做的那条产品线被大公司看中，对方给了两个选择：连人带项目被收购，团队整体并入；或者拿着这笔钱和信任，自己把它做成公司。谈判桌就在明天。",
+    "options": [
+      {
+        "text": "自己干——签合伙协议、找律师、定亏损线，一夜没睡但账目清醒",
+        "deltas3": {
+          "outlook": -5,
+          "worldview": -4
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -8,
+          "health": -2
+        },
+        "aftermath": "创业第二年你差点发不出工资。第三年公司活了下来，你的亏损线成了同行抄的模板。",
+        "requires": {
+          "money": 30
+        }
+      },
+      {
+        "text": "并入大公司——平台更大，先学会游泳再想造船",
+        "deltas3": {
+          "outlook": 3,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 5
+        },
+        "aftermath": "并入后的头衔和薪水都涨了。你在新平台的第二年，把老项目做成了集团标杆。"
+      },
+      {
+        "text": "折中：卖七成股份套现，留三成和顾问身份——船我看着，浪你们冲",
+        "deltas3": {
+          "worldview": -5,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 4
+        },
+        "aftermath": "那三成股份后来翻了十倍。而你的顾问时间，每周只有半天——刚刚好。"
+      }
+    ]
+  },
+  {
+    "id": "youth-301",
+    "stage": "youth",
+    "type": "rescue",
+    "line": "career",
+    "rescue": "money",
+    "ageHint": "26岁2个月",
+    "ageMonths": 314,
+    "text": "月底的账户余额吓了你一跳：房租还没交，钱包比脸干净。这半年到底花哪儿了？",
+    "options": [
+      {
+        "text": "找朋友周转一笔，立了还款计划——开口很难，但账要活",
+        "deltas3": {
+          "worldview": -1,
+          "values": -2
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 10
+        },
+        "aftermath": "朋友转账附言：下不为例。三个月后你连本带息还清，附言：下必为例。"
+      },
+      {
+        "text": "搬进更便宜的合租房，砍掉两项订阅——生活降配，债务清零",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 8
+        },
+        "aftermath": "新合租房窗户对着另一堵墙，但月底余额第一次变成了正数。"
+      },
+      {
+        "text": "硬扛——吃两周泡面，把窟窿自己咽下去",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": -2,
+          "money": 3,
+          "health": -2
+        },
+        "aftermath": "泡面第十七天你瘦了四斤，账清了。你把那周的泡面口味记录保存至今——再来一次认输。"
+      }
+    ]
+  },
+  {
+    "id": "adult-101",
+    "stage": "adult",
+    "type": "context",
+    "line": "study",
+    "ageHint": "33岁6个月",
+    "ageMonths": 402,
+    "text": "行业 new 出来一份报告，结论和你的经验相反。组里传阅了一圈，都说数据有问题。",
+    "options": [
+      {
+        "text": "自己把数据重算了一遍——错了更好，对了更要紧",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "重算的结果是：报告对了一半。你在周会上讲了哪一半对——全场安静了很久。"
+      },
+      {
+        "text": "约报告作者线下一聊——经验对不上，就当面碰一碰",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "存进收藏夹——「再看看」，这一看又是三年",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "adult-102",
+    "stage": "adult",
+    "type": "context",
+    "line": "study",
+    "ageHint": "36岁6个月",
+    "ageMonths": 438,
+    "text": "孩子问你一道小学奥数题，你算了十分钟没算出来。卷子上的孩子正一脸期待。",
+    "options": [
+      {
+        "text": "承认不会，俩人一起查——「这道题咱俩同一起跑线」",
+        "deltas3": {
+          "worldview": 2,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "你们折腾了一晚上，解出来时全家都睡了。第二天孩子跟全班炫耀：这道题我妈都不会，我俩会。"
+      },
+      {
+        "text": "偷偷补完课再讲——不会的题，不能丢面子",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        }
+      },
+      {
+        "text": "讲了思路不讲答案——「方法给你，路自己走」",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "adult-103",
+    "stage": "adult",
+    "type": "context",
+    "line": "study",
+    "ageHint": "39岁6个月",
+    "ageMonths": 474,
+    "text": "大学同学群里在传一份行业公开课清单，有人发起组队学习，缴费制，一期三个月。",
+    "options": [
+      {
+        "text": "报名并当了组长——「钱都交了，没有退路」",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -2,
+          "health": -1
+        },
+        "aftermath": "三个月里你交了十二次作业。结业时同学说你管得比班主任严——你自己知道，你是怕自己退。",
+        "requires": {
+          "money": 20
+        }
+      },
+      {
+        "text": "只报名不当组长——学习是私事，不想管人",
+        "deltas3": {
+          "outlook": -1,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -2
+        }
+      },
+      {
+        "text": "不报，把清单里的书单抄了下来——自学也算学",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "adult-201",
+    "stage": "adult",
+    "type": "context",
+    "line": "career",
+    "ageHint": "34岁",
+    "ageMonths": 408,
+    "text": "部门要提拔一个项目主管。领导私下问你：你想不想上？落选了也不会怎么样。",
+    "options": [
+      {
+        "text": "想，并且列了三个月的履职计划——机会只敲一次门",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1,
+          "health": -1
+        },
+        "aftermath": "你上了。那三个月的履职计划贴在工位上，划掉的每一行都算数。"
+      },
+      {
+        "text": "婉拒——「我带人比管人强，把手艺守好也是贡献」",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "提了个折中：当「技术主管」不当「行政主管」——只管方案不管考勤",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "adult-202",
+    "stage": "adult",
+    "type": "context",
+    "line": "career",
+    "ageHint": "37岁",
+    "ageMonths": 444,
+    "text": "你带的组员把一个bug瞒了三天才上报，客户投诉已经到了总监那里。他是你招进来的。",
+    "options": [
+      {
+        "text": "先处理bug再处理人——「连人带问题一起骂，只会学会瞒」",
+        "deltas3": {
+          "values": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "bug当晚修复。复盘会上你先检讨了自己的上线流程。那组员后来成了组里报忧最快的人。"
+      },
+      {
+        "text": "按制度处理：写检讨、全组通报——规矩就是规矩",
+        "deltas3": {
+          "values": -3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "私下谈了一次，把「瞒三天」的每一步心理都问了出来——写进了新人手册",
+        "deltas3": {
+          "worldview": 2,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "adult-203",
+    "stage": "adult",
+    "type": "critical",
+    "line": "career",
+    "ageHint": "43岁",
+    "ageMonths": 516,
+    "text": "猎头开出的条件比现在翻倍，但公司是初创，期权画在三年后的纸上。你卡里躺着房贷和孩子的学费。",
+    "options": [
+      {
+        "text": "去——签合同前把「三年期权」写成条款，风险锁进纸里",
+        "deltas3": {
+          "outlook": -4,
+          "worldview": -3
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 3,
+          "health": -1
+        },
+        "aftermath": "初创第二年公司差点没熬过去，但条款保住了基本盘。第三年期权兑现，你把那张纸裱了起来。"
+      },
+      {
+        "text": "不去——「账上满格的日子，不赌纸上的数字」",
+        "deltas3": {
+          "outlook": 3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "谈成兼职顾问——拿一半钱，留原职，两头都试一年",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": 2,
+          "health": -1
+        },
+        "aftermath": "一年后初创活了下来，你也看清了自己想要的——回了原岗，顾问退了，朋友留着。"
+      }
+    ]
+  },
+  {
+    "id": "adult-301",
+    "stage": "adult",
+    "type": "rescue",
+    "line": "friend",
+    "rescue": "mood",
+    "ageHint": "33岁9个月",
+    "ageMonths": 405,
+    "text": "连续三周，你对什么都提不起劲：饭没味，觉不够，笑出来都像完成任务。",
+    "options": [
+      {
+        "text": "挂了个心理咨询的号——「心里这摊事，找个专业的人聊聊」",
+        "deltas3": {
+          "worldview": -1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 12,
+          "money": -2,
+          "health": 1
+        },
+        "aftermath": "第三次咨询后你睡了个整觉。咨询师说的话你记在本上：情绪不是敌人，是信使。"
+      },
+      {
+        "text": "把事情讲给最不怕麻烦的朋友听——电话打了两个小时",
+        "deltas3": {
+          "values": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 10
+        },
+        "aftermath": "朋友最后说：你早该打来。那个周末俩人爬了趟山，你一口气喊到了山顶。"
+      },
+      {
+        "text": "请了三天假，把作息掰回来——先睡够，再谈别的",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 8,
+          "money": -1,
+          "health": 3
+        },
+        "aftermath": "三天后你发现，事情没变，但扛事情的人缓过来了。假期申请你存了模板——还会再用。"
+      }
+    ]
+  },
+  {
+    "id": "adult-302",
+    "stage": "adult",
+    "type": "rescue",
+    "line": "health",
+    "rescue": "health",
+    "ageHint": "38岁4个月",
+    "ageMonths": 460,
+    "text": "体检报告下来，三个箭头齐刷刷朝上。医生把报告推过来：再这么熬，身体先辞职。",
+    "options": [
+      {
+        "text": "遵医嘱做全套：戒宵夜、每周三次快走、复查盯满一年",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": 2
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -2,
+          "health": 15
+        },
+        "aftermath": "一年后复查两个箭头消失。医生说：这个年纪能管住自己，少见。"
+      },
+      {
+        "text": "拉着全家一起改——晚饭后散步成了雷打不动的节目",
+        "deltas3": {
+          "values": 3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 6,
+          "money": -1,
+          "health": 12
+        },
+        "aftermath": "散步路线从小区走到江边。指标好没好你不太确定——但那一年家里聊天的时间，多了三百多个小时。"
+      },
+      {
+        "text": "买了最好的体检套餐，指标照旧——「花钱买个安心」",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 3,
+          "money": -3,
+          "health": 4
+        },
+        "aftermath": "安心没买来，箭头还在。第二年你把套餐钱换成了跑鞋——真跑起来才知道，箭头是自己吓自己的。"
+      }
+    ]
+  },
+  {
+    "id": "midlife-101",
+    "stage": "midlife",
+    "type": "context",
+    "line": "study",
+    "ageHint": "47岁6个月",
+    "ageMonths": 570,
+    "text": "老年活动中心开了一门智能手机摄影课，教室里坐的比你小二十岁。",
+    "options": [
+      {
+        "text": "坐第一排，作业交得比谁都勤——晚开的花也是花",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "结业影展你拍了张《拆迁中的老街》，被区文化馆收了。年轻的老师说：取景有年头的人才有。",
+        "requires": {
+          "money": 20
+        }
+      },
+      {
+        "text": "旁听了几节，回头自己琢磨——手机这东西，摸比教快",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "拉着老伙计一起报——两个人互相壮胆，谁也别想中途跑",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "midlife-102",
+    "stage": "midlife",
+    "type": "context",
+    "line": "study",
+    "ageHint": "51岁3个月",
+    "ageMonths": 615,
+    "text": "家里 wi-fi 路由器坏了，维修师傅要三天才能上门。孙子的视频课下午就开。",
+    "options": [
+      {
+        "text": "照着网上的教程自己修——拧螺丝这件事，五十岁也不晚",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "路由器修好了，师傅上门时你已经装完了。他笑着说：大爷，你可以来我这上班。"
+      },
+      {
+        "text": "把孙子的课挪到楼下自己家蹭网——办法总比困难多",
+        "deltas3": {
+          "outlook": 1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "干脆陪孙子去楼下图书馆上课——三天就三天",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "midlife-103",
+    "stage": "midlife",
+    "type": "context",
+    "line": "study",
+    "ageHint": "54岁",
+    "ageMonths": 648,
+    "text": "你在旧书网淘到年轻时没读完的一套书，断货多年。包裹到的那天，你搬了个小马扎坐在阳台。",
+    "options": [
+      {
+        "text": "从头读，做笔记——「年轻时欠的书，现在还」",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "你读了一年，笔记记了半本。有页边上写着：二十岁没懂，五十岁懂了——也不亏。"
+      },
+      {
+        "text": "先翻当年没读完的那本——老朋友重逢，先叙旧",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "把书借给正需要它的年轻人——书跟人一样，也要在对的年纪遇到",
+        "deltas3": {
+          "worldview": 2,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "midlife-201",
+    "stage": "midlife",
+    "type": "context",
+    "line": "career",
+    "ageHint": "48岁9个月",
+    "ageMonths": 585,
+    "text": "公司新一轮调整，年轻领导直接管到了你头上。会上他讲的新词，你一半没听过。",
+    "options": [
+      {
+        "text": "会后排他坐下，把这半年他讲的新词列了个表，一个一个弄懂",
+        "deltas3": {
+          "worldview": -3,
+          "outlook": -3
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": -1
+        },
+        "aftermath": "三个月后例会上你用他的词讲了他的方案，讲得比他还清楚。他后来开会总叫你先讲。"
+      },
+      {
+        "text": "用自己的老办法把活干好——「词是新词，事是老事」",
+        "deltas3": {
+          "worldview": 1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "主动申请给他当顾问——「你懂新的，我懂坑在哪，换着来」",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "midlife-202",
+    "stage": "midlife",
+    "type": "context",
+    "line": "career",
+    "ageHint": "52岁6个月",
+    "ageMonths": 630,
+    "text": "干了半辈子的行业在传转型：老手艺要配新工具，学着用的人留下，不学的慢慢退。",
+    "options": [
+      {
+        "text": "报名新工具培训班——跟三十岁的人一个起跑线，坐得住",
+        "deltas3": {
+          "outlook": -3,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "money": -1,
+          "health": -1
+        },
+        "aftermath": "培训班你年纪最大，作业最早交。结业时老师傅说：手艺人的功夫，一半在手，一半在肯重新当学徒。"
+      },
+      {
+        "text": "带着老手艺去找新工具的开发团队——「你们造工具，我教你们手艺的坑」",
+        "deltas3": {
+          "worldview": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "按部就班到退休——「学不动了，把手上的事做干净」",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "midlife-203",
+    "stage": "midlife",
+    "type": "context",
+    "line": "career",
+    "ageHint": "57岁",
+    "ageMonths": 684,
+    "text": "返聘的邀请函到了：单位想请你带两年新人。条件只有一条——「把您知道的说出来」。",
+    "options": [
+      {
+        "text": "接了，把半辈子的笔记整理成十二讲——倾囊相授",
+        "deltas3": {
+          "values": 3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 2
+        },
+        "aftermath": "十二讲后来装订成册，扉页印着你的名字。年轻人在扉页写的批注是：救命书。"
+      },
+      {
+        "text": "接了，但只讲「怎么想」不讲「怎么抄」——「授人以渔，鱼你们自己养」",
+        "deltas3": {
+          "worldview": -2,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 2
+        }
+      },
+      {
+        "text": "没接——「教人这件事，我退休后再说」",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "midlife-301",
+    "stage": "midlife",
+    "type": "rescue",
+    "line": "career",
+    "rescue": "money",
+    "ageHint": "50岁",
+    "ageMonths": 600,
+    "text": "一场家庭变故把积蓄抽走了一半，账上的数字头一回让你夜里睡不着。孩子升学、老人用药、房贷，三座山一起压过来。",
+    "options": [
+      {
+        "text": "把账摊给全家看，四个人围着桌子砍开支——「这个家没有不能看的账」",
+        "deltas3": {
+          "worldview": -2,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 8,
+          "money": 9
+        },
+        "aftermath": "全家砍出了每月两千的富余。孩子主动退了补习班，说：我自己也能学。那晚你睡得很沉。"
+      },
+      {
+        "text": "接了份周末的兼职顾问——「凭手艺赚钱，不丢人」",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -2
+        },
+        "resourceDeltas": {
+          "mood": 5,
+          "money": 10,
+          "health": -2
+        },
+        "aftermath": "兼职做了十个月，账回来了，人瘦了六斤。停工那天你睡了一天一夜——值。"
+      },
+      {
+        "text": "把两份保险减了一份、定投停了——「先保眼前的日子」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 6,
+          "money": 7
+        },
+        "aftermath": "账缓过来了。两年后你把保险补了回去——那年你算明白：这笔钱买的不是单，是睡得着觉。"
+      }
+    ]
+  },
+  {
+    "id": "elder-101",
+    "stage": "elder",
+    "type": "context",
+    "line": "study",
+    "ageHint": "63岁4个月",
+    "ageMonths": 760,
+    "text": "孙女的旧平板淘汰下来了。你戴着老花镜研究了三天，学会了视频通话。",
+    "options": [
+      {
+        "text": "学会一项就教一项，一个月内把全楼的老伙计教会了",
+        "deltas3": {
+          "values": 2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "你家的客厅成了「平板补习班」。老伙计们学会的第一件事，都是给孙辈打视频——然后聊到忘挂。"
+      },
+      {
+        "text": "只学视频通话——够用就行，别的以后再说",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      },
+      {
+        "text": "把每一步都记在本子上，画了箭头——「我这本子比说明书好使」",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "elder-102",
+    "stage": "elder",
+    "type": "context",
+    "line": "study",
+    "ageHint": "75岁",
+    "ageMonths": 900,
+    "text": "社区读书会的年度书单下来了，十二本书，年轻人说好读，你翻了两页就犯困。",
+    "options": [
+      {
+        "text": "坚持一本一本来——「犯困就慢读，慢有慢的读法」",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        },
+        "aftermath": "你一年读完了九本。年终分享会上你说：年轻人的书里，也有老年的人。全场安静了一下。"
+      },
+      {
+        "text": "跟读书会提议加一本老书——「书单也该有六十岁以上的声音」",
+        "deltas3": {
+          "outlook": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "退了读书会，把时间换给评书和戏曲——「各读各的书」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "elder-103",
+    "stage": "elder",
+    "type": "context",
+    "line": "study",
+    "ageHint": "79岁2个月",
+    "ageMonths": 950,
+    "text": "你开始给社区写「楼栋小史」：这栋楼三十年来的家家户户，你记得大半。",
+    "options": [
+      {
+        "text": "一户一户采访，写了三万字——「趁记得，都写下来」",
+        "deltas3": {
+          "worldview": 2,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "health": -1
+        },
+        "aftermath": "小史打印了二十份发给老邻居。有人说：你写我家那段，跟我妈讲的一字不差。"
+      },
+      {
+        "text": "只写自己记得的，不采访——「记忆有记忆的写法」",
+        "deltas3": {
+          "worldview": 2,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "写了个开头就搁下了——「来日方长」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1,
+          "values": -1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "elder-201",
+    "stage": "elder",
+    "type": "context",
+    "line": "career",
+    "ageHint": "65岁",
+    "ageMonths": 780,
+    "text": "退休第三年，原单位返聘你做质量顾问，一周两天。老伙计们说你傻：都退了还去。",
+    "options": [
+      {
+        "text": "接了——「手艺搁着会锈，两天刚好」",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 2
+        },
+        "aftermath": "两年顾问期满，你带出的三个年轻质检员都独当一面了。欢送会上单位送了块牌匾：传帮带。"
+      },
+      {
+        "text": "没接，但每月回去讲一次课——「班我不上，课可以讲」",
+        "deltas3": {
+          "worldview": -1,
+          "outlook": 1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 1
+        }
+      },
+      {
+        "text": "婉拒——「退了就是退了，新的日程已经排满」",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1,
+          "health": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "elder-202",
+    "stage": "elder",
+    "type": "context",
+    "line": "career",
+    "ageHint": "73岁4个月",
+    "ageMonths": 880,
+    "text": "小区门口的便利店老板是你的老邻居，想盘出去，问你有没有兴趣接——「就图个有人气」。",
+    "options": [
+      {
+        "text": "接了——每天开门七小时，街坊都来聊天，「人气比钱实在」",
+        "deltas3": {
+          "outlook": -2,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 3,
+          "money": -1
+        },
+        "aftermath": "便利店成了小区的客厅。半年后你把报纸角摆上了货架——老人只看不买，你也照摆。",
+        "requires": {
+          "money": 30
+        }
+      },
+      {
+        "text": "没接，但答应每天下午去坐镇两小时——「看店可以，盘店算了」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "婉拒，把老邻居介绍给了想创业的年轻人——「我当介绍人，不当掌柜」",
+        "deltas3": {
+          "worldview": -1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "elder-203",
+    "stage": "elder",
+    "type": "context",
+    "line": "career",
+    "ageHint": "78岁4个月",
+    "ageMonths": 940,
+    "text": "带出来的徒弟如今自己开了厂，专程来请你去「坐镇」——不干活，就在厂里转转，看看哪里不对劲。",
+    "options": [
+      {
+        "text": "每周去转半天——「我这双眼睛，就是最好的质检」",
+        "deltas3": {
+          "worldview": -1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": 1
+        },
+        "aftermath": "你指出的第七个问题救了一批货。徒弟逢人就说：我师父的眼睛，比机器贵。"
+      },
+      {
+        "text": "去了三次，把「哪里容易出事」写成一册手册交给他——「眼睛会老，手册不会」",
+        "deltas3": {
+          "worldview": 1,
+          "values": 1
+        },
+        "resourceDeltas": {
+          "mood": 2
+        }
+      },
+      {
+        "text": "婉拒——「厂是你的了，路你自己走，我在家给你留着茶」",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "elder-301",
+    "stage": "elder",
+    "type": "rescue",
+    "line": "health",
+    "rescue": "health",
+    "ageHint": "68岁4个月",
+    "ageMonths": 820,
+    "text": "一场小感冒拖成了肺炎，住了半个月院。出院那天，医生的话很直白：这副身板，得当个正经事来管了。",
+    "options": [
+      {
+        "text": "请了康复师，制定了恢复计划——「听专业的话，做专业的事」",
+        "deltas3": {
+          "worldview": -2,
+          "outlook": 2
+        },
+        "resourceDeltas": {
+          "mood": 3,
+          "money": -3,
+          "health": 14
+        },
+        "aftermath": "三个月后你重新走完了公园的大圈。康复师说：配合度满分的病人，十年难遇一个。"
+      },
+      {
+        "text": "把抽烟几十年的习惯戒了，换成每天遛弯——「老习惯让路，给日子腾地方」",
+        "deltas3": {
+          "outlook": 3,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 5,
+          "money": 2,
+          "health": 12
+        },
+        "aftermath": "戒烟第三个月最难熬，全楼的老伙计轮流陪你下棋。一年后复查，医生把烟史从病历里划掉了。"
+      },
+      {
+        "text": "让儿女安排——「他们折腾他们的，我配合配合」",
+        "deltas3": {
+          "outlook": 1,
+          "worldview": -1
+        },
+        "resourceDeltas": {
+          "mood": 2,
+          "money": -2,
+          "health": 6
+        },
+        "aftermath": "儿女买齐了保健品和跑步机。跑步机用了三个月成了晾衣架——但有一说一，陪你买菜的次数倒是多了。"
+      }
+    ]
+  },
+  {
+    "id": "teen-301",
+    "stage": "teen",
+    "type": "rescue",
+    "line": "friend",
+    "rescue": "mood",
+    "ageHint": "14岁6个月",
+    "ageMonths": 174,
+    "text": "月考、竞赛、家里的期待，三头一起压过来。这两个星期你谁都不想理，饭也吃不下。",
+    "options": [
+      {
+        "text": "跟班主任说了实话——「我最近状态不对，想找人聊聊」",
+        "deltas3": {
+          "worldview": -1,
+          "values": 2
+        },
+        "resourceDeltas": {
+          "mood": 12,
+          "health": 2
+        },
+        "aftermath": "老师给你调了三天作业量，又悄悄让同桌多陪了你两周。第三周你笑了，同桌说：回来啦。"
+      },
+      {
+        "text": "写了一封没寄出的信，把烦的全写下来——写完撕了，轻了",
+        "deltas3": {
+          "outlook": 2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 9,
+          "health": 1
+        },
+        "aftermath": "撕信那晚你睡了这个月第一个整觉。后来你养成了习惯：难受就写，写完撕——纸片篓知道你所有的秘密。"
+      },
+      {
+        "text": "硬扛过去——「谁还没个低谷，睡一觉就好了」",
+        "deltas3": {
+          "outlook": -2,
+          "worldview": 1
+        },
+        "resourceDeltas": {
+          "mood": 4,
+          "health": -2
+        },
+        "aftermath": "你熬过来了，但那三周瘦了五斤。很多年后你跟人说：那一次，其实可以不用一个人扛的。"
       }
     ]
   }

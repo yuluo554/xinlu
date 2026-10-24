@@ -7,6 +7,8 @@ import {
   birthEnvOptions,
   createRun,
   initialDimsOf,
+  optionDimsDelta,
+  optionLocks,
   pickEvent,
   resolveEnding,
 } from "../engine/engine";
@@ -145,8 +147,10 @@ function renderCard(): void {
     stageIndex: state.stageIndex,
     stage,
     ageHint: event.ageHint,
+    ageMonths: event.ageMonths,
     text: event.text,
     options: event.options.map((o) => o.text),
+    locks: optionLocks(state, event),
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
   });
@@ -164,8 +168,8 @@ function onChoose(index: number): void {
     toNext();
     return;
   }
-  // choice 表情反馈(02 §二):按本次 tf 偏移方向 + 选择前 mood 抽帧,同种子可复现
-  const tfDelta = event.options[index]?.deltas.tf ?? 0;
+  // choice 表情反馈(02 §二):按本次派生 tf 偏移方向 + 选择前 mood 抽帧,同种子可复现
+  const tfDelta = optionDimsDelta(event, index).tf ?? 0;
   const dir: DeltaDir = tfDelta > 0 ? "pos" : tfDelta < 0 ? "neg" : "neutral";
   choiceFeedback = pickChoiceFrame(dir, createFishParams(state.dims).mood, state.seed + state.history.length);
   const aftermath = event.options[index]?.aftermath;

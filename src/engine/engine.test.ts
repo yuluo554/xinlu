@@ -6,6 +6,7 @@ import {
   applyChoice,
   createRun,
   mbtiLetters,
+  optionAvailable,
   pickEvent,
   resolveEnding,
   seededDraw,
@@ -50,12 +51,25 @@ describe("createRun", () => {
     expect(run.env).toEqual(ENV);
   });
 
+  it("v3 状态层初始值：三观 50 中位 / 资源 60 / 线进度 0 / 父母在册（v3/02 §八）", () => {
+    const run = createRun(ENV, 2026);
+    expect(run.values3).toEqual({ worldview: 50, outlook: 50, values: 50 });
+    expect(run.resources).toEqual({ mood: 60, money: 60, health: 60 });
+    expect(run.lines).toEqual({ study: 0, career: 0, love: 0, friend: 0, health: 0 });
+    expect(run.npcs).toEqual([
+      { id: "mother", bond: 70, tag: "亲密" },
+      { id: "father", bond: 70, tag: "亲密" },
+    ]);
+  });
+
   it("两次 createRun 状态独立，无共享引用", () => {
     const a = createRun(ENV, 1);
     const b = createRun(ENV, 1);
     a.dims.ei = 99;
+    a.values3.values = 99;
     a.history.push({ eventId: "x", option: 0, dimsAfter: a.dims });
     expect(b.dims.ei).toBe(51);
+    expect(b.values3.values).toBe(50);
     expect(b.history).toEqual([]);
   });
 
@@ -90,58 +104,61 @@ describe("seededDraw", () => {
   });
 });
 
-describe("applyChoice", () => {
-  it("常规偏移写入 dims 并追加 history（infant-001 选项 0）", () => {
+describe("applyChoice（v3 传导链：选项 → 三观 → 派生四维 + 资源/线进度）", () => {
+  it("infant-011 o0（outlook −3）：派生 ei+1/jp+1，三观与资源同步入账", () => {
     const after = applyChoice(createRun(ENV, 7), 0);
-    expect(after.dims).toEqual(dimsOf(53, 52, 51, 54));
+    // 待答 = 开卷窗口最早档 infant-011（3个月）；o0 deltas3 {outlook:-3}
+    expect(after.dims).toEqual(dimsOf(52, 52, 50, 55));
+    expect(after.values3).toEqual({ worldview: 50, outlook: 47, values: 50 });
+    expect(after.resources).toEqual({ mood: 59, money: 60, health: 60 });
     expect(after.history).toHaveLength(1);
-    expect(after.history[0]).toMatchObject({ eventId: "infant-001", option: 0 });
+    expect(after.history[0]).toMatchObject({ eventId: "infant-011", option: 0 });
     expect(after.history[0]!.dimsAfter).toEqual(after.dims);
   });
 
-  it("钳制上界：跨 100 的偏移停在 100", () => {
+  it("infant-011 o1（worldview+3/outlook+3）：sn+1 与 ei−1/jp−1 同算（方向表 02 §二）", () => {
+    const after = applyChoice(createRun(ENV, 7), 1);
+    expect(after.dims).toEqual(dimsOf(50, 53, 50, 53));
+    expect(after.values3).toEqual({ worldview: 53, outlook: 53, values: 50 });
+  });
+
+  it("小增量只动三观不动性格：round(0.4×1)=0（性格是慢变量）", () => {
+    const after = applyChoice(createRun(ENV, 7), 2);
+    // o2 {worldview:2} → sn+1，且偏移键零值不落盘（dimsOffsetOf 不产生 0 值键）
+    expect(after.dims).toEqual(dimsOf(51, 53, 50, 54));
+    expect(after.values3).toEqual({ worldview: 52, outlook: 50, values: 50 });
+  });
+
+  it("钳制上界：跨 100 的派生偏移停在 100", () => {
     const state: RunState = {
-      seed: 7,
-      env: ENV,
+      ...createRun(ENV, 7),
       stageIndex: 7,
       dims: dimsOf(99, 50, 100, 50),
       history: historyOf((e) => e.stage === "elder" && e.type !== "critical"),
-      flags: [],
     };
-    // elder 的 main/context 全部消费后，待答 = 库序首个 critical（elder-002）；选项 1 deltas {ei:+2, tf:+2}
-    const after = applyChoice(state, 1);
-    expect(after.dims).toEqual(dimsOf(100, 50, 100, 50));
+    // 待答 = elder-002（库序首个 critical）；o0 派生 ei+3/tf+1/jp+3
+    const after = applyChoice(state, 0);
+    expect(after.dims).toEqual(dimsOf(100, 50, 100, 53));
   });
 
-  it("钳制下界：跌破 0 的偏移停在 0", () => {
+  it("钳制下界：跌破 0 的派生偏移停在 0", () => {
     const state: RunState = {
-      seed: 7,
-      env: ENV,
+      ...createRun(ENV, 7),
       stageIndex: 7,
       dims: dimsOf(0, 50, 0, 50),
       history: historyOf((e) => e.stage === "elder" && e.type !== "critical"),
-      flags: [],
     };
-    // 待答事件 = elder-002；选项 0 deltas {ei:-1, jp:+3, tf:+1}
-    const after = applyChoice(state, 0);
-    expect(after.dims).toEqual(dimsOf(0, 50, 1, 53));
-  });
-
-  it("中立值 50 无偏移的维度保持不动", () => {
-    const fresh = createRun(ENV, 7);
-    const state: RunState = { ...fresh, dims: dimsOf(50, 50, 50, 50) };
-    // infant-001 选项 1 deltas {ei:-1, sn:2}
-    const after = applyChoice(state, 1);
-    expect(after.dims).toEqual(dimsOf(49, 52, 50, 50));
+    // o2 {outlook:2, worldview:1} → 派生 ei−1/jp−1（sn 偏移 round(0.4)=0 不动）
+    const after = applyChoice(state, 2);
+    expect(after.dims).toEqual(dimsOf(0, 50, 0, 49));
   });
 
   it("flag 去重：已持有的 flag 不重复入列", () => {
     const state: RunState = {
-      seed: 7,
-      env: ENV,
+      ...createRun(ENV, 7),
       stageIndex: 3,
-      dims: dimsOf(50, 50, 50, 50),
-      history: historyOf((e) => e.stage === "teen" && e.id !== "teen-002"),
+      // 只消费 teen-002（174）及之前的月龄段：floor 单调语义下目标事件仍待答
+      history: historyOf((e) => e.stage === "teen" && e.ageMonths <= 174 && e.id !== "teen-002"),
       flags: ["rebel"],
     };
     // 待答事件 = teen-002（pre: rebel 已满足）；选项 1 带 flag rebel
@@ -156,59 +173,138 @@ describe("applyChoice", () => {
     expect(after.history[0]!.dimsAfter.ei).toBe(snap);
   });
 
+  it("支线选项推进线进度：infant-201 o0 → career +8；fate 不入账", () => {
+    const run = createRun(ENV, 7);
+    const afterLine = applyChoice(run, 0);
+    expect(afterLine.lines.career).toBe(0); // 开卷窗口是 fate context，线不动
+    // 顶到 infant-201（career 18 月龄档，轮转使其先于同档 fate 事件出牌）
+    let state = run;
+    for (let i = 0; i < 12 && pickEvent(state)!.id !== "infant-201"; i++) {
+      state = applyChoice(state, 0);
+    }
+    expect(pickEvent(state)!.id).toBe("infant-201");
+    const after = applyChoice(state, 0);
+    expect(after.lines.career).toBe(8);
+  });
+
+  it("requires 资源门槛：不达标被拒、达标放行（youth-203 o0 需 money ≥ 30）", () => {
+    const state: RunState = {
+      ...createRun(ENV, 7),
+      stageIndex: 4,
+      history: historyOf(
+        (e) => e.stage === "youth" && (e.ageMonths < 348 || ["youth-301", "youth-017"].includes(e.id)) && e.id !== "youth-203",
+      ),
+      // money 25：< 30 锁定 o0，同时 ≥ 25 不触发 money rescue（隔离用例）
+      resources: { mood: 60, money: 25, health: 60 },
+      lines: { study: 0, career: 60, love: 0, friend: 0, health: 0 },
+    };
+    const event = pickEvent(state)!;
+    expect(event.id).toBe("youth-203");
+    expect(optionAvailable(state, event, 0)).toBe(false);
+    expect(() => applyChoice(state, 0)).toThrow(/锁定/);
+    expect(optionAvailable(state, event, 1)).toBe(true);
+    const rich = { ...state, resources: { mood: 60, money: 30, health: 60 } };
+    expect(optionAvailable(rich, event, 0)).toBe(true);
+    expect(() => applyChoice(rich, 0)).not.toThrow();
+  });
+
   it("选项越界抛错", () => {
     const fresh = createRun(ENV, 7);
-    expect(() => applyChoice(fresh, 2)).toThrow(/选项越界/);
+    expect(() => applyChoice(fresh, 3)).toThrow(/选项越界/);
     expect(() => applyChoice(fresh, -1)).toThrow(/选项越界/);
   });
 });
 
-describe("pickEvent", () => {
-  it("main 优先于 context/critical，按库序", () => {
-    expect(pickEvent(createRun(ENV, 7))!.id).toBe("infant-001");
+describe("pickEvent（v3 单调调度：开卷窗口 + 锚点 + 轮转 + critical 收束）", () => {
+  it("阶段首抽 = 开卷窗口最早月龄档（infant 3个月）", () => {
+    expect(pickEvent(createRun(ENV, 7))!.id).toBe("infant-011");
   });
 
-  it("main 消费后转入 context；全耗尽后 critical；耗尽返回 null（密度无关，逐条走通 infant）", () => {
-    const infant = EVENTS.filter((e) => e.stage === "infant");
-    expect(infant.length).toBeGreaterThanOrEqual(6);
+  it("全程逐条走通 infant：任意抽取序列 ageMonths 不减、critical 最后、耗尽返回 null", () => {
     let state = createRun(ENV, 7);
-    for (const m of infant.filter((e) => e.type === "main")) {
-      expect(pickEvent(state)!.id, `main 应按库序出牌：${m.id}`).toBe(m.id);
-      state = applyChoice(state, 0);
-    }
-    const contextIds = new Set(infant.filter((e) => e.type === "context").map((e) => e.id));
-    expect(contextIds.size).toBeGreaterThanOrEqual(1);
-    for (let drawn = 0; drawn < contextIds.size; drawn++) {
+    const sequence: string[] = [];
+    let lastAge = -1;
+    for (;;) {
       const ev = pickEvent(state);
-      expect(ev!.type, `第 ${drawn + 1} 次抽取应为 context`).toBe("context");
-      expect(contextIds.has(ev!.id)).toBe(true);
+      if (!ev) break;
+      expect(ev.ageMonths, `${ev.id} 月龄回退`).toBeGreaterThanOrEqual(lastAge);
+      lastAge = ev.ageMonths;
+      sequence.push(`${ev.id}(${ev.ageMonths})`);
       state = applyChoice(state, 0);
     }
-    for (const c of infant.filter((e) => e.type === "critical")) {
-      expect(pickEvent(state)!.id, `critical 应按库序出牌：${c.id}`).toBe(c.id);
-      state = applyChoice(state, 0);
-    }
-    expect(pickEvent(state)).toBeNull();
+    const infantIds = EVENTS.filter((e) => e.stage === "infant").map((e) => e.id).sort();
+    const consumed = sequence.map((s) => s.split("(")[0]).sort();
+    expect(consumed).toEqual(infantIds);
+    const criticals = sequence.filter((s) => s.startsWith("infant-02"));
+    expect(criticals).toHaveLength(2);
+    expect(sequence.indexOf(criticals[0]!)).toBeGreaterThan(sequence.length - 3);
     state = advanceStage(state);
-    expect(pickEvent(state)!.id).toBe("toddler-001");
+    expect(pickEvent(state)!.stage).toBe("toddler");
   });
 
   it("pre 不满足的事件被过滤（teen-002 需要 rebel）", () => {
-    // 消费 teen 除 teen-002 与最后一个 critical 外的全部事件：过滤发生时落到该 critical
-    const lastCritical = EVENTS.filter((e) => e.stage === "teen" && e.type === "critical").at(-1)!;
+    // 消费 teen 中 <204 月龄段与同档他者（teen-016/017）：floor 单调语义下 teen-002 唯一待答
     const noRebel: RunState = {
-      seed: 7,
-      env: ENV,
+      ...createRun(ENV, 7),
       stageIndex: 3,
-      dims: dimsOf(50, 50, 50, 50),
       history: historyOf(
-        (e) => e.stage === "teen" && e.id !== "teen-002" && e.id !== lastCritical.id,
+        (e) => e.stage === "teen" && (e.ageMonths < 204 || ["teen-006", "teen-016", "teen-017"].includes(e.id)) && e.id !== "teen-002",
       ),
       flags: [],
+      lines: { study: 0, career: 0, love: 0, friend: 0, health: 0 },
     };
-    expect(pickEvent(noRebel)!.id).toBe(lastCritical.id);
+    // teen-002（pre rebel）被过滤 → 待答 = 月龄最小的 fate critical（teen-003/022 同 216，库序先行）
+    expect(pickEvent(noRebel)!.id).toBe("teen-003");
     const withRebel = { ...noRebel, flags: ["rebel"] };
     expect(pickEvent(withRebel)!.id).toBe("teen-002");
+  });
+
+  it("支线 critical 按线进度解锁（阈值 60，v3/02 §四）", () => {
+    const withStudyCritical = historyOf(
+      (e) => e.stage === "teen" && (e.ageMonths < 205 || e.id === "teen-203") && e.id !== "teen-103",
+    );
+    const locked: RunState = {
+      ...createRun(ENV, 7),
+      history: withStudyCritical,
+      stageIndex: 3,
+      flags: [],
+      lines: { study: 40, career: 60, love: 0, friend: 0, health: 0 },
+    };
+    // study 40 < 60：teen-103 不入候选，待答 = 库序首个 fate critical（teen-003，216 档库序先行）
+    expect(pickEvent(locked)!.id).toBe("teen-003");
+    const unlocked: RunState = { ...locked, lines: { study: 60, career: 60, love: 0, friend: 0, health: 0 } };
+    // 解锁后 teen-103（205 月龄档）早于 fate critical（216）出牌
+    expect(pickEvent(unlocked)!.id).toBe("teen-103");
+  });
+
+  it("rescue 事件只在资源低值时入候选（<25 触发，v3/02 §三）", () => {
+    const base = historyOf(
+      (e) => e.stage === "youth" && e.ageMonths <= 314 && e.id !== "youth-301" && e.type !== "critical",
+    );
+    const healthy: RunState = {
+      ...createRun(ENV, 7),
+      stageIndex: 4,
+      history: base,
+      resources: { mood: 60, money: 60, health: 60 },
+    };
+    // money 60：youth-301 不入候选，待答 = 314 档之后的普通事件
+    const picked = pickEvent(healthy)!;
+    expect(picked.type).not.toBe("rescue");
+    const broke: RunState = { ...healthy, resources: { mood: 60, money: 24, health: 60 } };
+    // money 24 < 25：rescue 进池，314 档先于剩余普通事件出牌，全程仍单调
+    const seq: string[] = [];
+    let state = broke;
+    let lastAge = -1;
+    for (;;) {
+      const ev = pickEvent(state);
+      if (!ev) break;
+      expect(ev.ageMonths).toBeGreaterThanOrEqual(lastAge);
+      lastAge = ev.ageMonths;
+      seq.push(ev.id);
+      state = applyChoice(state, 0);
+    }
+    expect(seq).toContain("youth-301");
+    void picked;
   });
 
   it("同状态重复调用幂等；终局后返回 null", () => {
@@ -219,7 +315,7 @@ describe("pickEvent", () => {
   });
 });
 
-describe("advanceStage", () => {
+describe("advanceStage（离开阶段时结算：三观漂移 + 资源自然结算）", () => {
   it("逐阶段推进，elder 推进后进入终局（stageIndex = 8）", () => {
     let state = createRun(ENV, 7);
     expect(state.stageIndex).toBe(0);
@@ -227,6 +323,26 @@ describe("advanceStage", () => {
     expect(state.stageIndex).toBe(1);
     const last: RunState = { ...state, stageIndex: 7 };
     expect(advanceStage(last).stageIndex).toBe(STAGES.length);
+  });
+
+  it("infant 结算：漂移 values+1（stage-drift）；心境 −5、积蓄按 career 0 → −4、健康 0", () => {
+    const state = createRun(ENV, 7);
+    const next = advanceStage(state);
+    expect(next.values3).toEqual({ worldview: 50, outlook: 50, values: 51 });
+    expect(next.resources).toEqual({ mood: 55, money: 56, health: 60 });
+    expect(next.stageIndex).toBe(1);
+  });
+
+  it("elder 结算：健康衰减 −6；career 线高时积蓄转正（+1）", () => {
+    const state: RunState = {
+      ...createRun(ENV, 7),
+      stageIndex: 7,
+      lines: { study: 0, career: 100, love: 0, friend: 0, health: 0 },
+    };
+    const next = advanceStage(state);
+    expect(next.resources.health).toBe(54);
+    expect(next.resources.money).toBe(61);
+    expect(next.stageIndex).toBe(STAGES.length);
   });
 
   it("终局后再推进抛错；推进不改 dims/flags/history", () => {
@@ -244,7 +360,7 @@ describe("resolveEnding", () => {
   it("按区间命中条件结局（end-01 / end-02 / end-06）", () => {
     const base: RunState = { ...createRun(ENV, 7), history: [] };
     expect(resolveEnding({ ...base, dims: dimsOf(60, 40, 60, 60) }).id).toBe("end-01");
-    expect(resolveEnding({ ...base, dims: dimsOf(40, 60, 40, 60) }).id).toBe("end-02");
+    expect(resolveEnding({ ...base, dims: dimsOf(60, 60, 40, 60) }).id).toBe("end-02");
     expect(resolveEnding({ ...base, dims: dimsOf(60, 60, 60, 60) }).id).toBe("end-06");
   });
 
@@ -255,7 +371,7 @@ describe("resolveEnding", () => {
   });
 
   it("end-04 必含 rebel 且禁含 conform", () => {
-    const base: RunState = { ...createRun(ENV, 7), dims: dimsOf(60, 40, 40, 40) };
+    const base: RunState = { ...createRun(ENV, 7), dims: dimsOf(40, 40, 40, 40) };
     expect(resolveEnding({ ...base, flags: ["rebel"] }).id).toBe("end-04");
     expect(resolveEnding({ ...base, flags: ["rebel", "conform"] }).id).toBe("end-fallback");
     expect(resolveEnding({ ...base, flags: ["conform"] }).id).toBe("end-fallback");
@@ -336,6 +452,14 @@ describe("可复现契约：同 seed + 同选项序列 ⇒ 全程逐字段全等
     for (const dim of DIM_KEYS) {
       expect(final.dims[dim]).toBeGreaterThanOrEqual(0);
       expect(final.dims[dim]).toBeLessThanOrEqual(100);
+    }
+    for (const axis of ["worldview", "outlook", "values"] as const) {
+      expect(final.values3[axis]).toBeGreaterThanOrEqual(0);
+      expect(final.values3[axis]).toBeLessThanOrEqual(100);
+    }
+    for (const res of ["mood", "money", "health"] as const) {
+      expect(final.resources[res]).toBeGreaterThanOrEqual(0);
+      expect(final.resources[res]).toBeLessThanOrEqual(100);
     }
     expect(resolveEnding(final).id).toMatch(/^end-/);
   }

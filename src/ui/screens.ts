@@ -86,8 +86,10 @@ export function cardAskScreen(vm: {
   stageIndex: number;
   stage: Stage;
   ageHint: string;
+  ageMonths: number;
   text: string;
   options: string[];
+  locks: boolean[];
   fishRadius: number;
   backdrop: SceneBackdrop;
 }): string {
@@ -95,12 +97,19 @@ export function cardAskScreen(vm: {
     <section class="screen screen-card">
       ${sceneLayer(vm.backdrop)}
       ${topbar(vm.stageIndex)}
-      <article class="card event-card">
+      <article class="card event-card" data-age-months="${vm.ageMonths}">
         <p class="stage-tag">${STAGE_LABEL[vm.stage]} · ${esc(vm.ageHint)}</p>
         <div class="fish-slot" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
         <p class="event-text">${esc(vm.text)}</p>
         <div class="options">
-          ${vm.options.map((o, i) => `<button type="button" class="option" data-option="${i}">${esc(o)}</button>`).join("")}
+          ${vm.options
+            .map(
+              (o, i) =>
+                vm.locks[i]
+                  ? `<button type="button" class="option" data-option="${i}">${esc(o)}</button>`
+                  : `<button type="button" class="option option-locked" data-option="${i}" disabled title="资源不足，此路暂不可选">${esc(o)}</button>`,
+            )
+            .join("")}
         </div>
       </article>
     </section>`;

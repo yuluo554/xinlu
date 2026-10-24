@@ -1,0 +1,11 @@
+{
+  "_meta": "非选项漂移表（plan/v3/02 §二 ▸ M1'' 增补）：每阶段小结时轻推三观，|值| ≤2 整数。方向口径：worldview + 向感应 / outlook + 向安然 / values + 向共情。M1'' 定版：各轴全程净漂移近似归零（时代之风不定风向），单阶段 |值|≤2 保留「他人影响」的叙事感。引擎与校验器只读 8 个阶段键。",
+  "infant": { "worldview": 0, "outlook": 0, "values": 1 },
+  "toddler": { "worldview": 1, "outlook": 0, "values": 0 },
+  "childhood": { "worldview": 0, "outlook": 1, "values": -1 },
+  "teen": { "worldview": 1, "outlook": -1, "values": 0 },
+  "youth": { "worldview": -1, "outlook": -2, "values": -1 },
+  "adult": { "worldview": -1, "outlook": -1, "values": 1 },
+  "midlife": { "worldview": -1, "outlook": 1, "values": 0 },
+  "elder": { "worldview": 1, "outlook": 2, "values": 0 }
+}

@@ -45,7 +45,7 @@ const VIEWPORTS = [
     shareShot: "share-card-1280.png",
   },
 ];
-const MAX_STEPS = 600; // 121 事件 + aftermath + 8 小结 + 开局，余量 ~2 倍
+const MAX_STEPS = 900; // 175 事件 × 2 屏 + 8 小结 + 开局 + rescue，余量 ~1.2 倍
 
 // --base-url <url>：跳过 build/preview，直接驱动已就绪的静态服务（干净环境冒烟 / Pages 线上实开复用同一套路）。
 const args = process.argv.slice(2);
@@ -223,7 +223,7 @@ async function main() {
       });
       if (v > 0) {
         // 二局只清存档键（图鉴 xinlu.gallery.v2 保留：跨局累计是其本意），从开局屏起跑
-        await cdp.evaluate("localStorage.removeItem('xinlu.save.v1')");
+        await cdp.evaluate("localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
         await cdp.send("Page.navigate", { url: pageUrl });
         await cdp.waitEvent("Page.loadEventFired");
       } else {
@@ -277,12 +277,21 @@ async function main() {
       writeFileSync(join(ROOT, "docs", "assets", vp.fishCardShot), Buffer.from(cardShot.data, "base64"));
 
       // 同步 evaluate 连点：卡片点第 0 项 / 小结与 aftermath 继续 / 开局提交默认组合
+      // v3-M1'':全程采集 data-age-months 序列与选项数（年龄不回退 + ≥3 选项断言）
+      const ageSeq = [];
+      let minOptions = Infinity;
       let endingSeen = false;
       for (let step = 0; step < MAX_STEPS; step++) {
         const acted = await cdp.evaluate(`(() => {
           if (document.querySelector(".screen-ending")) return "ending";
-          const opt = document.querySelector("[data-option]");
-          if (opt) { opt.click(); return "card"; }
+          const card = document.querySelector(".screen-card .event-card[data-age-months]");
+          const opt = document.querySelector("[data-option]:not([disabled])");
+          if (card && opt) {
+            window.__age = Number(card.dataset.ageMonths);
+            window.__opts = document.querySelectorAll("[data-option]").length;
+            opt.click();
+            return "card";
+          }
           const cont = document.querySelector("[data-continue]");
           if (cont) { cont.click(); return "next"; }
           const start = document.querySelector("[data-env-form] button[type=submit]");
@@ -293,9 +302,20 @@ async function main() {
           endingSeen = true;
           break;
         }
+        if (acted === "card") {
+          const sample = await cdp.evaluate("({ age: window.__age, opts: window.__opts })");
+          ageSeq.push(sample.age);
+          minOptions = Math.min(minOptions, sample.opts);
+        }
         if (String(acted).startsWith("stuck:")) throw new Error(`页面卡在未知屏：${acted}`);
       }
       if (!endingSeen) throw new Error(`${vp.width} 档：${MAX_STEPS} 步内未到终局`);
+      if (minOptions < 3) throw new Error(`${vp.width} 档：出现选项数 ${minOptions} < 3 的卡片（v3 口径 ≥3）`);
+      for (let i = 1; i < ageSeq.length; i++) {
+        if (ageSeq[i] < ageSeq[i - 1]) {
+          throw new Error(`${vp.width} 档：年龄回退 ${ageSeq[i - 1]} → ${ageSeq[i]}（第 ${i} 张卡，v3 单调口径）`);
+        }
+      }
 
       // 断言：关键屏节点 + 终局类型非空（v2/03 §1）+ mascot 主视觉（v2/03 §2）
       const verdict = await cdp.evaluate(`(() => {
@@ -406,14 +426,14 @@ async function main() {
         throw new Error(`${vp.width} 档：图鉴返回未回开局屏`);
       }
 
-      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share });
-      out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}`);
+      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share, cards: ageSeq.length, ageSpan: `${ageSeq[0]}–${ageSeq[ageSeq.length - 1]}` });
+      out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄`);
     }
 
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 选项≥3`);
     }
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
     out("=".repeat(56));

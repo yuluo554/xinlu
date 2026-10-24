@@ -26,16 +26,37 @@ if (ARGS.some((a) => !["--count", "--full"].includes(a))) {
   process.exit(2);
 }
 
-// ── 口径常量（来源：plan/02，只抄数值不改写表述）──
+// ── 口径常量（来源：plan/02 + plan/v3/02 ▸ M1'' 增补，只抄数值不改写表述）──
 const STAGES = ["infant", "toddler", "childhood", "teen", "youth", "adult", "midlife", "elder"];
 const STAGE_LABEL = { infant: "婴儿", toddler: "幼儿", childhood: "童年", teen: "少年", youth: "青年", adult: "壮年", midlife: "中年", elder: "老年" };
 const DIMS = ["ei", "sn", "tf", "jp"];
-const EVENT_TYPES = ["main", "context", "critical"];
-/** §一：常规 |Δ| ≤ 3，重大抉择（critical）|Δ| ≤ 8 */
-const DELTA_MAX = { main: 3, context: 3, critical: 8 };
+const EVENT_TYPES = ["main", "context", "critical", "rescue"];
+const VALUES_AXES = ["worldview", "outlook", "values"];
+const RES_KEYS = ["mood", "money", "health"];
+const LINE_KEYS = ["fate", "study", "career", "love", "friend", "health"];
+/** v3-M1'' 分批开启密度的支线（02 §四：M1'' 交付 study+career，M2'' 补 love+friend，M3'' 补 health） */
+const LINE_DENSITY_ON = ["study", "career"];
+/** v3/02 §四 ▸ M1'' 增补：支线每阶段每线 ≥3 */
+const LINE_DENSITY_MIN = 3;
+/** 三观增量口径（v3/02 §二）：常规 |Δ| ≤3 / critical ≤8；rescue 同常规 */
+const D3_MAX = { main: 3, context: 3, critical: 8, rescue: 3 };
+/** 资源增量口径（v3/02 §三）：常规 |Δ| ≤10 / critical 与 rescue ≤25 */
+const RES_MAX = { main: 10, context: 10, critical: 25, rescue: 25 };
+/** 月龄解析格式（v3/02 §一 ▸ M1'' 增补）：N个月 / N岁 / N岁半 / N岁M个月 */
+function parseAgeMonths(hint) {
+  let m = /^(\d+)岁(\d+)个月$/.exec(hint);
+  if (m) return Number(m[1]) * 12 + Number(m[2]);
+  m = /^(\d+)岁半$/.exec(hint);
+  if (m) return Number(m[1]) * 12 + 6;
+  m = /^(\d+)岁$/.exec(hint);
+  if (m) return Number(m[1]) * 12;
+  m = /^(\d+)个月$/.exec(hint);
+  if (m) return Number(m[1]);
+  return null;
+}
 /** plan/04 M1 1.1：骨架数据每阶段 ≥2 条样例（M4 全量密度开启后自动被矩阵覆盖，仍保持为底线） */
 const SKELETON_MIN_PER_STAGE = 2;
-/** §二密度矩阵：main 4–6 / context ≥8 / critical ≥2（仅 --full 门启用） */
+/** §二密度矩阵（fate 线内）：main 4–6 / context ≥8 / critical ≥2（仅 --full 门启用） */
 const DENSITY = { main: [4, 6], context: [8, Infinity], critical: [2, Infinity] };
 /** §一：50 = 中立；§三合成口径：初始值 = 50 + 四要素修正量之和，须落域 [0,100] */
 const BIRTH_BASE = 50;
@@ -77,13 +98,17 @@ const birthMap = readJson("birth-map.json");
 const endings = readJson("endings.json");
 const portraits = readJson("portraits.json");
 const moodMap = readJson("fish-mood-map.json");
+const stageDrift = readJson("stage-drift.json");
+const monologues = readJson("monologues.json");
 
-// ── 一、事件库（§二第 1–4 项 + §七文案去重）──
+// ── 一、事件库（plan/02 §二 + plan/v3/02 ▸ M1'' 增补：ageMonths / line / deltas3 / 资源 / ≥3 选项 / 单调）──
 const flagsDefined = new Set(); // 按库内顺序累积：pre 只许引用更早事件定义的 flag（§二第 3 项，防不可达死锁）
 const firstFlagSource = new Map();
-const perStage = new Map(STAGES.map((s) => [s, { main: 0, context: 0, critical: 0 }]));
+const perStage = new Map(STAGES.map((s) => [s, { main: 0, context: 0, critical: 0, rescue: 0 }]));
+const perStageLine = new Map(STAGES.map((s) => [s, Object.fromEntries(LINE_KEYS.map((l) => [l, 0]))]));
 const seenEventIds = new Set();
 const seenEventTexts = new Set();
+const rescuePerRes = { mood: 0, money: 0, health: 0 };
 let eventCount = 0;
 
 if (Array.isArray(events)) {
@@ -104,14 +129,34 @@ if (Array.isArray(events)) {
     }
     if (typeof ev.id === "string") seenEventIds.add(ev.id);
 
-    // stage / type 枚举；ageHint / text 非空
+    // stage / type / line 枚举；ageHint / text 非空
     if (!STAGES.includes(ev.stage)) fail("E.SCHEMA", `${at} stage 非法：${JSON.stringify(ev.stage)}`);
     else if (typeof ev.id === "string" && !ev.id.startsWith(`${ev.stage}-`)) fail("E.SCHEMA", `${ev.id} 前缀与 stage「${ev.stage}」不一致`);
     if (!EVENT_TYPES.includes(ev.type)) fail("E.SCHEMA", `${at} type 非法：${JSON.stringify(ev.type)}`);
+    if (!LINE_KEYS.includes(ev.line)) fail("E.LINE", `${at} line 缺失或非法：${JSON.stringify(ev.line)}（枚举 fate/study/career/love/friend/health，v3/02 §四）`);
+    else if (ev.type === "main" && ev.line !== "fate") fail("E.LINE", `${ev.id} main 事件必须挂 fate 线（主线定锚）`);
+    if (ev.type === "rescue") {
+      if (!RES_KEYS.includes(ev.rescue)) fail("E.LINE", `${at} rescue 事件缺 rescue 资源键或非法：${JSON.stringify(ev.rescue)}`);
+      else rescuePerRes[ev.rescue] += 1;
+    } else if (ev.rescue !== undefined) {
+      fail("E.LINE", `${at} 非 rescue 事件不应有 rescue 键：${JSON.stringify(ev.rescue)}`);
+    }
+    if (ev.lineGain !== undefined && (typeof ev.lineGain !== "number" || !Number.isInteger(ev.lineGain) || ev.lineGain < 0 || ev.lineGain > 100)) {
+      fail("E.LINE", `${at} lineGain 应为 [0,100] 整数：${JSON.stringify(ev.lineGain)}`);
+    }
     if (typeof ev.ageHint !== "string" || !ev.ageHint.trim()) fail("E.SCHEMA", `${at} 缺 ageHint`);
     if (typeof ev.text !== "string" || !ev.text.trim()) fail("E.SCHEMA", `${at} 缺 text`);
     else if (seenEventTexts.has(ev.text)) fail("E.DUP", `${at} 事件文案与更早事件完全重复（§七：禁止换标签充数）`);
     else seenEventTexts.add(ev.text);
+
+    // v3 年龄单调键（v3/02 §一 ▸ M1'' 增补）：ageMonths 与 ageHint 机判全等
+    if (!Number.isInteger(ev.ageMonths) || ev.ageMonths < 0 || ev.ageMonths > 1200) {
+      fail("E.AGE", `${at} ageMonths 缺失或非法：${JSON.stringify(ev.ageMonths)}（应为 [0,1200] 整数）`);
+    } else if (typeof ev.ageHint === "string") {
+      const parsed = parseAgeMonths(ev.ageHint);
+      if (parsed === null) fail("E.AGE", `${ev.id} ageHint「${ev.ageHint}」不可解析（格式 N个月/N岁/N岁半/N岁M个月）`);
+      else if (parsed !== ev.ageMonths) fail("E.AGE", `${ev.id} ageMonths=${ev.ageMonths} ≠ ageHint「${ev.ageHint}」解析值 ${parsed}`);
+    }
 
     // pre：只许引用此前事件定义过的 flag
     if (ev.pre !== undefined) {
@@ -124,9 +169,9 @@ if (Array.isArray(events)) {
       }
     }
 
-    // options：≥2 条；至少一维 delta 非零或带 flag；|Δ| 不超口径
-    if (!Array.isArray(ev.options) || ev.options.length < 2) {
-      fail("E.SCHEMA", `${at} options 缺失或不足 2 条（§二第 1 项）`);
+    // options：≥3 条（v3 口径收紧，v3/02 §四）；至少一轴 deltas3 非零或带 flag；|Δ| 不超口径
+    if (!Array.isArray(ev.options) || ev.options.length < 3) {
+      fail("E.OPTIONS", `${at} options 缺失或不足 3 条（v3 口径 ≥3，v3/02 §四）`);
     } else {
       const seenOptText = new Set();
       for (let j = 0; j < ev.options.length; j++) {
@@ -148,42 +193,159 @@ if (Array.isArray(events)) {
           }
         }
 
-        const deltas = op.deltas ?? {};
-        if (typeof deltas !== "object" || Array.isArray(deltas)) {
-          fail("E.SCHEMA", `${oat} deltas 不是对象`);
-          continue;
+        // v3 三观主效应（v3/02 §二）：deltas3 必填对象；旧四维 deltas 字段禁止回潮
+        if (op.deltas !== undefined) fail("E.VALUES", `${oat} 携带已移除的旧 deltas 字段（v3 schema 只认 deltas3，防回退）`);
+        const d3 = op.deltas3 ?? {};
+        if (typeof d3 !== "object" || Array.isArray(d3)) {
+          fail("E.VALUES", `${oat} deltas3 不是对象`);
+        } else {
+          if (Object.keys(d3).length === 0 && op.flag === undefined) fail("E.VALUES", `${oat} 既无三观增量也无 flag（v3/02 §二）`);
+          const maxAbs = D3_MAX[ev.type] ?? 3;
+          for (const [k, v] of Object.entries(d3)) {
+            if (!VALUES_AXES.includes(k)) fail("E.VALUES", `${oat} deltas3 轴非法：${k}（枚举 worldview/outlook/values）`);
+            else if (!Number.isInteger(v)) fail("E.VALUES", `${oat} deltas3 ${k} 不是整数：${JSON.stringify(v)}`);
+            else if (v === 0) fail("E.VALUES", `${oat} deltas3 ${k}=0（零偏移请删掉该轴）`);
+            else if (Math.abs(v) > maxAbs) fail("E.VALUES", `${oat} deltas3 ${k}=${v} 超口径（${ev.type} |Δ|≤${maxAbs}，v3/02 §二）`);
+          }
         }
-        if (Object.keys(deltas).length === 0 && op.flag === undefined) fail("E.DELTA", `${oat} 既无 delta 也无 flag（§二第 2 项）`);
-        const maxAbs = DELTA_MAX[ev.type] ?? 3;
-        for (const [k, v] of Object.entries(deltas)) {
-          if (!DIMS.includes(k)) fail("E.DELTA", `${oat} delta 维度非法：${k}`);
-          else if (!Number.isInteger(v)) fail("E.DELTA", `${oat} delta ${k} 不是整数：${JSON.stringify(v)}`);
-          else if (v === 0) fail("E.DELTA", `${oat} delta ${k}=0（零偏移请删掉该维）`);
-          else if (Math.abs(v) > maxAbs) fail("E.DELTA", `${oat} delta ${k}=${v} 超口径（${ev.type} |Δ|≤${maxAbs}，§一）`);
+
+        // v3 资源增损（v3/02 §三 ▸ M1'' 增补）：≥1 键、整数非零、不超口径
+        const rd = op.resourceDeltas;
+        if (rd === undefined || typeof rd !== "object" || Array.isArray(rd)) {
+          fail("E.RES", `${oat} resourceDeltas 缺失或不是对象（每选项必填）`);
+        } else {
+          if (Object.keys(rd).length === 0) fail("E.RES", `${oat} resourceDeltas 为空（每选项 ≥1 项非零增损）`);
+          const maxAbs = RES_MAX[ev.type] ?? 10;
+          for (const [k, v] of Object.entries(rd)) {
+            if (!RES_KEYS.includes(k)) fail("E.RES", `${oat} 资源键非法：${k}（枚举 mood/money/health）`);
+            else if (!Number.isInteger(v)) fail("E.RES", `${oat} 资源 ${k} 不是整数：${JSON.stringify(v)}`);
+            else if (v === 0) fail("E.RES", `${oat} 资源 ${k}=0（零偏移请删掉该键）`);
+            else if (Math.abs(v) > maxAbs) fail("E.RES", `${oat} 资源 ${k}=${v} 超口径（${ev.type} |Δ|≤${maxAbs}，v3/02 §三）`);
+          }
+        }
+
+        // v3 选项资源门槛（v3/02 §三 ▸ M1'' 增补）
+        if (op.requires !== undefined) {
+          if (typeof op.requires !== "object" || Array.isArray(op.requires) || Object.keys(op.requires).length === 0) {
+            fail("E.REQ", `${oat} requires 应为非空对象`);
+          } else {
+            for (const [k, v] of Object.entries(op.requires)) {
+              if (!RES_KEYS.includes(k)) fail("E.REQ", `${oat} requires 资源键非法：${k}`);
+              else if (!Number.isInteger(v) || v < 1 || v > 100) fail("E.REQ", `${oat} requires ${k} 应为 [1,100] 整数：${JSON.stringify(v)}`);
+            }
+          }
         }
         if (op.aftermath !== undefined && (typeof op.aftermath !== "string" || !op.aftermath.trim())) fail("E.SCHEMA", `${oat} aftermath 应为非空字符串`);
       }
     }
 
-    // 阶段计数（供骨架密度与 --full 密度矩阵）
+    // 阶段计数（供骨架密度与 --full 密度矩阵 + v3 线密度）
     if (perStage.has(ev.stage)) perStage.get(ev.stage)[ev.type] += 1;
+    if (perStageLine.has(ev.stage) && LINE_KEYS.includes(ev.line)) perStageLine.get(ev.stage)[ev.line] += 1;
   }
+
+  // ── v3 阶段内月龄单调（v3/02 §一 ▸ M1'' 增补①②）──
+  for (const s of STAGES) {
+    const list = events.filter((e) => e && e.stage === s && Number.isInteger(e.ageMonths));
+    let prevMain = -1;
+    let maxNonCritical = -1;
+    for (const e of list) {
+      if (e.type === "main") {
+        if (e.ageMonths < prevMain) fail("E.AGE", `${s} main 库序乱序：${e.id}（${e.ageMonths} < 前锚 ${prevMain}）`);
+        prevMain = e.ageMonths;
+      } else if (e.type !== "critical") {
+        maxNonCritical = Math.max(maxNonCritical, e.ageMonths);
+      }
+    }
+    // critical（含支线）全部在普通事件之后出牌：最低月龄的 critical 须 ≥ 非 critical 最大值；
+    // critical 之间按月龄排序出牌（同月龄按库序），排序后天然不减。
+    const criticals = list.filter((x) => x.type === "critical").sort((a, b) => a.ageMonths - b.ageMonths);
+    if (criticals.length && criticals[0].ageMonths < maxNonCritical) {
+      fail("E.AGE", `${s} critical 早于本阶段最晚普通事件：${criticals[0].id}（${criticals[0].ageMonths} < ${maxNonCritical}）`);
+    }
+  }
+  // 跨阶段单调（③）：相邻阶段 max ≤ 下一阶段 min
+  for (let i = 0; i < STAGES.length - 1; i++) {
+    const cur = events.filter((e) => e && e.stage === STAGES[i] && Number.isInteger(e.ageMonths));
+    const next = events.filter((e) => e && e.stage === STAGES[i + 1] && Number.isInteger(e.ageMonths));
+    if (cur.length && next.length) {
+      const curMax = Math.max(...cur.map((e) => e.ageMonths));
+      const nextMin = Math.min(...next.map((e) => e.ageMonths));
+      if (curMax > nextMin) fail("E.AGE", `跨阶段回退：${STAGES[i]} 最大月龄 ${curMax} > ${STAGES[i + 1]} 最小月龄 ${nextMin}`);
+    }
+  }
+}
+
+// rescue 数量口径（v3/02 §三）：每资源恰好 2 条，共 6 条
+for (const r of RES_KEYS) {
+  if (rescuePerRes[r] !== 2) fail("E.RES", `rescue 事件 ${r} 资源 ${rescuePerRes[r]} 条 ≠ 口径 2 条（v3/02 §三）`);
 } 
 
 // 骨架密度（常开）：每阶段 ≥2 条
 for (const s of STAGES) {
   const c = perStage.get(s);
-  const total = c.main + c.context + c.critical;
+  const total = c.main + c.context + c.critical + c.rescue;
   if (total < SKELETON_MIN_PER_STAGE) fail("E.DENSITY", `阶段 ${s}（${STAGE_LABEL[s]}）仅 ${total} 条（骨架要求每阶段 ≥${SKELETON_MIN_PER_STAGE}，plan/04 1.1）`);
 }
-// --full 密度矩阵（M4 门）：main 4–6 / context ≥8 / critical ≥2
+// --full 密度矩阵（M4 门，fate 线内）：main 4–6 / context ≥8 / critical ≥2
 if (WANT_FULL) {
   for (const s of STAGES) {
     const c = perStage.get(s);
-    if (c.main < DENSITY.main[0] || c.main > DENSITY.main[1]) fail("E.DENSITY", `阶段 ${s} main ${c.main} 条（口径 ${DENSITY.main[0]}–${DENSITY.main[1]}）`);
-    if (c.context < DENSITY.context[0]) fail("E.DENSITY", `阶段 ${s} context ${c.context} 条（口径 ≥${DENSITY.context[0]}）`);
-    if (c.critical < DENSITY.critical[0]) fail("E.DENSITY", `阶段 ${s} critical ${c.critical} 条（口径 ≥${DENSITY.critical[0]}）`);
+    const lines = perStageLine.get(s);
+    const fate = { main: c.main, context: c.context, critical: c.critical };
+    if (fate.main < DENSITY.main[0] || fate.main > DENSITY.main[1]) fail("E.DENSITY", `阶段 ${s} fate main ${fate.main} 条（口径 ${DENSITY.main[0]}–${DENSITY.main[1]}）`);
+    if (fate.context < DENSITY.context[0]) fail("E.DENSITY", `阶段 ${s} fate context ${fate.context} 条（口径 ≥${DENSITY.context[0]}）`);
+    if (fate.critical < DENSITY.critical[0]) fail("E.DENSITY", `阶段 ${s} fate critical ${fate.critical} 条（口径 ≥${DENSITY.critical[0]}）`);
   }
+}
+// v3 支线密度（v3/02 §四 ▸ M1'' 增补，常开分批）：已开启的线每阶段 ≥3
+for (const s of STAGES) {
+  const lines = perStageLine.get(s);
+  for (const l of LINE_DENSITY_ON) {
+    if (lines[l] < LINE_DENSITY_MIN) fail("E.DENSITY", `阶段 ${s} ${l} 线 ${lines[l]} 条 < 口径 ${LINE_DENSITY_MIN}（v3/02 §四分批口径）`);
+  }
+}
+
+// ── 二·五、三观层文件（v3/02 §二 ▸ M1'' 增补：漂移表 + 独白表）──
+let driftOk = 0;
+if (stageDrift && typeof stageDrift === "object" && !Array.isArray(stageDrift)) {
+  for (const s of STAGES) {
+    const row = stageDrift[s];
+    if (!row || typeof row !== "object" || Array.isArray(row)) {
+      fail("V.DRIFT", `stage-drift 缺阶段「${s}」行`);
+      continue;
+    }
+    for (const axis of VALUES_AXES) {
+      const v = row[axis];
+      if (typeof v !== "number" || !Number.isInteger(v) || Math.abs(v) > 2) {
+        fail("V.DRIFT", `stage-drift ${s}.${axis} 应为 |值| ≤2 整数：${JSON.stringify(v)}`);
+      } else {
+        driftOk++;
+      }
+    }
+  }
+  const extra = Object.keys(stageDrift).filter((k) => k !== "_meta" && !STAGES.includes(k));
+  if (extra.length) fail("V.DRIFT", `stage-drift 含未知阶段键：${extra.join(",")}`);
+} else if (stageDrift !== null) {
+  fail("V.DRIFT", "stage-drift.json 应为对象（_meta + 8 阶段键）");
+}
+let monoOk = 0;
+if (monologues && typeof monologues === "object" && !Array.isArray(monologues)) {
+  for (const axis of VALUES_AXES) {
+    const cell = monologues[axis];
+    if (!cell || typeof cell !== "object" || Array.isArray(cell)) {
+      fail("V.MONO", `monologues 缺轴「${axis}」`);
+      continue;
+    }
+    for (const band of ["low", "mid", "high"]) {
+      if (typeof cell[band] !== "string" || !cell[band].trim()) fail("V.MONO", `monologues ${axis}.${band} 缺非空文案`);
+      else monoOk++;
+    }
+  }
+  const extra = Object.keys(monologues).filter((k) => k !== "_meta" && !VALUES_AXES.includes(k));
+  if (extra.length) fail("V.MONO", `monologues 含未知键：${extra.join(",")}`);
+} else if (monologues !== null) {
+  fail("V.MONO", "monologues.json 应为对象（_meta + 3 轴键）");
 }
 
 // ── 二、birth-map（§三）──
@@ -396,17 +558,19 @@ if (moodMap && typeof moodMap === "object" && !Array.isArray(moodMap)) {
 
 // ── 输出 ──
 const out = (s) => process.stdout.write(s + "\n");
-out("数据校验门 · 依据 plan/02（单一定义源）");
+out("数据校验门 · 依据 plan/02（单一定义源）+ plan/v3/02 ▸ M1'' 增补");
 out("=".repeat(56));
 
 const areaOk = (p) => !fails.some((f) => f.startsWith(`[${p}`));
 const lines = [
-  ["FILE", "数据文件 5 份可读且 JSON 合法"],
-  ["E", `事件库 ${eventCount} 条：id 唯一 / 枚举合法 / 选项 ≥2 / 偏移口径 / pre 防死锁 / 骨架密度 ≥${SKELETON_MIN_PER_STAGE} / 文案去重`],
+  ["FILE", "数据文件 7 份可读且 JSON 合法"],
+  ["E", `事件库 ${eventCount} 条：id 唯一 / 枚举合法 / 选项 ≥3 / 三观增量口径 / 资源口径 / pre 防死锁 / 月龄单调 / 骨架密度 ≥${SKELETON_MIN_PER_STAGE} / 文案去重`],
+  ["L", `多线：line 枚举 / main=fate / rescue 每资源 2 条 / 支线密度 ${LINE_DENSITY_ON.join("+")} 每阶段 ≥${LINE_DENSITY_MIN}（分批口径，love/friend/health 随 M2''/M3'' 开启）`],
   ["B", `birth-map ${birthStats ? `${birthStats.combos}/${BIRTH_COMBOS}` : "—"} 组合覆盖 + 初始值全部落域 [0,100]`],
   ["X", `endings ${endingSummary ? `${endingSummary.conditioned} 条件 + ${endingSummary.fallbackCount} 兜底` : "—"}：schema / 末位兜底 / flag 引用闭合`],
   ["P", `portraits ${portraitFilled}/${PORTRAIT_TYPES.length} 型封闭枚举${WANT_FULL ? " + 80–150 字" : ""}`],
   ["M", `fish-mood-map ${moodStats ? `覆盖 ${moodStats.covered}/${moodStats.total} 帧 + 终局锁 ${moodStats.locked} 张` : "—"}：19/19 全覆盖 / 类别枚举 / 终局不重复（v2/02 §二）`],
+  ["V", `三观层：stage-drift ${driftOk}/24 格（8 阶段×3 轴，|值|≤2）+ monologues ${monoOk}/9 条（3 轴×3 区间）`],
 ];
 for (const [p, label] of lines) out(`${areaOk(p) ? "PASS" : "FAIL"}  ${label}`);
 for (const f of fails) out(`FAIL  ${f}`);
@@ -417,7 +581,8 @@ if (WANT_COUNT) {
   out(`事件总数: ${eventCount}`);
   for (const s of STAGES) {
     const c = perStage.get(s);
-    out(`  ${s.padEnd(10)} ${STAGE_LABEL[s]}: main ${c.main} / context ${c.context} / critical ${c.critical}（计 ${c.main + c.context + c.critical}）`);
+    const l = perStageLine.get(s);
+    out(`  ${s.padEnd(10)} ${STAGE_LABEL[s]}: fate ${c.main}m/${c.context}c/${c.critical}x + 支线 study ${l.study} / career ${l.career} / rescue ${c.rescue}（计 ${c.main + c.context + c.critical + c.rescue + l.study + l.career + l.love + l.friend + l.health}）`);
   }
   out(`结局: 条件结局 ${endingSummary?.conditioned ?? "—"} + 兜底 ${endingSummary?.fallbackCount ?? "—"}（口径 ≥${ENDING_MIN_CONDITIONED} + 1）`);
   out(`画像: ${portraitFilled}/${PORTRAIT_TYPES.length} 型在位`);
