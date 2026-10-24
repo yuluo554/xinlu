@@ -24,10 +24,11 @@ import {
   stageEntries,
 } from "./logic";
 import { exportShareCard } from "./share-card";
+import { GALLERY_TYPES, loadGallery, recordRun, representativeDims } from "./gallery";
 import portraits from "../data/portraits.json" with { type: "json" };
 import * as S from "./screens";
 
-type View = "start" | "card" | "aftermath" | "summary" | "ending" | "corrupt";
+type View = "start" | "card" | "aftermath" | "summary" | "ending" | "corrupt" | "gallery";
 
 let root: HTMLElement;
 let state: RunState | null = null;
@@ -35,6 +36,10 @@ let view: View = "start";
 let pendingAftermath: { stage: Stage; ageHint: string; text: string } | null = null;
 // choice 类表情反馈帧(02 §二):表现态,不进存档(schema v1 冻结,刷新续局回待机态)。
 let choiceFeedback: string | null = null;
+// 本局刚解锁新型(图鉴提示用表现态;刷新续局到终局不重复喊「新解锁」)。
+let galleryJustUnlocked = false;
+// 图鉴格结局记录的 avatar 渲染参数(锁定帧已定,四维取中位代表值)。
+const NEUTRAL_DIMS = { ei: 50, sn: 50, tf: 50, jp: 50 };
 
 type Boot = { kind: "fresh" } | { kind: "resume"; state: RunState } | { kind: "corrupt" };
 
@@ -89,6 +94,9 @@ function render(): void {
     case "ending":
       renderEnding();
       break;
+    case "gallery":
+      renderGallery();
+      break;
     case "corrupt":
       root.innerHTML = S.corruptScreen();
       bindRestart();
@@ -117,6 +125,10 @@ function renderStart(error?: string): void {
     }
     persist();
     view = "card";
+    render();
+  });
+  root.querySelector<HTMLButtonElement>("[data-gallery-open]")?.addEventListener("click", () => {
+    view = "gallery";
     render();
   });
 }
@@ -196,8 +208,24 @@ function toNext(): void {
   }
   state = advanceStage(state);
   persist();
+  if (state.stageIndex >= STAGES.length) recordGallery();
   view = state.stageIndex >= STAGES.length ? "ending" : "summary";
   render();
+}
+
+/** 通关记一笔图鉴（02 §三独立 key）：恰在推进至终局的一次性迁移点调用；续局到终局不重记。
+ *  存储不可用降级为「本局不入册」，不影响复盘。 */
+function recordGallery(): void {
+  if (!state) return;
+  const ending = resolveEnding(state);
+  const letters = endingLetters(ending, state);
+  try {
+    const before = loadGallery();
+    recordRun({ letters, endingId: ending.id, now: Date.now() });
+    galleryJustUnlocked = !before.types[letters];
+  } catch {
+    galleryJustUnlocked = false;
+  }
 }
 
 function renderSummary(): void {
@@ -225,15 +253,24 @@ function renderSummary(): void {
 function renderEnding(): void {
   if (!state) return;
   const ending = resolveEnding(state);
+  const letters = endingLetters(ending, state);
+  const gallery = loadGallery();
   root.innerHTML = S.endingScreen({
     title: ending.title,
-    letters: endingLetters(ending, state),
+    letters,
     text: ending.text,
     retrospect: ending.retrospect,
     criticals: criticalChoices(state.history),
     seed: state.seed,
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
+    gallery: {
+      unlocked: Object.keys(gallery.types).length,
+      total: GALLERY_TYPES.length,
+      letters,
+      isNew: galleryJustUnlocked,
+      runs: gallery.runs,
+    },
   });
   hydrateFish(endingFrame(ending.id));
   hydrateRadar(STAGES.map((s) => dimsAtStageStart(state!, s)));
@@ -272,6 +309,24 @@ function bindShare(ending: Ending): void {
         btn.textContent = "生成失败，请重试";
         btn.disabled = false;
       });
+  });
+}
+
+/** 图鉴屏（v2/03 §4）：16 型格与结局记录的 avatar 缩略在此水合——型格按代表四维待机像，
+ *  结局记录印 ending 锁表帧（取图走 endingFrame，零新映射）。 */
+function renderGallery(): void {
+  root.innerHTML = S.galleryScreen(loadGallery());
+  for (const cell of root.querySelectorAll<HTMLElement>("[data-gallery-type]")) {
+    const slot = cell.querySelector("[data-slot='gallery-fish']");
+    if (slot) renderFish(createFishParams(representativeDims(cell.dataset.galleryType!)), slot);
+  }
+  for (const record of root.querySelectorAll<HTMLElement>("[data-gallery-ending]")) {
+    const slot = record.querySelector("[data-slot='gallery-fish']");
+    if (slot) renderFish(createFishParams(NEUTRAL_DIMS), slot, endingFrame(record.dataset.galleryEnding!));
+  }
+  root.querySelector<HTMLButtonElement>("[data-gallery-back]")?.addEventListener("click", () => {
+    view = "start";
+    render();
   });
 }
 
@@ -329,6 +384,7 @@ function restart(): void {
   state = null;
   pendingAftermath = null;
   choiceFeedback = null;
+  galleryJustUnlocked = false;
   view = "start";
   render();
 }

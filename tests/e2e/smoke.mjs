@@ -47,9 +47,16 @@ const VIEWPORTS = [
 ];
 const MAX_STEPS = 600; // 121 事件 + aftermath + 8 小结 + 开局，余量 ~2 倍
 
+// --base-url <url>：跳过 build/preview，直接驱动已就绪的静态服务（干净环境冒烟 / Pages 线上实开复用同一套路）。
 const args = process.argv.slice(2);
-if (args.some((a) => a !== "--no-build")) {
-  process.stderr.write("e2e smoke: 用法 node tests/e2e/smoke.mjs [--no-build]\n");
+let baseUrl = null;
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === "--no-build") continue;
+  if (args[i] === "--base-url") {
+    baseUrl = args[++i] ?? null;
+    continue;
+  }
+  process.stderr.write("e2e smoke: 用法 node tests/e2e/smoke.mjs [--no-build] [--base-url <url>]\n");
   process.exit(2);
 }
 
@@ -134,30 +141,39 @@ async function main() {
     }
   };
 
-  // ── 构建（保证 e2e 测的是当前代码；--no-build 跳过用现成 dist）──
-  if (!args.includes("--no-build")) {
+  // ── 构建（保证 e2e 测的是当前代码；--base-url / --no-build 跳过）──
+  if (baseUrl === null && !args.includes("--no-build")) {
     out("[1/5] vite build …");
     execFileSync(process.execPath, [VITE_JS, "build"], { cwd: ROOT, stdio: "pipe" });
-  } else if (!existsSync(join(ROOT, "dist", "index.html"))) {
+  } else if (baseUrl === null && !existsSync(join(ROOT, "dist", "index.html"))) {
     throw new Error("--no-build 但 dist/index.html 不存在，先 npm run build");
   }
 
   try {
-    // ── 静态服务 ──
-    out("[2/5] vite preview …");
-    const preview = spawn(
-      process.execPath,
-      [VITE_JS, "preview", "--port", String(PORT_PREVIEW), "--strictPort", "--host", "127.0.0.1"],
-      {
-        cwd: ROOT,
-        stdio: "ignore",
-      }
-    );
-    spawned.push(preview);
-    await waitFor(async () => {
-      const r = await fetch(`http://127.0.0.1:${PORT_PREVIEW}/`);
-      return r.ok;
-    }, "preview server 就绪");
+    // ── 静态服务（--base-url 模式由外部提供，常见为 py -m http.server 伺服 dist/ 或线上 Pages）──
+    const pageUrl = baseUrl ?? `http://127.0.0.1:${PORT_PREVIEW}/`;
+    if (baseUrl === null) {
+      out("[2/5] vite preview …");
+      const preview = spawn(
+        process.execPath,
+        [VITE_JS, "preview", "--port", String(PORT_PREVIEW), "--strictPort", "--host", "127.0.0.1"],
+        {
+          cwd: ROOT,
+          stdio: "ignore",
+        }
+      );
+      spawned.push(preview);
+      await waitFor(async () => {
+        const r = await fetch(`http://127.0.0.1:${PORT_PREVIEW}/`);
+        return r.ok;
+      }, "preview server 就绪");
+    } else {
+      out(`[2/5] 外部静态服务 ${baseUrl} …`);
+      await waitFor(async () => {
+        const r = await fetch(baseUrl);
+        return r.ok;
+      }, "外部 base-url 就绪");
+    }
 
     // ── Edge 无头 + CDP ──
     out("[3/5] Edge headless (CDP) …");
@@ -206,11 +222,12 @@ async function main() {
         mobile: vp.mobile,
       });
       if (v > 0) {
-        await cdp.evaluate("localStorage.clear()"); // 二局清档，从开局屏起跑
-        await cdp.send("Page.navigate", { url: `http://127.0.0.1:${PORT_PREVIEW}/` });
+        // 二局只清存档键（图鉴 xinlu.gallery.v2 保留：跨局累计是其本意），从开局屏起跑
+        await cdp.evaluate("localStorage.removeItem('xinlu.save.v1')");
+        await cdp.send("Page.navigate", { url: pageUrl });
         await cdp.waitEvent("Page.loadEventFired");
       } else {
-        await cdp.send("Page.navigate", { url: `http://127.0.0.1:${PORT_PREVIEW}/` });
+        await cdp.send("Page.navigate", { url: pageUrl });
         await cdp.waitEvent("Page.loadEventFired");
       }
 
@@ -331,6 +348,64 @@ async function main() {
       const shot = await cdp.send("Page.captureScreenshot", { format: "png" });
       writeFileSync(join(ROOT, "docs", "assets", vp.shot), Buffer.from(shot.data, "base64"));
       writeFileSync(join(ROOT, "docs", "assets", vp.fishEndingShot), Buffer.from(shot.data, "base64"));
+
+      // v2-M4' 图鉴:终局进度提示(未解锁型口径) → 重开 → 开局屏入口 → 图鉴屏断言(16 格/结局记录/累计局数/水合鱼像)
+      const hint = await cdp.evaluate(`document.querySelector(".gallery-hint")?.textContent ?? ""`);
+      if (!/已解锁 \d+ \/ 16 型|图鉴集齐/.test(hint)) {
+        throw new Error(`${vp.width} 档：终局图鉴进度提示缺失（实得「${hint}」）`);
+      }
+      if (v === 0 && !hint.includes("新解锁")) {
+        throw new Error(`${vp.width} 档：首局应提示新解锁型号（实得「${hint}」）`);
+      }
+      await cdp.evaluate(`document.querySelector("[data-restart]").click()`);
+      if (!(await cdp.evaluate("!!document.querySelector('.screen-start')"))) {
+        throw new Error(`${vp.width} 档：重开后未回开局屏`);
+      }
+      if (!(await cdp.evaluate("!!document.querySelector('[data-gallery-open]')"))) {
+        throw new Error(`${vp.width} 档：开局屏图鉴入口未渲染`);
+      }
+      await cdp.evaluate(`document.querySelector("[data-gallery-open]").click()`);
+      const gal = await cdp.evaluate(`(() => {
+        const screen = document.querySelector(".screen-gallery");
+        if (!screen) return null;
+        const cells = [...screen.querySelectorAll(".gallery-cell")];
+        const unlocked = cells.filter((c) => c.classList.contains("unlocked"));
+        const records = [...screen.querySelectorAll(".gallery-record")];
+        const unlockedRecords = records.filter((r) => r.classList.contains("unlocked"));
+        return {
+          progress: screen.querySelector(".gallery-progress")?.textContent ?? "",
+          cells: cells.length,
+          unlockedTypes: unlocked.map((c) => c.dataset.galleryType),
+          records: records.length,
+          unlockedRecords: unlockedRecords.length,
+          fishCount: screen.querySelectorAll(".gallery-slot svg.fish-mascot").length,
+        };
+      })()`);
+      if (!gal) throw new Error(`${vp.width} 档：图鉴屏未渲染`);
+      if (gal.cells !== 16) throw new Error(`${vp.width} 档：图鉴格非 16（实得 ${gal.cells}）`);
+      if (!gal.unlockedTypes.includes(verdict.letters)) {
+        throw new Error(`${vp.width} 档：本局型号 ${verdict.letters} 未入图鉴（已解锁 ${gal.unlockedTypes.join(",")}）`);
+      }
+      if (gal.records !== 9) throw new Error(`${vp.width} 档：结局记录非 9 条（实得 ${gal.records}）`);
+      if (gal.unlockedRecords < 1) throw new Error(`${vp.width} 档：结局记录无解锁条目`);
+      // 水合像数 = 解锁型格 + 解局记录(每个解锁条目恰一只 avatar)
+      if (gal.fishCount !== gal.unlockedTypes.length + gal.unlockedRecords) {
+        throw new Error(`${vp.width} 档：图鉴 avatar 水合数不符（${gal.fishCount} ≠ ${gal.unlockedTypes.length}+${gal.unlockedRecords}）`);
+      }
+      const runsLine = `累计通关 ${v + 1} 局`;
+      if (!gal.progress.includes(runsLine)) {
+        throw new Error(`${vp.width} 档：图鉴累计局数不符（预期含「${runsLine}」，实得「${gal.progress}」）`);
+      }
+      // 图鉴屏截图留痕(暖帧丢弃纪律同上)
+      await cdp.evaluate("window.scrollTo(0, 0)");
+      await cdp.send("Page.captureScreenshot", { format: "png" });
+      const galleryShot = await cdp.send("Page.captureScreenshot", { format: "png" });
+      writeFileSync(join(ROOT, "docs", "assets", `v2m4-gallery-${vp.width}.png`), Buffer.from(galleryShot.data, "base64"));
+      await cdp.evaluate(`document.querySelector("[data-gallery-back]").click()`);
+      if (!(await cdp.evaluate("!!document.querySelector('.screen-start')"))) {
+        throw new Error(`${vp.width} 档：图鉴返回未回开局屏`);
+      }
+
       results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share });
       out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}`);
     }
@@ -338,7 +413,7 @@ async function main() {
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share})`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言`);
     }
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
     out("=".repeat(56));

@@ -14,13 +14,17 @@
 | [plan/05-发布留档.md](plan/05-发布留档.md) | 发布三件套留档（M6 撰写主体） |
 | [plan/06-运维节奏.md](plan/06-运维节奏.md) | 发布后八类缺口轮转 / 归档判据 |
 | [plan/backlog.md](plan/backlog.md) | 迭代队列（唯一队列，证据制；当前 B1 平衡缺口在队） |
-| plan/HANDOFF-M*.md | 各开发棒交接单（七节：进度证据 / 状态不变量 / 待办 / 口径 / 环境坑 / 核对清单 / 命令速查） |
+| [plan/v2/00-README总览.md](plan/v2/00-README总览.md) | v2.0 执行套件入口（01–06 + backlog：avatar / 分享卡 / 图鉴 / 双门禁，状态与 v1 套件各自维护） |
+| plan/HANDOFF-M*.md · plan/v2/HANDOFF-v2-M*.md | 各开发棒交接单（七节：进度证据 / 状态不变量 / 待办 / 口径 / 环境坑 / 核对清单 / 命令速查） |
 
 ## 门与常用命令
 
 ```bash
 node tools/check-sprint-layout.mjs    # 布局门（方法论装订，任何新对话第一件事）
 node tools/check-desensitized.mjs     # 脱敏门（发布前必跑，进 CI layout job）
+node tools/check-assets-license.mjs   # 许可门（素材 ⊆ 白名单 + credits 署名）
+node tools/check-dist-budget.mjs      # 预算门（dist gzip ≤500KB；无 dist 先 build）
+npm run e2e                           # E2E 双端一键通关冒烟（CDP 驱动 Edge 无头）
 npm run validate                      # 数据门（--full 常开：密度矩阵 + 画像字数）
 npm run validate -- --count           # 分母汇总（README / 台账数字对账）
 npm test                              # vitest 单测

@@ -10,6 +10,7 @@ import {
 } from "../engine/model";
 import type { SceneBackdrop } from "../viz/scene";
 import { DIM_SHORT, STAGE_LABEL, type ChoiceReview } from "./logic";
+import { ENDING_META, GALLERY_TYPES, type GalleryData } from "./gallery";
 // 场景氛围素材 URL(vite 静态 import → dist hash 文件名;水面/云层 = CC-BY Open Ocean 组,图标 = Simple Worlds 提取件)
 import waterUrl from "../../assets/web-ready/open-ocean/Other/WikndWakerWater_Background.webp";
 import cloudsUrl from "../../assets/web-ready/open-ocean/Other/Clouds_Background.webp";
@@ -74,7 +75,10 @@ export function startScreen(options: Record<keyof BirthEnv, string[]>, error?: s
         <button type="submit" class="btn btn-primary btn-start">开始这一生</button>
       </form>
       <p class="fine-print">单机运行，进度保存在本机浏览器，无需网络与账号。</p>
-      <p class="fine-print about-links"><a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a></p>
+      <p class="fine-print about-links">
+        <button type="button" class="btn-ghost" data-gallery-open>人格图鉴</button>
+        <a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a>
+      </p>
     </section>`;
 }
 
@@ -161,6 +165,7 @@ export function endingScreen(vm: {
   seed: number;
   fishRadius: number;
   backdrop: SceneBackdrop;
+  gallery: GalleryHint | null;
 }): string {
   const criticals =
     vm.criticals.length > 0
@@ -188,9 +193,65 @@ export function endingScreen(vm: {
       <h3>关键抉择</h3>
       <div class="criticals">${criticals}</div>
       <p class="fine-print">本局种子 ${vm.seed}——同种子同选择，结果可复现。</p>
+      ${galleryHintLine(vm.gallery)}
       <p class="fine-print about-links"><a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a></p>
       <button type="button" class="btn btn-primary" data-share>保存分享卡</button>
       <button type="button" class="btn btn-ghost" data-restart>重开一局</button>
+    </section>`;
+}
+
+/** 终局图鉴进度提示（v2/03 §4「未解锁型」提示）的视图模型；null = 存储不可用等降级场景不渲染。 */
+export interface GalleryHint {
+  unlocked: number;
+  total: number;
+  letters: string;
+  isNew: boolean;
+  runs: number;
+}
+
+function galleryHintLine(hint: GalleryHint | null): string {
+  if (!hint) return "";
+  const unlockedPart =
+    hint.unlocked >= hint.total
+      ? `${hint.unlocked}/${hint.total} 型——图鉴集齐！`
+      : `已解锁 ${hint.unlocked} / ${hint.total} 型，还有 ${hint.total - hint.unlocked} 型未解锁`;
+  const newPart = hint.isNew ? `——本局新解锁「${hint.letters}」` : "";
+  return `<p class="gallery-hint fine-print">人格图鉴：${unlockedPart}${newPart}；累计通关 ${hint.runs} 局。</p>`;
+}
+
+/** 图鉴屏（v2/03 §4）：16 型格（解锁印 avatar 缩略 / 未上锁印？？？）+ 结局记录（解锁印 ending 锁表帧）。 */
+export function galleryScreen(gallery: GalleryData): string {
+  const cells = GALLERY_TYPES.map((t) => {
+    const entry = gallery.types[t];
+    if (!entry) {
+      return `<li class="gallery-cell locked"><span class="gallery-unknown">？？？</span><span class="gallery-letters">未解锁</span></li>`;
+    }
+    const day = new Date(entry.firstSeenAt).toISOString().slice(0, 10);
+    return `<li class="gallery-cell unlocked" data-gallery-type="${t}">
+      <div class="gallery-slot" data-slot="gallery-fish"></div>
+      <span class="gallery-letters">${t}</span>
+      <span class="gallery-meta">×${entry.count} · ${day} 首见</span>
+    </li>`;
+  }).join("");
+  const records = ENDING_META.map((e) => {
+    const count = gallery.endings[e.id];
+    if (!count) {
+      return `<li class="gallery-record locked"><span class="gallery-unknown">？？？</span><span class="gallery-record-title">尚未抵达的结局</span></li>`;
+    }
+    return `<li class="gallery-record unlocked" data-gallery-ending="${e.id}">
+      <div class="gallery-slot" data-slot="gallery-fish"></div>
+      <span class="gallery-record-title">${esc(e.title)}</span>
+      <span class="gallery-meta">×${count}</span>
+    </li>`;
+  }).join("");
+  return `
+    <section class="screen screen-gallery">
+      <h2>人格图鉴</h2>
+      <p class="muted gallery-progress">累计通关 ${gallery.runs} 局 · 已解锁 ${Object.keys(gallery.types).length} / ${GALLERY_TYPES.length} 型</p>
+      <ul class="gallery-grid">${cells}</ul>
+      <h3>结局记录</h3>
+      <ul class="gallery-endings">${records}</ul>
+      <button type="button" class="btn btn-primary" data-gallery-back>返回</button>
     </section>`;
 }
 
