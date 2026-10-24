@@ -537,3 +537,48 @@ body {
     transition: none;
   }
 }
+
+/* —— v2 人格鱼 mascot(v2-M2'):卡片流反馈 / 阶段小结转场 / 终局主视觉 —— */
+.fish-slot {
+  display: flex;
+  justify-content: center;
+  margin: 10px auto;
+  padding: 6px;
+  background: var(--accent-soft);
+  border-radius: var(--radius-item);
+}
+
+.fish-slot svg.fish-mascot {
+  width: 128px;
+  height: 128px;
+}
+
+.fish-slot-ending svg.fish-mascot {
+  width: 200px;
+  height: 200px;
+}
+
+/* 待机游动:周期与幅度由 activity 经 CSS 变量注入(renderFish 的 --fish-dur / --fish-amp) */
+.fish-idle {
+  animation: fish-drift var(--fish-dur, 1100ms) ease-in-out infinite alternate;
+}
+
+.fish-still {
+  animation: none;
+}
+
+@keyframes fish-drift {
+  from {
+    transform: translateX(calc(-1 * var(--fish-amp, 10px)));
+  }
+
+  to {
+    transform: translateX(var(--fish-amp, 10px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fish-idle {
+    animation: none;
+  }
+}

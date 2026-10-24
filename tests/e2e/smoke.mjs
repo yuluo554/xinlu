@@ -22,8 +22,22 @@ const EDGE_CANDIDATES = [
 const PORT_PREVIEW = 4173;
 const PORT_CDP = 9223;
 const VIEWPORTS = [
-  { width: 375, height: 812, mobile: true, shot: "e2e-smoke-375.png" },
-  { width: 1280, height: 800, mobile: false, shot: "e2e-smoke-1280.png" },
+  {
+    width: 375,
+    height: 812,
+    mobile: true,
+    shot: "e2e-smoke-375.png",
+    fishCardShot: "v2m2-mascot-card-375.png",
+    fishEndingShot: "v2m2-mascot-375.png",
+  },
+  {
+    width: 1280,
+    height: 800,
+    mobile: false,
+    shot: "e2e-smoke-1280.png",
+    fishCardShot: "v2m2-mascot-card-1280.png",
+    fishEndingShot: "v2m2-mascot-1280.png",
+  },
 ];
 const MAX_STEPS = 600; // 121 事件 + aftermath + 8 小结 + 开局，余量 ~2 倍
 
@@ -197,6 +211,20 @@ async function main() {
       const startSeen = await cdp.evaluate("!!document.querySelector('.screen-start')");
       if (!startSeen) throw new Error("开局屏未出现");
 
+      // v2-M2' 卡片流 mascot 断言:提交开局进入首卡,mascot 已挂载且表情帧 href 非空(待机态)
+      await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
+      const cardFish = await cdp.evaluate(`(() => {
+        const svg = document.querySelector(".screen-card .fish-mascot");
+        if (!svg) return null;
+        const frame = svg.querySelector(".fish-frame");
+        return { idle: !!svg.querySelector(".fish-idle"), href: frame ? frame.getAttribute("href") : "" };
+      })()`);
+      if (!cardFish) throw new Error(`${vp.width} 档：卡片流 mascot 未渲染`);
+      if (!cardFish.idle) throw new Error(`${vp.width} 档：卡片流 mascot 不在待机态`);
+      if (!cardFish.href) throw new Error(`${vp.width} 档：mascot 表情帧 href 为空`);
+      const cardShot = await cdp.send("Page.captureScreenshot", { format: "png" });
+      writeFileSync(join(ROOT, "docs", "assets", vp.fishCardShot), Buffer.from(cardShot.data, "base64"));
+
       // 同步 evaluate 连点：卡片点第 0 项 / 小结与 aftermath 继续 / 开局提交默认组合
       let endingSeen = false;
       for (let step = 0; step < MAX_STEPS; step++) {
@@ -218,25 +246,30 @@ async function main() {
       }
       if (!endingSeen) throw new Error(`${vp.width} 档：${MAX_STEPS} 步内未到终局`);
 
-      // 断言：关键屏节点 + 终局类型非空（v2/03 §1）
+      // 断言：关键屏节点 + 终局类型非空（v2/03 §1）+ mascot 主视觉（v2/03 §2）
       const verdict = await cdp.evaluate(`(() => {
         const ending = document.querySelector(".screen-ending");
         const title = ending?.querySelector("h2")?.textContent?.trim() ?? "";
         const letters = ending?.querySelector(".ending-type")?.textContent?.trim() ?? "";
         const radarSvg = !!ending?.querySelector("[data-slot='radar'] svg");
-        return { title, letters, radarSvg };
+        const fishSvg = ending?.querySelector(".fish-mascot");
+        const fishHref = fishSvg?.querySelector(".fish-frame")?.getAttribute("href") ?? "";
+        return { title, letters, radarSvg, fishSvg: !!fishSvg, fishHref };
       })()`);
       if (!verdict.title) throw new Error(`${vp.width} 档：终局标题为空`);
       if (!/^[EI][SN][TF][JP]$/.test(verdict.letters)) {
         throw new Error(`${vp.width} 档：终局类型字母非法「${verdict.letters}」`);
       }
       if (!verdict.radarSvg) throw new Error(`${vp.width} 档：终局雷达未渲染`);
+      if (!verdict.fishSvg) throw new Error(`${vp.width} 档：终局 mascot 未渲染`);
+      if (!verdict.fishHref) throw new Error(`${vp.width} 档：终局 mascot 表情帧 href 为空`);
 
       // 截图留痕（暖帧丢弃：第一张合成器可能滞后，丢）
       await cdp.evaluate("window.scrollTo(0, 0)");
       await cdp.send("Page.captureScreenshot", { format: "png" });
       const shot = await cdp.send("Page.captureScreenshot", { format: "png" });
       writeFileSync(join(ROOT, "docs", "assets", vp.shot), Buffer.from(shot.data, "base64"));
+      writeFileSync(join(ROOT, "docs", "assets", vp.fishEndingShot), Buffer.from(shot.data, "base64"));
       results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters });
       out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）`);
     }
@@ -244,9 +277,9 @@ async function main() {
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染`);
     }
-    out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => v.shot).join(" + ")}`);
+    out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
     out("=".repeat(56));
     out("结论: e2e 冒烟全绿（375/1280 双端一键通关）");
   } finally {

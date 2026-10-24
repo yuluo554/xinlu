@@ -26,7 +26,7 @@ assets/
 
 | 素材组 | 来源 | 许可证 | 商用 | 备注 |
 |---|---|---|---|---|
-| `dafeiyu/fish/` 62 张 | [roseion/dsh-dayu-fish-skin](https://github.com/roseion/dsh-dayu-fish-skin)（仓库 MIT，`fish/` 为其处理产物） | 仓库 MIT 覆盖其代码与处理；**底层素材为第三方梗图/二创** | ⚠️ 谨慎 | 上游 SOURCES.md 自述「素材来自互联网公开项目，未自行创作，仅供个人学习使用」；其 ASSETS.md 记载完整处理链（抠图/拆帧/缩放脚本） |
+| `dafeiyu/fish/` 62 张 | [roseion/dsh-dayu-fish-skin](https://github.com/roseion/dsh-dayu-fish-skin)（仓库 MIT，`fish/` 为其处理产物） | 仓库 MIT 覆盖其代码与处理；**底层素材为第三方梗图/二创** | ⚠️ 谨慎 | 上游 SOURCES.md 自述「素材来自互联网公开项目，未自行创作，仅供个人学习使用」；其 ASSETS.md 记载完整处理链（抠图/拆帧/缩放脚本）。**D1 拍板 B 档（2026-10-24）：处理版已入库分发**，已知限制声明见下节与 `public/credits.md` |
 | `upstream/dafeiyu-pet/` | [1190fasheqi/dafeiyu-pet](https://github.com/1190fasheqi/dafeiyu-pet) | MIT（c）2026 | ✅ | LICENSE 原文随附；「鲸鱼娘·大肥鱼」透明桌宠三视图多尺寸 |
 | `upstream/codex-deepseek-pet/`（`assets/whale/` 系 AI 生成素材） | [YunYueSama/codex-deepseek-pet](https://github.com/YunYueSama/codex-deepseek-pet) | 大肥鱼项目署名许可 1.0（自定义署名许可，非标准 MIT） | ✅ 须署名 | 许可原文与素材边界声明随附（ASSET_LICENSE.md）；**whale/ 全量图集约 150MB 仅登记未下载**（见下节） |
 | `upstream/codex-deepseek-pet/你这吃白饭的蓝色大肥鱼.png` | 同上 | **上游明示：社区参考图，原作者与授权尚待核实** | ❌ 不得商用 | 仅留底参考；上游 ASSET_LICENSE.md 原话「不能仅凭本仓库的署名许可将其视为可自由转载或商用的原创素材」 |
@@ -37,6 +37,14 @@ assets/
 ## DeepSeek 形象提示（全部大肥鱼素材共用）
 
 「蓝色大肥鱼 / 鲸鱼娘」是 DeepSeek 吉祥物的社区二创形象。codex 仓库 ASSET_LICENSE.md 明示：许可「不授予底层参考作品、角色设计、标志等第三方内容的额外权利，也不代表 DeepSeek 官方授权」。第二版若公开发布或商用，形象权利风险需自行评估；本台账仅按上游声明如实记录。
+
+### 已知限制声明（B 档分发随附，D1 拍板 2026-10-24）
+
+D1 拍板为 **B 标准**（plan/v2/00 §决策记录）：CC-BY/MIT 素材 + `fish/` 62 张处理版 + whale 系入库分发，配本声明与 credits 署名（`public/credits.md`）。分发件中的已知限制：
+
+- `fish/` 19 张表情底层素材为互联网流传的「吃白饭的大肥鱼」表情包（上游自述「仅供个人学习使用」，原作者不可考）；仓库 MIT 许可覆盖抠图/拆帧等处理劳动，不覆盖底层画作权利。
+- 「蓝色大肥鱼 / 鲸鱼娘」形象为 DeepSeek 社区二创，非 DeepSeek 官方授权；商用场景的形象权利风险需自行评估。
+- 4 张 GIF 原件与梗图原图维持 ❌ 层排除（上游无 LICENSE / 原作者授权待核实），不进 git、不进 dist、不进 Release。
 
 ## v2 可直接粘贴的署名文案
 
@@ -55,10 +63,10 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 | itch.io CC0 鱼类素材（如 PixelFishes 50+ 种、Kelano Studio Wild Fish 30 种） | itch.io 对应标签页 | 本机访问 itch.io 超时，未采集 |
 | `upstream/dafeiyu-pet/sprites/正面_238.png`（重新下载） | 上游 raw 经镜像重下（`curl -C -` 校验 IEND 闭合） | 2026-10-24 实测坏件：IDAT 声明 79327B 与实际错位（镜像续传截断先例，v2/04 风险表）；web-ready 转换已剔除该件，187/306 档完好 |
 
-## 跟踪策略（v2-M1' 1.2 落地，2026-10-24）
+## 跟踪策略（v2-M1' 1.2 落地，2026-10-24；D1=B 增记同日）
 
-- **git 只跟踪**：`assets/web-ready/`（压缩 WebP，单张 ≤50KB 已核查 40/40 全绿）+ 许可/溯源文本（LICENSE / SOURCES / ASSET_LICENSE / manifest.json）+ `simple-worlds` SVG 矢量源。
-- **原始位图件（png/gif/ico）一律不入 git**（.gitignore 扩展名规则，本地留底）；⚠️ `fish/` 62 张与 ❌ 层维持排除，D1 拍板后按台账显式豁免。
+- **git 只跟踪**：`assets/web-ready/`（压缩 WebP，单张 ≤50KB 已核查 40/40 全绿）+ 许可/溯源文本（LICENSE / SOURCES / ASSET_LICENSE / manifest.json）+ `simple-worlds` SVG 矢量源 + **⚠️ `fish/` 62 张处理版 webp（D1=B 档显式豁免，2026-10-24；含 dist 引用的 19 张表情 / whale-idle 等，62 张体积约 1.9MB 原样入库，`fish/*` + `!fish/*.webp` 形态豁免、非 webp 仍排除）**。
+- **原始位图件（png/gif/ico）一律不入 git**（.gitignore 扩展名规则，本地留底）；❌ 层（梗图原图、4 张 GIF 原件）与 upstream 无许可目录维持排除。
 - **web-ready 转换口径**：ffmpeg libwebp，q85 起，>50KB 依次降档（缩宽 1024→q60、缩宽 800→q45 / 缩宽 512→q70）；`正面_238.png` 因源损坏未转换（见上表）。
 
 ## 工程注意

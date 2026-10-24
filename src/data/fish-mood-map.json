@@ -1,0 +1,44 @@
+{
+  "frames": {
+    "01": { "seg": "thoughtful", "dir": "neg", "hint": "瘫了·力竭" },
+    "03": { "seg": "warm", "dir": "pos", "hint": "期待·雀跃" },
+    "04": { "seg": "warm", "dir": "pos", "hint": "大笑·张罗有成" },
+    "05": { "seg": "thoughtful", "dir": "neutral", "hint": "困惑·打量" },
+    "06": { "seg": "warm", "dir": "pos", "hint": "自豪·叉腰" },
+    "07": { "seg": "thoughtful", "dir": "neg", "hint": "呆滞·宕机" },
+    "08": { "seg": "thoughtful", "dir": "neg", "hint": "躺倒·挂机" },
+    "10": { "seg": "thoughtful", "dir": "neg", "hint": "忙碌·焦头" },
+    "13": { "seg": "warm", "dir": "pos", "hint": "得意·亮实力" },
+    "14": { "seg": "warm", "dir": "neutral", "hint": "狡黠·胸有成竹" },
+    "15": { "seg": "warm", "dir": "pos", "hint": "满足·安坐" },
+    "16": { "seg": "thoughtful", "dir": "neg", "hint": "低落·愧疚" },
+    "17": { "seg": "thoughtful", "dir": "neg", "hint": "害怕·求饶" },
+    "18": { "seg": "thoughtful", "dir": "neg", "hint": "惊慌·告警" },
+    "19": { "seg": "thoughtful", "dir": "neutral", "hint": "好奇·打探" },
+    "20": { "seg": "thoughtful", "dir": "neg", "hint": "着急·劝架" },
+    "22": { "seg": "thoughtful", "dir": "neg", "hint": "认输·收摊" },
+    "24": { "seg": "thoughtful", "dir": "neg", "hint": "摊倒·没电" },
+    "26": { "seg": "thoughtful", "dir": "neg", "hint": "炸毛·回击" }
+  },
+  "stage": {
+    "infant": ["07"],
+    "toddler": ["13"],
+    "childhood": ["10"],
+    "teen": ["18"],
+    "youth": ["16"],
+    "adult": ["20"],
+    "midlife": ["08"],
+    "elder": ["22"]
+  },
+  "ending": {
+    "end-01": "03",
+    "end-02": "15",
+    "end-03": "05",
+    "end-04": "26",
+    "end-05": "06",
+    "end-06": "04",
+    "end-07": "14",
+    "end-08": "19",
+    "end-fallback": "01"
+  }
+}

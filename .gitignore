@@ -15,12 +15,15 @@ dist.zip
 
 # v2 素材库护栏（台账单源 assets/README.md；v2-M1' 1.2 跟踪策略落地——plan/v2/02 §八）：
 # git 只跟踪 assets/web-ready/（压缩 WebP ≤50KB/张）+ 许可/溯源文本 + SVG 矢量源；
-# 原始位图件与 zip 一律留本地不入 git；⚠️ fish/ 层待 D1 拍板后在台账记档并显式豁免。
+# 原始位图件与 zip 一律留本地不入 git。
+# ⚠️ fish/ 层：D1 已拍板 B 档（2026-10-24，plan/v2/00 §决策记录）——处理版 webp 显式豁免
+# 入库（目录级排除改内容级排除，非 webp 仍排除；已知限制声明与台账记档见 assets/README.md）。
 assets/**/*.zip
 assets/**/*.png
 assets/**/*.gif
 assets/**/*.ico
-assets/dafeiyu/fish/
+assets/dafeiyu/fish/*
+!assets/dafeiyu/fish/*.webp
 assets/upstream/deepseek-fat-fish-codex-pet/
 
 # 日志

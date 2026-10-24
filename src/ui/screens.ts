@@ -69,12 +69,14 @@ export function cardAskScreen(vm: {
   ageHint: string;
   text: string;
   options: string[];
+  fishRadius: number;
 }): string {
   return `
     <section class="screen screen-card">
       ${topbar(vm.stageIndex)}
       <article class="card event-card">
         <p class="stage-tag">${STAGE_LABEL[vm.stage]} · ${esc(vm.ageHint)}</p>
+        <div class="fish-slot" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
         <p class="event-text">${esc(vm.text)}</p>
         <div class="options">
           ${vm.options.map((o, i) => `<button type="button" class="option" data-option="${i}">${esc(o)}</button>`).join("")}
@@ -107,6 +109,7 @@ export function summaryScreen(vm: {
   stage: Stage;
   count: number;
   deltas: Dims;
+  fishRadius: number;
 }): string {
   const items = DIM_KEYS.map((d: DimKey) => {
     const v = vm.deltas[d];
@@ -119,6 +122,7 @@ export function summaryScreen(vm: {
       ${topbar(vm.stageIndex)}
       <h2>${STAGE_LABEL[vm.stage]} · 小结</h2>
       <p class="muted">本阶段经历了 ${vm.count} 次抉择，四维悄然挪动：</p>
+      <div class="fish-slot fish-slot-stage" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
       <div class="viz-row two">
         <div class="radar-slot" data-slot="radar"></div>
         <div class="deltas">${items}</div>
@@ -134,6 +138,7 @@ export function endingScreen(vm: {
   retrospect: string[];
   criticals: ChoiceReview[];
   seed: number;
+  fishRadius: number;
 }): string {
   const criticals =
     vm.criticals.length > 0
@@ -149,6 +154,7 @@ export function endingScreen(vm: {
       ${topbar(STAGES.length)}
       <h2>${esc(vm.title)}</h2>
       <p class="ending-type">${esc(vm.letters)}</p>
+      <div class="fish-slot fish-slot-ending" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
       <p class="ending-text">${esc(vm.text)}</p>
       <div class="viz-row two">
         <div class="radar-slot" data-slot="radar"></div>

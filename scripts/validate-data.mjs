@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// ═══ 数据校验门（plan/04 M1 1.3）═══
-// 依据 plan/02（单一定义源）§一/二/三/四/五 实现其点名的全部校验项。
+// ═══ 数据校验门（plan/04 M1 1.3 + plan/v2/04 v2-M2' 2.3）═══
+// 依据 plan/02（v1 单一定义源）§一/二/三/四/五 与 plan/v2/02（v2 增量单源）§二 实现其点名的全部校验项。
 // 本脚本只"查"口径、不复写口径：下方常量是从 plan/02 抄录的校验阈值——
 // 改口径必须先改 plan/02 再同步这里；发现第二份口径表述 = 缺陷进 backlog。
 //
@@ -11,7 +11,7 @@
 //            M4 出口必须以 --full 全绿，届时把 package.json 的 validate 命令加上 --flag（同提交）。
 // 退出码：0 全绿 / 1 有 FAIL / 2 用法错误。
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -52,6 +52,11 @@ const ENDING_MIN_CONDITIONED = 8;
 const PORTRAIT_TYPES = ["ISTJ", "ISFJ", "INFJ", "INTJ", "ISTP", "ISFP", "INFP", "INTP", "ESTP", "ESFP", "ENFP", "ENTP", "ESTJ", "ESFJ", "ENFJ", "ENTJ"];
 /** §五：画像各 80–150 字（仅 --full 门启用） */
 const PORTRAIT_LEN = [80, 150];
+/** v2/02 §二：fish-mood-map 帧库 19 张（帧名清单扫 assets/dafeiyu/fish/ 目录，不在此复写） */
+const MOOD_FRAME_COUNT = 19;
+/** v2/02 §一/二：tf 三段枚举与 delta 方向枚举 */
+const MOOD_SEGS = ["thoughtful", "neutral", "warm"];
+const MOOD_DIRS = ["pos", "neg", "neutral"];
 
 const FLAG_RE = /^[a-z][a-z0-9-]*$/; // flag 命名卫生：小写 kebab（大小写漂移会被 pre/结局引用检查拦住）
 
@@ -71,6 +76,7 @@ const events = readJson("events.json");
 const birthMap = readJson("birth-map.json");
 const endings = readJson("endings.json");
 const portraits = readJson("portraits.json");
+const moodMap = readJson("fish-mood-map.json");
 
 // ── 一、事件库（§二第 1–4 项 + §七文案去重）──
 const flagsDefined = new Set(); // 按库内顺序累积：pre 只许引用更早事件定义的 flag（§二第 3 项，防不可达死锁）
@@ -322,6 +328,72 @@ if (portraits && typeof portraits === "object" && !Array.isArray(portraits)) {
   }
 }
 
+// ── 五、fish-mood-map（v2/02 §二：表情映射）──
+let moodStats = null;
+if (moodMap && typeof moodMap === "object" && !Array.isArray(moodMap)) {
+  // 帧名清单 = fish/ 目录的两位编号表情（不在此复写清单）；19 张是口径数字，漂移即红
+  const fishDir = join(ROOT, "assets", "dafeiyu", "fish");
+  const diskFrames = existsSync(fishDir)
+    ? readdirSync(fishDir).filter((n) => /^\d{2}\.webp$/i.test(n)).map((n) => n.replace(/\.webp$/i, "")).sort()
+    : [];
+  if (diskFrames.length !== MOOD_FRAME_COUNT) {
+    fail("M.COUNT", `assets/dafeiyu/fish/ 编号表情 ${diskFrames.length} 张 ≠ 口径 ${MOOD_FRAME_COUNT}（v2/02 §二，清单漂移先修台账）`);
+  }
+  const frames = moodMap.frames;
+  const frameNames = frames && typeof frames === "object" && !Array.isArray(frames) ? Object.keys(frames) : [];
+  const onDisk = new Set(diskFrames);
+  for (const k of frameNames) {
+    if (!onDisk.has(k)) fail("M.FRAME", `frames 键「${k}」在 assets/dafeiyu/fish/ 无对应编号表情件`);
+    const f = frames[k];
+    if (!f || typeof f !== "object" || Array.isArray(f)) {
+      fail("M.SCHEMA", `frames.${k} 不是对象`);
+      continue;
+    }
+    if (!MOOD_SEGS.includes(f.seg)) fail("M.SCHEMA", `frames.${k}.seg 非法：${JSON.stringify(f.seg)}（枚举 ${MOOD_SEGS.join("/")}）`);
+    if (!MOOD_DIRS.includes(f.dir)) fail("M.SCHEMA", `frames.${k}.dir 非法：${JSON.stringify(f.dir)}（枚举 ${MOOD_DIRS.join("/")}）`);
+    if (typeof f.hint !== "string" || !f.hint.trim()) fail("M.SCHEMA", `frames.${k} 缺非空 hint（aria 语义）`);
+  }
+  // 覆盖 19/19：目录里每张编号表情都被映射引用至少一次
+  const referenced = new Set();
+  const addRef = (k) => { if (frameNames.includes(k)) referenced.add(k); else fail("M.REF", `映射引用了未登记帧「${k}」`); };
+  const stage = moodMap.stage;
+  if (!stage || typeof stage !== "object" || Array.isArray(stage)) {
+    fail("M.STAGE", "stage 不是对象（8 阶段 × 情绪弧，v2/02 §二）");
+  } else {
+    const stageKeys = Object.keys(stage).sort();
+    if (JSON.stringify(stageKeys) !== JSON.stringify([...STAGES].sort())) {
+      fail("M.STAGE", `stage 键 ${stageKeys.join(",")} ≠ 8 阶段全集`);
+    }
+    for (const [k, list] of Object.entries(stage)) {
+      if (!Array.isArray(list) || list.length < 1 || list.length > 2) {
+        fail("M.STAGE", `stage.${k} 应为 1–2 张，实为 ${JSON.stringify(list)}`);
+        continue;
+      }
+      list.forEach(addRef);
+    }
+  }
+  const ending = moodMap.ending;
+  if (!ending || typeof ending !== "object" || Array.isArray(ending)) {
+    fail("M.ENDING", "ending 不是对象（9 结局各锁 1 张，v2/02 §二）");
+  } else {
+    const endingIds = Array.isArray(endings) ? endings.map((e) => e.id) : [];
+    const mapKeys = Object.keys(ending).sort();
+    if (JSON.stringify(mapKeys) !== JSON.stringify([...endingIds].sort())) {
+      fail("M.ENDING", `ending 键与 endings.json id 全集不一致：${mapKeys.join(",")}`);
+    }
+    const locked = Object.values(ending);
+    for (const k of locked) addRef(k);
+    if (new Set(locked).size !== locked.length) {
+      const dup = locked.filter((k, i) => locked.indexOf(k) !== i);
+      fail("M.ENDING", `终局锁定帧重复：${[...new Set(dup)].join(",")}（9 结局不重复，v2/02 §二）`);
+    }
+  }
+  const lockedLen = ending && typeof ending === "object" && !Array.isArray(ending) ? Object.keys(ending).length : 0;
+  const missing = diskFrames.filter((k) => !frameNames.includes(k));
+  if (missing.length) fail("M.COVER", `映射表缺帧：${missing.join(",")}（覆盖 ${diskFrames.length - missing.length}/${diskFrames.length}）`);
+  moodStats = { covered: diskFrames.length - missing.length, total: diskFrames.length, locked: lockedLen };
+}
+
 // ── 输出 ──
 const out = (s) => process.stdout.write(s + "\n");
 out("数据校验门 · 依据 plan/02（单一定义源）");
@@ -329,11 +401,12 @@ out("=".repeat(56));
 
 const areaOk = (p) => !fails.some((f) => f.startsWith(`[${p}`));
 const lines = [
-  ["FILE", "数据文件 4 份可读且 JSON 合法"],
+  ["FILE", "数据文件 5 份可读且 JSON 合法"],
   ["E", `事件库 ${eventCount} 条：id 唯一 / 枚举合法 / 选项 ≥2 / 偏移口径 / pre 防死锁 / 骨架密度 ≥${SKELETON_MIN_PER_STAGE} / 文案去重`],
   ["B", `birth-map ${birthStats ? `${birthStats.combos}/${BIRTH_COMBOS}` : "—"} 组合覆盖 + 初始值全部落域 [0,100]`],
   ["X", `endings ${endingSummary ? `${endingSummary.conditioned} 条件 + ${endingSummary.fallbackCount} 兜底` : "—"}：schema / 末位兜底 / flag 引用闭合`],
   ["P", `portraits ${portraitFilled}/${PORTRAIT_TYPES.length} 型封闭枚举${WANT_FULL ? " + 80–150 字" : ""}`],
+  ["M", `fish-mood-map ${moodStats ? `覆盖 ${moodStats.covered}/${moodStats.total} 帧 + 终局锁 ${moodStats.locked} 张` : "—"}：19/19 全覆盖 / 类别枚举 / 终局不重复（v2/02 §二）`],
 ];
 for (const [p, label] of lines) out(`${areaOk(p) ? "PASS" : "FAIL"}  ${label}`);
 for (const f of fails) out(`FAIL  ${f}`);

@@ -12,6 +12,7 @@ import {
 } from "../engine/engine";
 import { STAGES, type BirthEnv, type Dims, type RunState, type Stage } from "../engine/model";
 import { clear, hasSaveKey, load, save } from "../storage/storage";
+import { createFishParams, endingFrame, pickChoiceFrame, renderFish, stageFrame, type DeltaDir } from "../viz/fish";
 import { renderCurve } from "../viz/curve";
 import { renderRadar } from "../viz/radar";
 import {
@@ -29,6 +30,8 @@ let root: HTMLElement;
 let state: RunState | null = null;
 let view: View = "start";
 let pendingAftermath: { stage: Stage; ageHint: string; text: string } | null = null;
+// choice 类表情反馈帧(02 §二):表现态,不进存档(schema v1 冻结,刷新续局回待机态)。
+let choiceFeedback: string | null = null;
 
 type Boot = { kind: "fresh" } | { kind: "resume"; state: RunState } | { kind: "corrupt" };
 
@@ -129,7 +132,9 @@ function renderCard(): void {
     ageHint: event.ageHint,
     text: event.text,
     options: event.options.map((o) => o.text),
+    fishRadius: createFishParams(state.dims).orderliness.radius,
   });
+  hydrateFish(choiceFeedback ?? undefined);
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-option]")) {
     btn.addEventListener("click", () => onChoose(Number(btn.dataset.option)));
   }
@@ -143,6 +148,10 @@ function onChoose(index: number): void {
     toNext();
     return;
   }
+  // choice 表情反馈(02 §二):按本次 tf 偏移方向 + 选择前 mood 抽帧,同种子可复现
+  const tfDelta = event.options[index]?.deltas.tf ?? 0;
+  const dir: DeltaDir = tfDelta > 0 ? "pos" : tfDelta < 0 ? "neg" : "neutral";
+  choiceFeedback = pickChoiceFrame(dir, createFishParams(state.dims).mood, state.seed + state.history.length);
   const aftermath = event.options[index]?.aftermath;
   state = applyChoice(state, index);
   persist();
@@ -166,6 +175,7 @@ function renderAftermath(): void {
     ageHint: pendingAftermath.ageHint,
     aftermath: pendingAftermath.text,
   });
+  hydrateFish(choiceFeedback ?? undefined);
   bindContinue();
   bindRestart();
 }
@@ -198,7 +208,9 @@ function renderSummary(): void {
     stage,
     count: stageEntries(state.history, stage).length,
     deltas: stageDeltas(state, stage),
+    fishRadius: createFishParams(state.dims).orderliness.radius,
   });
+  hydrateFish(stageFrame(stage));
   hydrateRadar([dimsAtStageStart(state, stage)]);
   bindContinue();
   bindRestart();
@@ -214,7 +226,9 @@ function renderEnding(): void {
     retrospect: ending.retrospect,
     criticals: criticalChoices(state.history),
     seed: state.seed,
+    fishRadius: createFishParams(state.dims).orderliness.radius,
   });
+  hydrateFish(endingFrame(ending.id));
   hydrateRadar(STAGES.map((s) => dimsAtStageStart(state!, s)));
   const curveSlot = root.querySelector("[data-slot='curve']");
   if (curveSlot) renderCurve(state.history, curveSlot, initialDimsOf(state.env));
@@ -225,6 +239,12 @@ function hydrateRadar(past: readonly Dims[]): void {
   if (!state) return;
   const slot = root.querySelector("[data-slot='radar']");
   if (slot) renderRadar(state.dims, slot, past);
+}
+
+function hydrateFish(frame?: string): void {
+  if (!state) return;
+  const slot = root.querySelector("[data-slot='fish']");
+  if (slot) renderFish(createFishParams(state.dims), slot, frame);
 }
 
 function bindContinue(): void {
@@ -268,6 +288,7 @@ function restart(): void {
   }
   state = null;
   pendingAftermath = null;
+  choiceFeedback = null;
   view = "start";
   render();
 }
