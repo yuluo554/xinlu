@@ -10,7 +10,7 @@
 
 ## 30 秒跑起来
 
-线上地址：GitHub Pages（v1.0.0 发布后在此填入，发布留档见 `plan/05-发布留档.md`）。
+线上地址：**[yuluo554.github.io/xinlu](https://yuluo554.github.io/xinlu/)**（发布留档见 `plan/05-发布留档.md`）。
 
 本地运行只需两条命令（Node ≥ 20）：
 
