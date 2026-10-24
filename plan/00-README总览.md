@@ -15,7 +15,7 @@
 | 02 | [02-数据与口径.md](02-数据与口径.md) | 事件库 schema / 四维口径单一定义 / 存档 schema | ✅ 已定稿 |
 | 03 | [03-模块清单与验收.md](03-模块清单与验收.md) | 6 模块 × 职责 / 契约 / 验收（与 01 §二 条目数收敛） | ✅ 已定稿 |
 | 04 | [04-里程碑任务分解.md](04-里程碑任务分解.md) | M0–M6 任务块 / 验证命令 / 评审门 | ✅ 已定稿 |
-| 05 | [05-发布留档.md](05-发布留档.md) | 发布三件套留档（tag 时点 / tag 后追加 分栏） | ⬜ 待 M6 撰写主体（骨架已建） |
+| 05 | [05-发布留档.md](05-发布留档.md) | 发布三件套留档（tag 时点 / tag 后追加 分栏） | ✅ 已定稿（2026-10-24，tag v1.0.0） |
 | 06 | [06-运维节奏.md](06-运维节奏.md) | 发布后八类缺口轮转 / 归档判据 | ✅ 规则已定稿（backlog 待启用） |
 | — | [backlog.md](backlog.md) | 迭代队列（唯一队列，证据制） | ✅ 已启用（2026-10-24，M4 后按 06 节奏运转；B1 平衡缺口在队） |
 | — | [../DESIGN.md](../DESIGN.md) | 需求澄清记录（AskUserQuestion 结论） | ✅ 已定稿 |
@@ -36,6 +36,7 @@
 | 2026-10-23 | 开源许可 | MIT（仓库根 `LICENSE` 文件，`package.json` license 字段同值） | 无 LICENSE：GitHub 公开传播无授权基础；Apache-2.0：专利条款对本作无增益且文本更重 |
 | 2026-10-23 | 方法论装订 | `ai-tool-project-sprint`：AGENTS.md 锚点 + `tools/check-sprint-layout.mjs` 布局门 + `tools/check-desensitized.mjs` 脱敏门，进 CI layout job | 只靠对话记忆：实测会让交接漏写、状态副本漂移（skill 硬约束③） |
 | 2026-10-24 | 定名（M5 门面阶段决策） | **《心路》正式定名**（与 wordmark / 存档 key `xinlu.save.v1` / package name 一致，产品页随 M5 定稿） | 《人生演化论》《人格工厂》：M0 时已弃；改名将波及存档 key 与全量文档，无增益 |
+| 2026-10-24 | 发布推送通道（M6 实测） | **git push 一律走 SSH:22**（`git@github.com:yuluo554/xinlu.git`，已认证直连）；仓库管理走 gh API（HTTPS API 通路可用） | HTTPS 443 直连：git push 两次实测失败（间歇不通）；gh-proxy 镜像：需第三方中转且 push 凭据传递不便，SSH 可用后无必要；顺延：SSH 可用，不触发 |
 
 ## 招牌动词表（标题/定位宣言的能力名词 → 产出 → 断言；填不出即删词）
 
@@ -72,7 +73,7 @@
 | 同种子两次通关结果全等 | 种子化 RNG 设计 | （引擎性质） | vitest 可复现断言 | ✅（2026-10-24） |
 | 双端响应式 | create-project/前端规范 | 全部界面 | 375/1280px 手动清单 | ✅（2026-10-24） |
 | 演示 GIF | 实玩录屏 | README | `git ls-files` | ✅（2026-10-24，docs/assets/demo.gif，实玩流程 7 帧合成） |
-| 线上可玩（Pages） | M6 部署 | URL | 浏览器实开 | ⬜ 待 M6 部署 |
+| 线上可玩（Pages） | M6 部署 | URL | 浏览器实开 | ✅（2026-10-24，https://yuluo554.github.io/xinlu/ 实开一键通关留痕） |
 
 ## 里程碑总表（DoD 列只能加不能减；要减必须在决策记录留行。状态列与 README 状态表是两处机读副本，改状态必须同步翻齐）
 
@@ -84,7 +85,7 @@
 | M3 | 界面 + 可视化 + 双端响应式 | 375/768/1280px 手动清单全过并留痕；一周目可完整玩通 | ✅（2026-10-24） |
 | M4 | 完整内容：事件密度达标 + 多结局 + 画像文案 | `npm run validate` 全绿；≥3 条不同出生环境全通关实玩留痕；实际事件数回填本档台账 | ✅（2026-10-24） |
 | M5 | 打磨 + 门面（README 产品页 / DEVELOPMENT.md / GIF） | README 门清单（04 §M5）逐项过；全部实物表路径存在 | ✅（2026-10-24） |
-| M6 | 发布：构建→干净环境验证→Pages→CHANGELOG→tag→Release→留档 | **三件套：tag + Release 附产物（dist.zip + sha256）+ plan/05 留档**；Release 说明含五部分；tag 在构建与验证之后 | ⬜ 待 M6 |
+| M6 | 发布：构建→干净环境验证→Pages→CHANGELOG→tag→Release→留档 | **三件套：tag + Release 附产物（dist.zip + sha256）+ plan/05 留档**；Release 说明含五部分；tag 在构建与验证之后 | ✅（2026-10-24，tag v1.0.0 @ 3f64564；Release dist.zip sha256 复核一致；留档 plan/05） |
 
 ## 可选外部门禁
 
