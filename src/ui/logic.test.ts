@@ -5,6 +5,7 @@ import {
   createRun,
   initialDimsOf,
   mbtiLetters,
+  optionAvailable,
   pickEvent,
 } from "../engine/engine";
 import { STAGES, type Ending, type RunState } from "../engine/model";
@@ -19,14 +20,22 @@ import {
 
 const ENV = { era: "90s", place: "小城", mood: "和睦", style: "权威" };
 
-// 确定性选择：按已决事件数奇偶交替，覆盖两条选项路径
+// 确定性选择：按已决事件数奇偶交替，覆盖两条选项路径；首选被资源门槛锁定时回退到首个可用项
 const seeded = (state: RunState): number => state.history.length % 2;
 
 function driveToEnd(start: RunState): RunState {
   let state = start;
   while (state.stageIndex < STAGES.length) {
     const event = pickEvent(state);
-    state = event ? applyChoice(state, seeded(state)) : advanceStage(state);
+    if (!event) {
+      state = advanceStage(state);
+      continue;
+    }
+    const pref = seeded(state);
+    const idx = optionAvailable(state, event, pref)
+      ? pref
+      : event.options.findIndex((_, i) => optionAvailable(state, event, i));
+    state = applyChoice(state, idx);
   }
   return state;
 }

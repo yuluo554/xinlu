@@ -101,3 +101,12 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 | 上游 jpg 留底 | 同上两件原始件 | — | — | 留 `cc0/parchment/` 本地（.gitignore `assets/**/*.jpg` 扩展，原始位图不入 git 纪律延续） |
 
 跟踪策略：`assets/game-icons/`（SVG 原样 + 溯源文本）与 `assets/cc0/**/*.webp`（处理版）入 git；jpg 原始件不入。
+
+### v3-M3'' 增补（2026-10-24，3.4 支线补齐素材）
+
+| 项 | 内容 |
+|---|---|
+| 来源 | Game-Icons 官方全量包**重新下载核验**（`https://game-icons.net/archives/000000/transparent/game-icons.net.svg.zip`，4,168,300 字节与 M2'' 采集一致；直连一次成功）；无新增来源方 |
+| 许可证 | CC-BY 3.0（不变）；`game-icons/LICENSE-game-icons.txt` 已随附；public/credits.md 署名行不变（覆盖全部作者） |
+| 选取 | **增补 68 枚**（love/-4xx、friend/-5xx、health/-6xx 三线新事件每事件 1 枚；全库零重复 243/243）；逐张对文案增行 `docs/v3-M2-icons.md` §v3-M3'' 增补 |
+| 处理 | 原样入库（同 M2''：官方包即最小化产物）；路径 `game-icons/icons/<作者>/<名>.svg`；validate I 区随库扩至 243/243，许可门白名单不变 |

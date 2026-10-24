@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import eventsRaw from "../data/events.json";
 import { createRun, pickEvent, applyChoice, advanceStage, eventById } from "../engine/engine";
 import { STAGES, type RunState } from "../engine/model";
 import { timelineVM, resourceFloats, valueFloats, choiceFloats, LINE_META, RES_META } from "./timeline";
 import { EVENT_ICONS, iconUrl } from "./icons";
+
+const events = eventsRaw as unknown as Array<{ id: string }>;
 
 const ENV = { era: "90s", place: "小城", mood: "和睦", style: "权威" };
 
@@ -96,7 +99,7 @@ describe("choiceFloats（一次选择的合并浮动，资源在前三观在后�
 describe("图标注册表（icons.ts，对照表单源 icon-map.json）", () => {
   it("每个事件的图标名都能解析到真实 SVG URL（vite glob 全量入库）", () => {
     const ids = Object.keys(EVENT_ICONS);
-    expect(ids.length).toBe(175);
+    expect(ids.length).toBe(events.length); // 全库覆盖（随事件库增长同步，不做硬编码）
     for (const id of ids) {
       const name = EVENT_ICONS[id]!;
       expect(name, id).toMatch(/^[a-z0-9-]+$/);

@@ -247,6 +247,16 @@ async function main() {
         if (!switched) throw new Error(`${vp.width} 档:改选出生环境失败`);
       }
 
+      // v3-M3'' 开局屏三入口：随机出生 / 种子码 / 设置（提交开局前断言）
+      const startTools = await cdp.evaluate(`(() => ({
+        random: !!document.querySelector("[data-random-birth]"),
+        seed: !!document.querySelector("[data-seed-form] .seed-input"),
+        settings: !!document.querySelector("[data-settings-open]"),
+      }))()`);
+      if (!startTools.random || !startTools.seed || !startTools.settings) {
+        throw new Error(`${vp.width} 档：开局屏种子码/随机出生/设置入口缺失（${JSON.stringify(startTools)}）`);
+      }
+
       // v3-M2' 时间轴画卷断言:提交开局进入首卡——图标位/状态条/八段轨道在位,mascot 已按 08 §四降级(卡上无鱼)
       await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
       const cardInfo = await cdp.evaluate(`(() => {
@@ -278,6 +288,9 @@ async function main() {
         throw new Error(`${vp.width} 档：轨道宽度 ${cardInfo.railWidth.toFixed(0)}px 不符合${vp.width >= 768 ? "桌面双栏" : "移动窄轨"}口径`);
       }
       if (cardInfo.fishOnCard) throw new Error(`${vp.width} 档：事件卡上仍有 mascot（08 §四降级口径：三类出场，卡由图标承担）`);
+      // v3-M3'' 自定义第 4 槽离线隐藏口径（v3/02 §七）：默认无 Key/未启用 → 槽不渲染
+      const customSlotOffline = await cdp.evaluate(`!!document.querySelector("[data-custom-slot]")`);
+      if (customSlotOffline) throw new Error(`${vp.width} 档：离线状态下自定义槽仍渲染（v3/02 §七隐藏口径）`);
 
       // v2-M3' 场景背景断言:水面滤镜与云层不透明度 = 出生环境映射值(scene.ts 口径)
       const scene = await cdp.evaluate(`(() => {
@@ -306,9 +319,16 @@ async function main() {
       let criticalSeen = 0;
       let floatSeen = false;
       let dotsGrew = false;
+      let relationsChecked = false;
       for (let step = 0; step < MAX_STEPS; step++) {
         const acted = await cdp.evaluate(`(() => {
           if (document.querySelector(".screen-ending")) return "ending";
+          // v3-M3'' 图谱页：首个阶段小结时绕道图谱断言一圈（入口 → 渲染 → 返回）
+          if (!window.__relDone && document.querySelector(".screen-summary [data-relations-open]")) {
+            window.__relDone = true;
+            document.querySelector("[data-relations-open]").click();
+            return "relations";
+          }
           const card = document.querySelector(".screen-card .event-card[data-age-months]");
           const opt = document.querySelector("[data-option]:not([disabled])");
           if (card && opt) {
@@ -330,6 +350,21 @@ async function main() {
         if (acted === "ending") {
           endingSeen = true;
           break;
+        }
+        if (acted === "relations") {
+          const rel = await cdp.evaluate(`(() => ({
+            screen: !!document.querySelector(".screen-relations"),
+            nodes: document.querySelectorAll("[data-relations-chart] svg g").length,
+            edges: document.querySelectorAll("[data-relations-chart] svg line").length,
+            legend: document.querySelectorAll(".rel-legend-item").length,
+          }))()`);
+          if (!rel.screen) throw new Error(`${vp.width} 档：图谱页未渲染`);
+          if (rel.nodes < 3) throw new Error(`${vp.width} 档：图谱节点 ${rel.nodes} < 3（中心 + 父母）`);
+          if (rel.edges < 2) throw new Error(`${vp.width} 档：图谱连线 ${rel.edges} < 2（父母各一线）`);
+          if (rel.legend !== 4) throw new Error(`${vp.width} 档：tag 图例非 4 项（实得 ${rel.legend}）`);
+          await cdp.evaluate(`document.querySelector("[data-relations-back]").click()`);
+          relationsChecked = true;
+          continue;
         }
         if (acted === "card") {
           cardActions++;
@@ -384,6 +419,25 @@ async function main() {
       if (!verdict.radarSvg) throw new Error(`${vp.width} 档：终局雷达未渲染`);
       if (!verdict.fishSvg) throw new Error(`${vp.width} 档：终局 mascot 未渲染`);
       if (!verdict.fishHref) throw new Error(`${vp.width} 档：终局 mascot 表情帧 href 为空`);
+
+      // v3-M3'' 终局三断言：种子码形 / 图谱快照收录 / 点评位（离线 = 预设文案）
+      const m3Ending = await cdp.evaluate(`(() => {
+        const ending = document.querySelector(".screen-ending");
+        return {
+          seedCode: ending?.querySelector("[data-seed-code]")?.textContent?.trim() ?? "",
+          snapshotNodes: ending?.querySelectorAll("[data-relations-snapshot] svg g").length ?? 0,
+          commentary: ending?.querySelector("[data-llm-commentary]")?.textContent?.trim() ?? "",
+        };
+      })()`);
+      if (!/^XL-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/.test(m3Ending.seedCode)) {
+        throw new Error(`${vp.width} 档：终局种子码非法「${m3Ending.seedCode}」（应 XL-XXXX-XXXX）`);
+      }
+      if (m3Ending.snapshotNodes < 4) {
+        throw new Error(`${vp.width} 档：终局图谱快照节点 ${m3Ending.snapshotNodes} < 4（整局消费支线事件后应有父母以外的 NPC 入册）`);
+      }
+      if (m3Ending.commentary.length < 10) {
+        throw new Error(`${vp.width} 档：终局点评位为空（离线应为预设文案）`);
+      }
 
       // v2-M3' 分享卡:终局「保存分享卡」按钮 → 真实下载落盘 → 文件名口径 xinlu-<mbti>-<yyyymmdd>.png
       if (!verdict.shareBtn) throw new Error(`${vp.width} 档：终局分享卡按钮未渲染`);
@@ -473,6 +527,23 @@ async function main() {
         throw new Error(`${vp.width} 档：图鉴返回未回开局屏`);
       }
 
+      // v3-M3'' 设置页：开局屏入口 → 页面渲染（开关默认关）→ 返回
+      if (v === 0) {
+        await cdp.evaluate(`document.querySelector("[data-settings-open]").click()`);
+        const settingsSeen = await cdp.evaluate(`(() => ({
+          screen: !!document.querySelector(".screen-settings"),
+          enabled: document.querySelector(".settings-check input")?.checked ?? null,
+          providers: document.querySelectorAll(".settings-form select[name=provider] option").length,
+        }))()`);
+        if (!settingsSeen.screen) throw new Error(`${vp.width} 档：设置页未渲染`);
+        if (settingsSeen.enabled !== false) throw new Error(`${vp.width} 档：旁路开关默认应为关`);
+        if (settingsSeen.providers < 4) throw new Error(`${vp.width} 档：服务商预设 < 4`);
+        await cdp.evaluate(`document.querySelector("[data-settings-back]").click()`);
+        if (!(await cdp.evaluate("!!document.querySelector('.screen-start')"))) {
+          throw new Error(`${vp.width} 档：设置返回未回开局屏`);
+        }
+      }
+
       results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share, cards: ageSeq.length, ageSpan: `${ageSeq[0]}–${ageSeq[ageSeq.length - 1]}` });
       out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄`);
     }
@@ -514,7 +585,7 @@ async function main() {
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 选项≥3 图标全覆盖 critical分级/状态条/轨道色点/浮动层已断言`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 选项≥3 图标全覆盖 critical分级/状态条/轨道色点/浮动层/图谱页/种子码/自定义槽离线隐藏已断言`);
     }
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
     out("=".repeat(56));

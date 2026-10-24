@@ -207,3 +207,71 @@ describe("monologueOf / monologueBand（02 §二：区间 <35 / 35–65 / >65）
     expect(mid.worldview).not.toBe(high.worldview);
   });
 });
+
+// ── v3-M3'' 3.1 NPC 关系层（02 §五 ▸ M3'' 增补：衰减 0.5 / tag 阈值 / 钳制）──
+import { NPC_SPAWN_BOND, applyBonds, bondGainOf, tagOfBond } from "./values";
+
+describe("bondGainOf（values 轴增益衰减，系数 0.5）", () => {
+  it("values=50 中性基全额入账", () => {
+    expect(bondGainOf(10, 50)).toBe(10);
+    expect(bondGainOf(-15, 50)).toBe(-15);
+  });
+
+  it("values 极值衰减至一半：round(Δ×0.5)", () => {
+    expect(bondGainOf(15, 100)).toBe(8);
+    expect(bondGainOf(15, 0)).toBe(8);
+    expect(bondGainOf(-15, 100)).toBe(-8);
+  });
+
+  it("中段线性：values=60 → ×0.9", () => {
+    expect(bondGainOf(10, 60)).toBe(9);
+  });
+});
+
+describe("tagOfBond（tag 翻转阈值）", () => {
+  it("阈值边界四态", () => {
+    expect(tagOfBond(0)).toBe("决裂");
+    expect(tagOfBond(29)).toBe("决裂");
+    expect(tagOfBond(30)).toBe("疏离");
+    expect(tagOfBond(59)).toBe("疏离");
+    expect(tagOfBond(60)).toBe("亲密");
+    expect(tagOfBond(89)).toBe("亲密");
+    expect(tagOfBond(90)).toBe("羁绊");
+    expect(tagOfBond(100)).toBe("羁绊");
+  });
+});
+
+describe("applyBonds（入册 / 衰减 / 钳制 / 重 tag）", () => {
+  it("未在册 NPC 以中位 50 入册后应用增量（中性基无衰减）", () => {
+    const state = createRun(ENV, 42);
+    const next = applyBonds(state, { partner: 12 });
+    const npc = next.npcs.find((n) => n.id === "partner");
+    expect(next.npcs.length).toBe(state.npcs.length + 1);
+    expect(npc?.bond).toBe(NPC_SPAWN_BOND + 12);
+    expect(npc?.tag).toBe("亲密");
+  });
+
+  it("已入册 NPC 增量按当前 values 轴衰减（values=100 → 减半）", () => {
+    const state = { ...createRun(ENV, 42), values3: { worldview: 50, outlook: 50, values: 100 } };
+    const next = applyBonds(state, { mother: 15 });
+    expect(next.npcs.find((n) => n.id === "mother")?.bond).toBe(70 + 8);
+  });
+
+  it("bond 钳制 [0,100]；tag 随钳制翻转", () => {
+    const base = createRun(ENV, 42);
+    const high = applyBonds(base, { mother: 100 });
+    expect(high.npcs.find((n) => n.id === "mother")?.bond).toBe(100);
+    expect(high.npcs.find((n) => n.id === "mother")?.tag).toBe("羁绊");
+    const low = applyBonds(base, { mother: -200 });
+    expect(low.npcs.find((n) => n.id === "mother")?.bond).toBe(0);
+    expect(low.npcs.find((n) => n.id === "mother")?.tag).toBe("决裂");
+  });
+
+  it("空表 → 原状态返回；应用增量不改入参", () => {
+    const state = createRun(ENV, 42);
+    expect(applyBonds(state, {})).toBe(state);
+    const before = JSON.stringify(state.npcs);
+    applyBonds(state, { mother: 15 });
+    expect(JSON.stringify(state.npcs)).toBe(before);
+  });
+});

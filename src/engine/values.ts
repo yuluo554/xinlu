@@ -148,8 +148,52 @@ export function rescueOpen(state: RunState, res: ResKey): boolean {
   return state.resources[res] < RESCUE_TRIGGER;
 }
 
-// ── 线进度（02 §四）──
+// ── NPC 关系层（v3/02 §五 ▸ M3'' 增补：bondDeltas 衰减 / tag 阈值 / 钳制）──
 
+/** 新 NPC 入册时的初始 bond（中位）。 */
+export const NPC_SPAWN_BOND = 50;
+/** values 轴影响增益衰减的最大深度（02 §五：系数 0.5 单源本档）。 */
+export const BOND_DECAY = 0.5;
+
+/**
+ * bond 增益的 values 轴衰减：增益 × (1 − 0.5 × |values−50| / 50)。
+ * 价值观居中（50）时全额入账；越接近任一极值（极致原则或极致共情），
+ * 关系增益越钝感，极端时衰减至一半。取整沿 M1'' 换算先例 = 远离零（符号对称）。
+ */
+export function bondGainOf(delta: number, valuesAxis: number): number {
+  const factor = 1 - BOND_DECAY * (Math.abs(valuesAxis - 50) / 50);
+  return Math.sign(delta) * Math.round(Math.abs(delta) * factor);
+}
+
+/** tag 翻转阈值（02 §五 ▸ M3'' 增补：<30 决裂 / 30–59 疏离 / 60–89 亲密 / ≥90 羁绊）。 */
+export function tagOfBond(bond: number): import("./model").NpcTag {
+  if (bond >= 90) return "羁绊";
+  if (bond >= 60) return "亲密";
+  if (bond >= 30) return "疏离";
+  return "决裂";
+}
+
+/**
+ * 关系增量入账：未在册 NPC 以 NPC_SPAWN_BOND 入册后按序应用增量；
+ * bond 钳制 [0,100] 整数，tag 随 bond 重算。返回新状态，不改入参。
+ */
+export function applyBonds(state: RunState, bondDeltas: Record<string, number>): RunState {
+  const entries = Object.entries(bondDeltas).filter(([, v]) => typeof v === "number" && v !== 0);
+  if (entries.length === 0) return state;
+  const npcs = state.npcs.map((n) => ({ ...n }));
+  for (const [id, raw] of entries) {
+    let npc = npcs.find((n) => n.id === id);
+    if (!npc) {
+      npc = { id, bond: NPC_SPAWN_BOND, tag: tagOfBond(NPC_SPAWN_BOND) };
+      npcs.push(npc);
+    }
+    npc.bond = clampInt(npc.bond + bondGainOf(raw, state.values3.values));
+    npc.tag = tagOfBond(npc.bond);
+  }
+  return { ...state, npcs };
+}
+
+// ── 线进度（02 §四）──
 /** 事件的线进度增益：rescue 恒 0；缺省 context 8 / critical 15；fate 无进度不入账。 */
 export function lineGainOf(line: LineKey, type: EventType, lineGain?: number): number {
   if (line === "fate") return 0;
@@ -177,6 +221,39 @@ export function lineStateOf(progress: number): LineState {
   if (progress >= 30) return "平顺";
   if (progress >= 1) return "中断";
   return "未启";
+}
+
+// ── 自定义槽增量钳制（02 §七：LLM 产出走本地钳制后才入状态；口径与 validate 同抄 02 §二/§三）──
+
+const DELTAS3_CAP = { main: 3, context: 3, critical: 8, rescue: 3 } as const;
+const RES_CAP = { main: 10, context: 10, critical: 25, rescue: 25 } as const;
+
+/**
+ * LLM 归一产出的增量钳制：逐轴截到该事件类型的口径上限，零偏移删键。
+ * 反向标签相抵（和为 0）也在此删净，保证入状态前无零增量键。
+ */
+export function clampCustomDeltas(
+  deltas3: Deltas3,
+  resourceDeltas: ResourceDeltas,
+  type: EventType,
+): { deltas3: Deltas3; resourceDeltas: ResourceDeltas } {
+  const cap3 = DELTAS3_CAP[type] ?? 3;
+  const capR = RES_CAP[type] ?? 10;
+  const out3: Deltas3 = {};
+  for (const axis of VALUES_AXES) {
+    const v = deltas3[axis];
+    if (typeof v !== "number" || v === 0) continue;
+    const clamped = Math.max(-cap3, Math.min(cap3, Math.round(v)));
+    if (clamped !== 0) out3[axis] = clamped;
+  }
+  const outR: ResourceDeltas = {};
+  for (const key of RES_KEYS) {
+    const v = resourceDeltas[key];
+    if (typeof v !== "number" || v === 0) continue;
+    const clamped = Math.max(-capR, Math.min(capR, Math.round(v)));
+    if (clamped !== 0) outR[key] = clamped;
+  }
+  return { deltas3: out3, resourceDeltas: outR };
 }
 
 // ── 非选项漂移（02 §二：stageDrift 数据表）──

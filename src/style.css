@@ -1217,3 +1217,164 @@ body {
 .gallery-record .gallery-meta {
   flex-shrink: 0;
 }
+
+/* ── v3-M3'' 关系图谱（plan/v3/03 §4）── */
+
+.options-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.relations-slot {
+  max-width: 420px;
+  margin: 0 auto;
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+  padding: 8px;
+}
+
+.relations-slot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.relations-snapshot {
+  max-width: 420px;
+  margin: 0 auto;
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+  padding: 8px;
+}
+
+.relations-snapshot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rel-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+  margin: 12px 0 4px;
+  font-size: 0.85rem;
+  color: var(--ink-3);
+}
+
+.rel-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rel-legend-item i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* ── v3-M3'' 开局屏种子码工具 ── */
+
+.seed-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin: 0 0 18px;
+}
+
+.seed-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.seed-input {
+  width: 220px;
+  max-width: 60vw;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #c9bda4);
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+  font: inherit;
+  color: inherit;
+}
+
+/* ── v3-M3'' AI 自定义第 4 槽（离线隐藏）── */
+
+.custom-slot {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line, #c9bda4);
+}
+
+.custom-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--line, #c9bda4);
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+  font: inherit;
+  color: inherit;
+}
+
+.custom-error {
+  margin-top: 8px;
+}
+
+/* ── v3-M3'' 终局 AI 点评 ── */
+
+.ending-commentary {
+  max-width: 560px;
+  margin: 10px auto 0;
+  padding: 10px 16px;
+  border-left: 3px solid var(--accent, #b0873a);
+  background: var(--surface-2);
+  border-radius: 0 var(--radius-item) var(--radius-item) 0;
+  font-size: 0.95rem;
+  color: var(--ink-2, #5d4f3a);
+  text-align: left;
+}
+
+/* ── v3-M3'' 设置页 ── */
+
+.settings-form {
+  max-width: 480px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+  text-align: left;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.92rem;
+}
+
+.settings-form input,
+.settings-form select {
+  padding: 8px 12px;
+  border: 1px solid var(--line, #c9bda4);
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+  font: inherit;
+  color: inherit;
+}
+
+.settings-check {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px !important;
+}

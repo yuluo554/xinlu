@@ -18,6 +18,9 @@ import { DIM_SHORT, STAGE_LABEL, type ChoiceReview } from "./logic";
 import { ENDING_META, GALLERY_TYPES, type GalleryData } from "./gallery";
 import { LINE_META, RES_META, RES_KEYS, type Floater, type TimelineSegment } from "./timeline";
 import { iconStyle } from "./icons";
+import { NPC_PROFILES, TAG_COLORS, renderRelations } from "./relations";
+import { PROVIDERS, type LlmSettings } from "../llm/config";
+import type { RunState } from "../engine/model";
 // 场景氛围素材 URL(vite 静态 import → dist hash 文件名;水面/云层 = CC-BY Open Ocean 组,图标 = Simple Worlds 提取件)
 import waterUrl from "../../assets/web-ready/open-ocean/Other/WikndWakerWater_Background.webp";
 import cloudsUrl from "../../assets/web-ready/open-ocean/Other/Clouds_Background.webp";
@@ -121,9 +124,17 @@ export function startScreen(options: Record<keyof BirthEnv, string[]>, error?: s
         ${error ? `<p class="form-error">${esc(error)}</p>` : ""}
         <button type="submit" class="btn btn-primary btn-start">开始这一生</button>
       </form>
+      <div class="seed-tools">
+        <button type="button" class="btn btn-ghost" data-random-birth>随机出生</button>
+        <form class="seed-form" data-seed-form>
+          <input class="seed-input" name="seedCode" placeholder="或输入种子码，重走同一段人生" autocomplete="off" spellcheck="false" aria-label="种子码">
+          <button type="submit" class="btn btn-ghost">以此码开局</button>
+        </form>
+      </div>
       <p class="fine-print">单机运行，进度保存在本机浏览器，无需网络与账号。</p>
       <p class="fine-print about-links">
         <button type="button" class="btn-ghost" data-gallery-open>人格图鉴</button>
+        <button type="button" class="btn-ghost" data-settings-open>设置</button>
         <a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a>
       </p>
     </section>`;
@@ -145,6 +156,9 @@ export function cardAskScreen(vm: {
   resources: Resources;
   bump: readonly ResKey[];
   floaters: readonly Floater[];
+  /** AI 自定义第 4 槽（v3/02 §七）：仅旁路可用时渲染（离线隐藏口径）。 */
+  custom: boolean;
+  customError?: string;
 }): string {
   const line = LINE_META[vm.line];
   const head = `
@@ -177,6 +191,15 @@ export function cardAskScreen(vm: {
                 )
                 .join("")}
             </div>
+            ${
+              vm.custom
+                ? `<div class="custom-slot" data-custom-slot>
+              <input class="custom-input" name="customAction" placeholder="都不合意？写下你的行动，请 AI 裁决" maxlength="120" aria-label="自定义行动">
+              <button type="button" class="btn btn-ghost" data-custom-submit>问 AI</button>
+            </div>
+            ${vm.customError ? `<p class="form-error custom-error">${esc(vm.customError)}</p>` : ""}`
+                : ""
+            }
           </article>
         </div>
       </div>
@@ -241,7 +264,10 @@ export function summaryScreen(vm: {
         <div class="radar-slot" data-slot="radar"></div>
         <div class="deltas">${items}</div>
       </div>
-      <button type="button" class="btn btn-primary" data-continue>继续人生</button>
+      <div class="options options-row">
+        <button type="button" class="btn btn-primary" data-continue>继续人生</button>
+        <button type="button" class="btn btn-ghost" data-relations-open>关系图谱</button>
+      </div>
     </section>`;
 }
 
@@ -251,11 +277,12 @@ export function endingScreen(vm: {
   text: string;
   retrospect: string[];
   criticals: ChoiceReview[];
-  seed: number;
+  seedCode: string;
   resources: Resources;
   fishRadius: number;
   backdrop: SceneBackdrop;
   gallery: GalleryHint | null;
+  relations: RunState["npcs"];
 }): string {
   const criticals =
     vm.criticals.length > 0
@@ -274,6 +301,7 @@ export function endingScreen(vm: {
       <p class="ending-type">${esc(vm.letters)}</p>
       <div class="fish-slot fish-slot-ending" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
       <p class="ending-text">${esc(vm.text)}</p>
+      <div class="ending-commentary" data-llm-commentary aria-live="polite"></div>
       <div class="viz-row two">
         <div class="radar-slot" data-slot="radar"></div>
         <div class="curve-slot" data-slot="curve"></div>
@@ -282,7 +310,9 @@ export function endingScreen(vm: {
       <ul class="retrospect">${vm.retrospect.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>
       <h3>关键抉择</h3>
       <div class="criticals">${criticals}</div>
-      <p class="fine-print">本局种子 ${vm.seed}——同种子同选择，结果可复现。</p>
+      <h3>同行的人</h3>
+      <div class="relations-snapshot" data-relations-snapshot>${renderRelations(vm.relations)}</div>
+      <p class="fine-print">本局种子码 <span data-seed-code>${esc(vm.seedCode)}</span>——同码同人生；想重走或分享，开局屏输入这个码即可。</p>
       ${galleryHintLine(vm.gallery)}
       <p class="fine-print about-links"><a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a></p>
       <button type="button" class="btn btn-primary" data-share>保存分享卡</button>
@@ -351,5 +381,57 @@ export function corruptScreen(): string {
       <h2>存档无法读取</h2>
       <p class="muted">本机的存档似乎损坏了。我们不会动它的内容——你可以现在重新开始一段新的人生。</p>
       <button type="button" class="btn btn-primary" data-restart>重新开始</button>
+    </section>`;
+}
+
+/** 关系图谱页（v3/03 §4）：环形图谱 + tag 图例；返回目标由 app 层决定（小结或终局）。 */
+export function relationsScreen(): string {
+  const legend = Object.entries(TAG_COLORS)
+    .map(([tag, color]) => `<span class="rel-legend-item"><i style="background:${color}"></i>${tag}</span>`)
+    .join("");
+  const known = Object.values(NPC_PROFILES).filter((p) => p.line !== "fate").length;
+  return `
+    <section class="screen screen-relations">
+      <h2>关系图谱</h2>
+      <p class="muted">一圈同行的人。线越粗，羁绊越深；颜色是现在的关系。</p>
+      <div class="relations-slot" data-relations-chart></div>
+      <div class="rel-legend" aria-hidden="true">${legend}</div>
+      <p class="fine-print">图谱会随你的人生长出新名字（本段人生可能遇见 ${known} 位路人与父母同行）。</p>
+      <button type="button" class="btn btn-primary" data-relations-back>返回</button>
+    </section>`;
+}
+
+/** 设置页（v3/02 §七，D2=a）：BYO Key 明文存本机；未启用时全部字段不生效（离线口径）。 */
+export function settingsScreen(vm: { settings: LlmSettings; error?: string }): string {
+  const providerOptions = PROVIDERS.map(
+    (p) => `<option value="${esc(p.id)}"${p.id === vm.settings.provider ? " selected" : ""}>${esc(p.label)}</option>`,
+  ).join("");
+  return `
+    <section class="screen screen-settings">
+      <h2>设置</h2>
+      <form class="settings-form" data-settings-form>
+        <label class="settings-check">
+          <input type="checkbox" name="enabled"${vm.settings.enabled ? " checked" : ""}>
+          启用 AI 旁路（可选；不启用或离线时，游戏行为与 v2 完全一致）
+        </label>
+        <label>服务商
+          <select name="provider">${providerOptions}</select>
+        </label>
+        <label>接口地址（Base URL，OpenAI 兼容）
+          <input name="baseUrl" value="${esc(vm.settings.baseUrl)}" spellcheck="false">
+        </label>
+        <label>API Key
+          <input name="apiKey" type="password" value="${esc(vm.settings.apiKey)}" autocomplete="off" spellcheck="false">
+        </label>
+        <label>模型名
+          <input name="model" value="${esc(vm.settings.model)}" placeholder="例如 deepseek-chat" spellcheck="false">
+        </label>
+        <p class="fine-print">Key 以明文保存在本机浏览器，仅在你启用旁路后，为自定义行动裁决、事件变体与终局点评向所配服务商发起请求。请勿在公共设备填写；判定核心（人生演化本身）永不过网。</p>
+        ${vm.error ? `<p class="form-error">${esc(vm.error)}</p>` : ""}
+        <div class="options-row">
+          <button type="submit" class="btn btn-primary">保存</button>
+          <button type="button" class="btn btn-ghost" data-settings-back>返回</button>
+        </div>
+      </form>
     </section>`;
 }

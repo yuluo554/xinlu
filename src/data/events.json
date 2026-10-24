@@ -5626,6 +5626,7 @@
         "resourceDeltas": {
           "mood": 2
         },
+        "bondDeltas": { "teacher": 4 },
         "aftermath": "老师笑着给了你一颗星。那页作业后来被家长会传阅，标题是「想象力的一课」。"
       },
       {
@@ -5636,7 +5637,8 @@
         },
         "resourceDeltas": {
           "mood": 1
-        }
+        },
+        "bondDeltas": { "teacher": 8 }
       },
       {
         "text": "干脆连着画一排躺着的 8——躺着的看起来像一列小火车",
@@ -5646,7 +5648,8 @@
         },
         "resourceDeltas": {
           "mood": 1
-        }
+        },
+        "bondDeltas": { "teacher": 2 }
       }
     ]
   },
@@ -5924,6 +5927,7 @@
         "resourceDeltas": {
           "mood": 2
         },
+        "bondDeltas": { "teacher": 8 },
         "aftermath": "你讲了八分钟，超时被提醒两次。下课有三个同学找你借恐龙书。"
       },
       {
@@ -5934,7 +5938,8 @@
         },
         "resourceDeltas": {
           "mood": 2
-        }
+        },
+        "bondDeltas": { "teacher": 4 }
       },
       {
         "text": "把名额换给别人，回家把这件事写进日记——也算讲了",
@@ -5967,6 +5972,7 @@
           "mood": 1,
           "health": -1
         },
+        "bondDeltas": { "teacher": 10 },
         "aftermath": "集训第一年你没进过前二十。第三年你拿了区一等奖，奖状底下压着那张考砸的名单。"
       },
       {
@@ -5977,7 +5983,8 @@
         },
         "resourceDeltas": {
           "mood": 1
-        }
+        },
+        "bondDeltas": { "teacher": 6 }
       },
       {
         "text": "放弃了——周六属于楼下的空地和那群伙伴",
@@ -6230,6 +6237,7 @@
           "mood": 1,
           "health": -1
         },
+        "bondDeltas": { "teacher": 9 },
         "aftermath": "头两个月你排名垫底。半年后你追进了中游，比原来班里任何一个名次都硬。"
       },
       {
@@ -6241,6 +6249,7 @@
         "resourceDeltas": {
           "mood": 2
         },
+        "bondDeltas": { "teacher": 4 },
         "aftermath": "高考你考得不错。多年后你复盘：留下来的那一年，你反而把基础打穿了一层。"
       },
       {
@@ -6252,6 +6261,7 @@
         "resourceDeltas": {
           "mood": 1
         },
+        "bondDeltas": { "teacher": 7 },
         "aftermath": "你按着那张课表自学了一年。两边的老师后来都知道：隔壁班有个人在远程听课。"
       }
     ]
@@ -6540,6 +6550,7 @@
         "resourceDeltas": {
           "mood": 1
         },
+        "bondDeltas": { "mentor": 9 },
         "aftermath": "师傅看完那页纸，把你的两个疑问带进了周会。其中一个，后来成了项目的立项理由。"
       },
       {
@@ -6550,7 +6561,8 @@
         },
         "resourceDeltas": {
           "mood": 1
-        }
+        },
+        "bondDeltas": { "mentor": 5 }
       },
       {
         "text": "翻了个开头就搁下了——「过期档案，看了也白看」",
@@ -6560,7 +6572,8 @@
         },
         "resourceDeltas": {
           "mood": 1
-        }
+        },
+        "bondDeltas": { "mentor": -6 }
       }
     ]
   },
@@ -6862,6 +6875,7 @@
           "money": 1,
           "health": -1
         },
+        "bondDeltas": { "mentor": 9 },
         "aftermath": "你上了。那三个月的履职计划贴在工位上，划掉的每一行都算数。"
       },
       {
@@ -6872,7 +6886,8 @@
         },
         "resourceDeltas": {
           "mood": 1
-        }
+        },
+        "bondDeltas": { "mentor": 3 }
       },
       {
         "text": "提了个折中：当「技术主管」不当「行政主管」——只管方案不管考勤",
@@ -6883,7 +6898,8 @@
         "resourceDeltas": {
           "mood": 1,
           "money": 1
-        }
+        },
+        "bondDeltas": { "mentor": 6 }
       }
     ]
   },
@@ -7247,7 +7263,8 @@
         },
         "resourceDeltas": {
           "mood": 2
-        }
+        },
+        "bondDeltas": { "mentor": 10 }
       }
     ]
   },
@@ -7748,6 +7765,1987 @@
           "health": -2
         },
         "aftermath": "你熬过来了，但那三周瘦了五斤。很多年后你跟人说：那一次，其实可以不用一个人扛的。"
+      }
+    ]
+  },
+  {
+    "id": "infant-401",
+    "stage": "infant",
+    "type": "context",
+    "line": "love",
+    "ageHint": "6个月",
+    "ageMonths": 6,
+    "text": "妈妈要回去上班了。早上她换好外套，蹲在摇篮边跟你说了很久的话，你没听懂，只看见她眼睛红了。",
+    "options": [
+      {
+        "text": "哭得撕心裂肺，直到她又把你抱起来",
+        "deltas3": { "values": 1, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "mother": 8 },
+        "aftermath": "她迟到半小时，被领导说了几句。那天晚上你睡得特别沉，她也是。"
+      },
+      {
+        "text": "伸出小手挥了挥，像跟她说再见",
+        "deltas3": { "worldview": 1, "outlook": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 5 },
+        "aftermath": "外婆逢人就夸这孩子乖。她却在楼道里站了好久才下楼。"
+      },
+      {
+        "text": "抓住外婆的手指，把注意力交给新的人",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 2 }
+      }
+    ]
+  },
+  {
+    "id": "infant-402",
+    "stage": "infant",
+    "type": "context",
+    "line": "love",
+    "ageHint": "1岁8个月",
+    "ageMonths": 20,
+    "text": "过年，一屋子亲戚轮流抱你。有人胡子扎人，有人香水呛鼻，你被传了一圈。",
+    "options": [
+      {
+        "text": "大哭抗议，谁也抱不成",
+        "deltas3": { "worldview": -1, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "mother": 5 }
+      },
+      {
+        "text": "见谁都笑，人人夸你嘴甜",
+        "deltas3": { "values": 2, "worldview": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 3 }
+      },
+      {
+        "text": "只肯赖在妈妈肩上，谁也不给",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "mother": 8 }
+      }
+    ]
+  },
+  {
+    "id": "infant-403",
+    "stage": "infant",
+    "type": "context",
+    "line": "love",
+    "ageHint": "2岁6个月",
+    "ageMonths": 30,
+    "text": "妈妈病了，躺在床上，说话的声音很小。你第一次踮脚往床上看，有点怕。",
+    "options": [
+      {
+        "text": "把最心爱的布偶塞进她手里",
+        "deltas3": { "values": 3, "outlook": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 10 },
+        "aftermath": "布偶陪她躺了三天。多年后她还记得：那是你第一次心疼人。"
+      },
+      {
+        "text": "学着大人的样子拍拍她的背",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 8 }
+      },
+      {
+        "text": "躲在爸爸身后偷偷看",
+        "deltas3": { "worldview": 1, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "mother": 2, "father": 4 }
+      }
+    ]
+  },
+  {
+    "id": "toddler-401",
+    "stage": "toddler",
+    "type": "context",
+    "line": "love",
+    "ageHint": "4岁",
+    "ageMonths": 48,
+    "text": "放学铃响过了，小朋友一个个被接走。你坐在门口的小板凳上，数蚂蚁。",
+    "options": [
+      {
+        "text": "眼泪在眼眶里打转，但忍住不掉",
+        "deltas3": { "outlook": -1, "worldview": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "mother": 2 }
+      },
+      {
+        "text": "冲老师大哭，让全世界都知道",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 4, "father": 3 }
+      },
+      {
+        "text": "跟门卫爷爷聊天，等妈妈来",
+        "deltas3": { "worldview": 2 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 3 },
+        "aftermath": "门卫爷爷教你认了传达室窗台上的三盆花。妈妈赶到时，你已经混到一把瓜子。"
+      }
+    ]
+  },
+  {
+    "id": "toddler-402",
+    "stage": "toddler",
+    "type": "context",
+    "line": "love",
+    "ageHint": "5岁",
+    "ageMonths": 60,
+    "text": "半夜你被吵架声吵醒。门缝里漏进一条光，你抱着被子听不清词，只听得出气氛很坏。",
+    "options": [
+      {
+        "text": "推门进去，一手拉住一个",
+        "deltas3": { "values": 3, "worldview": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "mother": 6, "father": 6 },
+        "aftermath": "吵架戛然而止。后来他们都说，是那年五岁的你先低头的。"
+      },
+      {
+        "text": "把头蒙进被子里，假装听不见",
+        "deltas3": { "outlook": 2, "worldview": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "mother": 1, "father": 1 }
+      },
+      {
+        "text": "第二天分别给两人倒水",
+        "deltas3": { "values": 2, "outlook": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "mother": 5, "father": 5 }
+      }
+    ]
+  },
+  {
+    "id": "toddler-403",
+    "stage": "toddler",
+    "type": "context",
+    "line": "love",
+    "ageHint": "5岁10个月",
+    "ageMonths": 70,
+    "text": "爸爸出差一个月。每天晚饭桌上的椅子空着，妈妈给他留的碗你也认得。",
+    "options": [
+      {
+        "text": "每天在日历上画一个叉",
+        "deltas3": { "worldview": 1, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "father": 7 },
+        "aftermath": "画到第二十三天，钥匙在门锁里转动了。你扑过去的姿势，把日历都撞掉了。"
+      },
+      {
+        "text": "让妈妈开视频，给他看你的新玩具",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "father": 6 }
+      },
+      {
+        "text": "说不想念，假装无所谓",
+        "deltas3": { "outlook": 1, "worldview": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "father": 3 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-401",
+    "stage": "childhood",
+    "type": "context",
+    "line": "love",
+    "ageHint": "7岁",
+    "ageMonths": 84,
+    "text": "你翻出美术课剩下的皱纹纸，想给妈妈做一条生日项链。做到一半，胶水粘了满手。",
+    "options": [
+      {
+        "text": "坚持做完，粘手也粘得值",
+        "deltas3": { "values": 2, "worldview": 1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "mother": 9 },
+        "aftermath": "她戴着那条歪歪扭扭的纸项链上了一整天班，逢人就说是限量款。"
+      },
+      {
+        "text": "请爸爸帮忙收尾",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 7, "father": 5 }
+      },
+      {
+        "text": "半途改画一张贺卡",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 6 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-402",
+    "stage": "childhood",
+    "type": "context",
+    "line": "love",
+    "ageHint": "9岁",
+    "ageMonths": 108,
+    "text": "爸妈冷战第三天。饭桌上只有筷子碰碗的声音，你夹的菜不知道该往谁碗里放。",
+    "options": [
+      {
+        "text": "轮流给两个人夹菜，谁也不偏",
+        "deltas3": { "values": 3, "worldview": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "mother": 7, "father": 7 },
+        "aftermath": "第三天晚上，妈妈先开的口：还是孩子懂事。饭桌上的声音终于多于一种。"
+      },
+      {
+        "text": "躲回房间写作业，装作不知道",
+        "deltas3": { "outlook": 1, "worldview": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "mother": 2, "father": 2 }
+      },
+      {
+        "text": "假装肚子疼，逼他们一起送你去医院",
+        "deltas3": { "values": -1, "outlook": 1 },
+        "resourceDeltas": { "mood": -1, "health": -1 },
+        "bondDeltas": { "mother": 5, "father": 5 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-403",
+    "stage": "childhood",
+    "type": "context",
+    "line": "love",
+    "ageHint": "10岁6个月",
+    "ageMonths": 126,
+    "text": "影楼搞活动，全家拍一张全家福。拍照师傅喊了三遍'笑一笑'，爸爸的表情还是僵的。",
+    "options": [
+      {
+        "text": "讲个笑话逗全场",
+        "deltas3": { "values": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "mother": 6, "father": 6 },
+        "aftermath": "照片里所有人笑得东倒西歪。那张相片在客厅挂了很多年，成了逢年过节的保留节目。"
+      },
+      {
+        "text": "规规矩矩站好，配合大人",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 5, "father": 5 }
+      },
+      {
+        "text": "偷偷对镜头做鬼脸",
+        "deltas3": { "worldview": 1, "outlook": -1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "mother": 4, "father": 4 }
+      }
+    ]
+  },
+  {
+    "id": "teen-401",
+    "stage": "teen",
+    "type": "context",
+    "line": "love",
+    "ageHint": "13岁8个月",
+    "ageMonths": 164,
+    "text": "同桌传来的草稿纸角上，画了一个歪歪的笑脸。你的心跳快了一拍，笔尖停在半空。",
+    "options": [
+      {
+        "text": "画个更大的笑脸传回去",
+        "deltas3": { "values": 2, "worldview": 1 },
+        "resourceDeltas": { "mood": 3 },
+        "bondDeltas": { "partner": 10 },
+        "aftermath": "一来一回，草稿纸写满两页。那学期你俩的成绩，一起往上爬了十名。"
+      },
+      {
+        "text": "假装没看见，继续做题",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "partner": 4 }
+      },
+      {
+        "text": "传回去时加一句'别闹，听课'",
+        "deltas3": { "outlook": 1, "worldview": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "partner": 6 }
+      }
+    ]
+  },
+  {
+    "id": "teen-402",
+    "stage": "teen",
+    "type": "context",
+    "line": "love",
+    "ageHint": "15岁2个月",
+    "ageMonths": 182,
+    "text": "你俩在走廊说话被班主任看见了。'影响学习'四个字，第二天就传遍了全班。",
+    "options": [
+      {
+        "text": "大大方方承认：我们是朋友",
+        "deltas3": { "outlook": -2, "worldview": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "partner": 8 }
+      },
+      {
+        "text": "从此绕着走，纸条也断了",
+        "deltas3": { "outlook": 1, "worldview": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "partner": -6 }
+      },
+      {
+        "text": "把流言当耳旁风，该怎么处还怎么处",
+        "deltas3": { "values": 1, "outlook": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "partner": 10 }
+      }
+    ]
+  },
+  {
+    "id": "teen-403",
+    "stage": "teen",
+    "type": "context",
+    "line": "love",
+    "ageHint": "16岁6个月",
+    "ageMonths": 198,
+    "text": "志愿表交上去的前一晚，你俩在天台看城市的灯。那边问：报同一个城市吗？",
+    "options": [
+      {
+        "text": "报同一个城市",
+        "deltas3": { "values": 2, "outlook": -2 },
+        "resourceDeltas": { "mood": 3, "money": -1 },
+        "bondDeltas": { "partner": 12 },
+        "aftermath": "那晚的风很凉，你俩的心事很热。志愿表上，两个名字后面是同一座城。"
+      },
+      {
+        "text": "我想去更远的城市看看",
+        "deltas3": { "worldview": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "partner": -4 }
+      },
+      {
+        "text": "让我再想想",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "partner": 2 }
+      }
+    ]
+  },
+  {
+    "id": "youth-401",
+    "stage": "youth",
+    "type": "context",
+    "line": "love",
+    "ageHint": "20岁2个月",
+    "ageMonths": 242,
+    "text": "那个人又出现在你常去的自习室，占了你旁边的位置，桌上放着两杯奶茶。",
+    "options": [
+      {
+        "text": "坐过去，把话说明白",
+        "deltas3": { "values": 2, "outlook": -2 },
+        "resourceDeltas": { "mood": 3 },
+        "bondDeltas": { "partner": 10 },
+        "aftermath": "话说明白只用了十分钟，奶茶凉了都没喝完。后来那家店成了你们的据点。"
+      },
+      {
+        "text": "装作没注意，第二天换了座位",
+        "deltas3": { "outlook": 1, "worldview": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "partner": -5 }
+      },
+      {
+        "text": "收下奶茶，先当朋友处着",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "partner": 6 }
+      }
+    ]
+  },
+  {
+    "id": "youth-402",
+    "stage": "youth",
+    "type": "context",
+    "line": "love",
+    "ageHint": "22岁",
+    "ageMonths": 264,
+    "text": "那边去了另一座城市。视频里说'这边下雨了'，你抬头看自己窗外的太阳。",
+    "options": [
+      {
+        "text": "买周五晚上的票，月月见面",
+        "deltas3": { "outlook": -2, "values": 1 },
+        "resourceDeltas": { "mood": 2, "money": -4 },
+        "bondDeltas": { "partner": 9 }
+      },
+      {
+        "text": "把想念写成长消息，攒着一起发",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "partner": 6 }
+      },
+      {
+        "text": "感情淡了就淡了，各自往前",
+        "deltas3": { "outlook": 1, "worldview": -1 },
+        "resourceDeltas": { "mood": -3 },
+        "bondDeltas": { "partner": -8 }
+      }
+    ]
+  },
+  {
+    "id": "youth-403",
+    "stage": "youth",
+    "type": "context",
+    "line": "love",
+    "ageHint": "23岁6个月",
+    "ageMonths": 282,
+    "text": "你们租了第一套一起住的房子。为'牙膏从哪头挤'和'外卖谁下单'，磨合了整整两周。",
+    "options": [
+      {
+        "text": "立家务轮值表，白纸黑字",
+        "deltas3": { "worldview": -1, "values": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "partner": 8 }
+      },
+      {
+        "text": "都让一步，糊涂着过",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "partner": 7 }
+      },
+      {
+        "text": "各管各的抽屉，互不干涉",
+        "deltas3": { "worldview": 1, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "partner": 4 }
+      }
+    ]
+  },
+  {
+    "id": "adult-401",
+    "stage": "adult",
+    "type": "context",
+    "line": "love",
+    "ageHint": "33岁6个月",
+    "ageMonths": 402,
+    "text": "你把戒指盒藏在常去那家小馆子的甜品下面。手心全是汗，对方的叉子已经伸过来了。",
+    "options": [
+      {
+        "text": "现场单膝跪地",
+        "deltas3": { "values": 2, "outlook": -2 },
+        "resourceDeltas": { "mood": 4, "money": -5 },
+        "bondDeltas": { "partner": 12 },
+        "aftermath": "甜品差点被打翻。全餐厅的人都在鼓掌，那边哭着点了头。"
+      },
+      {
+        "text": "饭后回家再低调地问",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "partner": 9 }
+      },
+      {
+        "text": "突然紧张，把盒子又揣了回去",
+        "deltas3": { "outlook": 2, "worldview": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "partner": 2 }
+      }
+    ]
+  },
+  {
+    "id": "adult-402",
+    "stage": "adult",
+    "type": "context",
+    "line": "love",
+    "ageHint": "35岁6个月",
+    "ageMonths": 426,
+    "text": "婚期定了。两家老人为'酒席摆几桌'各执一词，你夹在中间翻译，翻译，再翻译。",
+    "options": [
+      {
+        "text": "按老人心愿办大，亲戚坐满",
+        "deltas3": { "values": 2, "worldview": -1 },
+        "resourceDeltas": { "mood": -1, "money": -8 },
+        "bondDeltas": { "mother": 8, "father": 8, "partner": 8 }
+      },
+      {
+        "text": "只领证加旅行，婚礼从简",
+        "deltas3": { "worldview": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": 2, "money": 2 },
+        "bondDeltas": { "mother": 3, "father": 3, "partner": 10 }
+      },
+      {
+        "text": "折中：两边各办一场小的",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": 1, "money": -4 },
+        "bondDeltas": { "mother": 6, "father": 6, "partner": 8 }
+      }
+    ]
+  },
+  {
+    "id": "adult-403",
+    "stage": "adult",
+    "type": "context",
+    "line": "love",
+    "ageHint": "38岁",
+    "ageMonths": 456,
+    "text": "婚后哪年都有坎。这次为'过年回谁家'，你俩冷战一周，家里安静得能听见冰箱声。",
+    "options": [
+      {
+        "text": "先低头，把话说开",
+        "deltas3": { "values": 3 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "partner": 11 },
+        "aftermath": "话说开才知道，那边怕的是你妈一个人过年。那年除夕，两家凑成了一桌。"
+      },
+      {
+        "text": "等对方先低头",
+        "deltas3": { "outlook": 2, "worldview": -1 },
+        "resourceDeltas": { "mood": -3 },
+        "bondDeltas": { "partner": -5 }
+      },
+      {
+        "text": "各回各家，各找各妈",
+        "deltas3": { "outlook": 1, "values": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "partner": -9 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-401",
+    "stage": "midlife",
+    "type": "context",
+    "line": "love",
+    "ageHint": "47岁",
+    "ageMonths": 564,
+    "text": "结婚二十周年。你翻出当年的红本本，那边凑过来看：'那时候你头发真多。'",
+    "options": [
+      {
+        "text": "策划一场只属于两人的旅行",
+        "deltas3": { "outlook": -1, "values": 2 },
+        "resourceDeltas": { "mood": 4, "money": -6 },
+        "bondDeltas": { "partner": 10 }
+      },
+      {
+        "text": "在家复刻一顿当年的定情菜",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 3 },
+        "bondDeltas": { "partner": 9 }
+      },
+      {
+        "text": "老夫老妻了，还过什么节",
+        "deltas3": { "outlook": 1, "values": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "partner": -4 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-402",
+    "stage": "midlife",
+    "type": "context",
+    "line": "love",
+    "ageHint": "50岁",
+    "ageMonths": 600,
+    "text": "你俩最近像搭伙过日子的同事：一个刷手机，一个看电视，一晚上说不上十句话。",
+    "options": [
+      {
+        "text": "关电视，提议出去走走",
+        "deltas3": { "values": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "partner": 8 }
+      },
+      {
+        "text": "顺其自然，老夫老妻都这样",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "partner": 2 }
+      },
+      {
+        "text": "报个双人兴趣班，逼自己一把",
+        "deltas3": { "worldview": -1, "outlook": -2 },
+        "resourceDeltas": { "mood": 2, "money": -3 },
+        "bondDeltas": { "partner": 10 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-403",
+    "stage": "midlife",
+    "type": "context",
+    "line": "love",
+    "ageHint": "53岁",
+    "ageMonths": 636,
+    "text": "母亲住院，弟弟妹妹在群里装看不见。你和伴侣在床边轮流守夜，累得话都少了。",
+    "options": [
+      {
+        "text": "和伴侣排好班，也拉着弟妹认领",
+        "deltas3": { "values": 2, "worldview": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "mother": 9, "partner": 9 }
+      },
+      {
+        "text": "自己扛，不麻烦任何人",
+        "deltas3": { "outlook": 2, "values": -1 },
+        "resourceDeltas": { "mood": -3, "health": -2 },
+        "bondDeltas": { "mother": 7, "partner": 3 }
+      },
+      {
+        "text": "请护工顶上，出钱出力不熬人",
+        "deltas3": { "worldview": -1, "outlook": 1 },
+        "resourceDeltas": { "money": -6, "mood": 1 },
+        "bondDeltas": { "mother": 6, "partner": 7 }
+      }
+    ]
+  },
+  {
+    "id": "elder-401",
+    "stage": "elder",
+    "type": "context",
+    "line": "love",
+    "ageHint": "62岁",
+    "ageMonths": 744,
+    "text": "老伴体检查出点问题，要住院观察。签字的时候，你的手比当年求婚时抖得还厉害。",
+    "options": [
+      {
+        "text": "天天送饭陪床，寸步不离",
+        "deltas3": { "values": 3 },
+        "resourceDeltas": { "mood": -2, "health": -1 },
+        "bondDeltas": { "partner": 12 },
+        "aftermath": "出院那天那边说：下辈子还找你。你嘴上说想得美，眼眶先红了。"
+      },
+      {
+        "text": "相信医生，白天来晚上回",
+        "deltas3": { "worldview": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "partner": 8 }
+      },
+      {
+        "text": "请子女轮流陪护",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "money": -4 },
+        "bondDeltas": { "partner": 5 }
+      }
+    ]
+  },
+  {
+    "id": "elder-402",
+    "stage": "elder",
+    "type": "context",
+    "line": "love",
+    "ageHint": "66岁",
+    "ageMonths": 792,
+    "text": "整理旧物翻出一铁盒：粮票、情书、你俩年轻时的黑白合照。老伴戴上老花镜，一张张认。",
+    "options": [
+      {
+        "text": "一起把这些故事讲给孙辈听",
+        "deltas3": { "values": 2, "worldview": 1 },
+        "resourceDeltas": { "mood": 3 },
+        "bondDeltas": { "partner": 9 }
+      },
+      {
+        "text": "把情书重新读一遍，念出声",
+        "deltas3": { "values": 3 },
+        "resourceDeltas": { "mood": 3 },
+        "bondDeltas": { "partner": 12 },
+        "aftermath": "读到第三行，两个人都笑场了。信纸黄了，字还烫。"
+      },
+      {
+        "text": "收进柜子深处：都是老黄历了",
+        "deltas3": { "outlook": 2 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "partner": 1 }
+      }
+    ]
+  },
+  {
+    "id": "elder-403",
+    "stage": "elder",
+    "type": "context",
+    "line": "love",
+    "ageHint": "72岁",
+    "ageMonths": 864,
+    "text": "清晨你俩在公园分头锻炼：老伴打拳，你遛弯。回来在长椅会合，一人一半豆浆。",
+    "options": [
+      {
+        "text": "聊聊昨晚的电视剧",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "partner": 6 }
+      },
+      {
+        "text": "默默坐着看鸽子，也很踏实",
+        "deltas3": { "worldview": 2 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "partner": 8 }
+      },
+      {
+        "text": "教老伴用手机拍鸽子",
+        "deltas3": { "worldview": -1, "values": 1 },
+        "resourceDeltas": { "mood": 3 },
+        "bondDeltas": { "partner": 7 }
+      }
+    ]
+  },
+  {
+    "id": "infant-501",
+    "stage": "infant",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "10个月",
+    "ageMonths": 10,
+    "text": "邻居家搬来一户带娃的人家，小孩和你差不多大。两个大人把你们并排放在爬行垫上。",
+    "options": [
+      {
+        "text": "把自己的摇铃递过去",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 9 },
+        "aftermath": "摇铃被啃了一下午。两家的妈妈从此熟得像亲戚——那是你和阿澈的开始。"
+      },
+      {
+        "text": "抢对方的摇铃",
+        "deltas3": { "values": -1, "outlook": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 2 }
+      },
+      {
+        "text": "各玩各的，偶尔对视",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 5 }
+      }
+    ]
+  },
+  {
+    "id": "infant-502",
+    "stage": "infant",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "1岁半",
+    "ageMonths": 18,
+    "text": "游乐场的滑梯排队排到了第四个。前面的小孩滑一次不走，赖在滑梯口。",
+    "options": [
+      {
+        "text": "耐心排队等",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 4 }
+      },
+      {
+        "text": "大哭，让大人来评理",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 2 }
+      },
+      {
+        "text": "绕去旁边的秋千，先玩为快",
+        "deltas3": { "outlook": -1, "worldview": 1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 5 }
+      }
+    ]
+  },
+  {
+    "id": "infant-503",
+    "stage": "infant",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "2岁8个月",
+    "ageMonths": 32,
+    "text": "你手里的饼干只剩最后一块。爬行垫对面，那双眼睛直勾勾地盯着。",
+    "options": [
+      {
+        "text": "掰一半分过去",
+        "deltas3": { "values": 3 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "整块都给",
+        "deltas3": { "values": 2, "worldview": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 10 }
+      },
+      {
+        "text": "背过身快速吃完",
+        "deltas3": { "values": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 1 }
+      }
+    ]
+  },
+  {
+    "id": "toddler-501",
+    "stage": "toddler",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "4岁4个月",
+    "ageMonths": 52,
+    "text": "班里有个说话结巴的小孩，大家学他说话，把他学哭了。老师让你过去。",
+    "options": [
+      {
+        "text": "拉他一起搭积木",
+        "deltas3": { "values": 3 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 6 }
+      },
+      {
+        "text": "站出来说'别学了'",
+        "deltas3": { "values": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "跟着大家起哄",
+        "deltas3": { "values": -2 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": -3 }
+      }
+    ]
+  },
+  {
+    "id": "toddler-502",
+    "stage": "toddler",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "5岁2个月",
+    "ageMonths": 62,
+    "text": "两个小孩为一辆玩具消防车扭作一团，谁也不撒手。吵到最后，都来找你评理。",
+    "options": [
+      {
+        "text": "一人玩十分钟，轮流来",
+        "deltas3": { "values": 2, "worldview": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 6 }
+      },
+      {
+        "text": "剪刀石头布定输赢",
+        "deltas3": { "worldview": 1, "outlook": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 5 }
+      },
+      {
+        "text": "把车没收，交给老师",
+        "deltas3": { "values": -1, "outlook": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 2 }
+      }
+    ]
+  },
+  {
+    "id": "toddler-503",
+    "stage": "toddler",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "5岁8个月",
+    "ageMonths": 68,
+    "text": "你和阿澈约好了'只跟你玩'。可今天新来的小孩，一直跟在你们身后。",
+    "options": [
+      {
+        "text": "三个人一起玩",
+        "deltas3": { "values": 2, "worldview": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 5 }
+      },
+      {
+        "text": "拉紧阿澈的手，走得更快",
+        "deltas3": { "values": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 9 }
+      },
+      {
+        "text": "把新小孩的帽子藏起来",
+        "deltas3": { "values": -2 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 6 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-501",
+    "stage": "childhood",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "7岁6个月",
+    "ageMonths": 90,
+    "text": "阿澈要跟父母去南方了。行李箱立在门口，那边塞给你一把弹珠，说'替我留着'。",
+    "options": [
+      {
+        "text": "把最宝贝的贴纸回赠",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 9 },
+        "aftermath": "那把弹珠你留到了现在。每年过年，电话里那声'喂'一直没变过。"
+      },
+      {
+        "text": "哭着追着车跑了一段",
+        "deltas3": { "values": 1, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "装作无所谓，挥挥手",
+        "deltas3": { "outlook": 1, "values": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 3 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-502",
+    "stage": "childhood",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "8岁10个月",
+    "ageMonths": 106,
+    "text": "班里的'核心小组'向你招手，条件是别再跟'那个成绩差的'玩。",
+    "options": [
+      {
+        "text": "拒绝站队",
+        "deltas3": { "values": 3, "worldview": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 10 }
+      },
+      {
+        "text": "两边都偷偷来往",
+        "deltas3": { "worldview": -1, "values": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 6 }
+      },
+      {
+        "text": "加入小组，各玩各的",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": -5 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-503",
+    "stage": "childhood",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "9岁8个月",
+    "ageMonths": 116,
+    "text": "你俩翻墙进工地捡球，被保安逮个正着，要请家长。阿澈攥紧了拳头。",
+    "options": [
+      {
+        "text": "一起认错，一起请家长",
+        "deltas3": { "values": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "bestie": 9 },
+        "aftermath": "两家的爸爸在办公室门口互相递了根烟。后来你俩开玩笑：这算过命的交情。"
+      },
+      {
+        "text": "自己把事扛下来",
+        "deltas3": { "values": 3 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "bestie": 12 }
+      },
+      {
+        "text": "让阿澈顶名，你没吭声",
+        "deltas3": { "values": -2, "outlook": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": -7 }
+      }
+    ]
+  },
+  {
+    "id": "teen-501",
+    "stage": "teen",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "14岁",
+    "ageMonths": 168,
+    "text": "保送推荐名额只有一个。名单出来，你和阿澈的名字排在一块儿，中间隔着一条线。",
+    "options": [
+      {
+        "text": "公平竞争，友谊归友谊",
+        "deltas3": { "values": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 7 }
+      },
+      {
+        "text": "主动让出名额",
+        "deltas3": { "values": 3, "outlook": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 12 }
+      },
+      {
+        "text": "收集对方的'黑料'递上去",
+        "deltas3": { "values": -3, "outlook": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "bestie": -12 }
+      }
+    ]
+  },
+  {
+    "id": "teen-502",
+    "stage": "teen",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "15岁8个月",
+    "ageMonths": 188,
+    "text": "你在杂志上交了个笔友，回了三封信。阿澈酸溜溜：写的哪句比我说的好听？",
+    "options": [
+      {
+        "text": "把信念给阿澈听",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 6 }
+      },
+      {
+        "text": "安排两人认识",
+        "deltas3": { "worldview": 2 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "保守这个秘密",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 3 }
+      }
+    ]
+  },
+  {
+    "id": "youth-501",
+    "stage": "youth",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "20岁8个月",
+    "ageMonths": 248,
+    "text": "毕业合租，你挑了阿澈。两周后发现：那位的袜子会飞过客厅，你的锅从来不洗。",
+    "options": [
+      {
+        "text": "立租房公约，贴冰箱上",
+        "deltas3": { "worldview": -1, "values": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 7 }
+      },
+      {
+        "text": "忍着，友谊值钱",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "bestie": 9 }
+      },
+      {
+        "text": "找借口搬走",
+        "deltas3": { "outlook": 1, "worldview": -1 },
+        "resourceDeltas": { "mood": -1, "money": -2 },
+        "bondDeltas": { "bestie": -4 }
+      }
+    ]
+  },
+  {
+    "id": "youth-502",
+    "stage": "youth",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "21岁10个月",
+    "ageMonths": 262,
+    "text": "阿澈开口借三个月工资，说家里出了急事。没细说，你也没多问。",
+    "options": [
+      {
+        "text": "借，不要借条",
+        "deltas3": { "values": 3 },
+        "resourceDeltas": { "money": -6, "mood": -1 },
+        "bondDeltas": { "bestie": 10 },
+        "aftermath": "钱第三个月准时回来了，多了一箱家乡的橘子。你没提借条的事，以后也没提过。"
+      },
+      {
+        "text": "借一半，帮急不帮穷",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "money": -3 },
+        "bondDeltas": { "bestie": 5 }
+      },
+      {
+        "text": "婉拒，介绍正规渠道",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": -2 }
+      }
+    ]
+  },
+  {
+    "id": "youth-503",
+    "stage": "youth",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "24岁",
+    "ageMonths": 288,
+    "text": "阿澈的婚礼定在五一，点名你当伴郎。可你手头项目正卡在节骨眼上。",
+    "options": [
+      {
+        "text": "调开工作，全程伴到底",
+        "deltas3": { "values": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": 2, "money": -2 },
+        "bondDeltas": { "bestie": 10 }
+      },
+      {
+        "text": "当天飞去当天回",
+        "deltas3": { "worldview": -1 },
+        "resourceDeltas": { "mood": 1, "money": -1 },
+        "bondDeltas": { "bestie": 6 }
+      },
+      {
+        "text": "视频连线致辞",
+        "deltas3": { "outlook": 1, "values": -1 },
+        "resourceDeltas": { "money": 1 },
+        "bondDeltas": { "bestie": -3 }
+      }
+    ]
+  },
+  {
+    "id": "adult-501",
+    "stage": "adult",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "34岁",
+    "ageMonths": 408,
+    "text": "十年没聚的老同学组了局。包厢里有人谈上市，有人谈脱发，阿澈给你留着主位旁边的座。",
+    "options": [
+      {
+        "text": "把近况和盘托出，包括难处",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "只报喜，撑住体面",
+        "deltas3": { "outlook": 1, "values": -1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 4 }
+      },
+      {
+        "text": "提前离席，不想比",
+        "deltas3": { "outlook": -1, "worldview": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 5 }
+      }
+    ]
+  },
+  {
+    "id": "adult-502",
+    "stage": "adult",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "36岁6个月",
+    "ageMonths": 438,
+    "text": "你发现和阿澈的聊天记录停在三个月前，朋友圈互相点了三年赞。",
+    "options": [
+      {
+        "text": "直接打电话：出来喝酒",
+        "deltas3": { "values": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": 2, "money": -1 },
+        "bondDeltas": { "bestie": 9 }
+      },
+      {
+        "text": "发条长消息叙旧",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 6 }
+      },
+      {
+        "text": "让它自然淡下去",
+        "deltas3": { "outlook": 2 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": -4 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-501",
+    "stage": "midlife",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "48岁",
+    "ageMonths": 576,
+    "text": "阿澈辞职创业，第一件事就是来找你：缺个懂行的，股份好商量。",
+    "options": [
+      {
+        "text": "入伙，赌一把",
+        "deltas3": { "outlook": -3, "worldview": 1 },
+        "resourceDeltas": { "mood": -1, "money": -6 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "要做就先立规矩，白纸黑字",
+        "deltas3": { "worldview": -1, "values": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 9 }
+      },
+      {
+        "text": "不入伙，但当第一个客户",
+        "deltas3": { "outlook": 1, "values": 1 },
+        "resourceDeltas": { "money": -2 },
+        "bondDeltas": { "bestie": 6 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-502",
+    "stage": "midlife",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "51岁",
+    "ageMonths": 612,
+    "text": "为一笔说不清的账，你俩吵了三十年来的第一架。那扇门摔上的时候，烟灰缸都震倒了。",
+    "options": [
+      {
+        "text": "冷静三天，先递台阶",
+        "deltas3": { "values": 2, "worldview": 1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "等对方道歉",
+        "deltas3": { "outlook": 2 },
+        "resourceDeltas": { "mood": -3 },
+        "bondDeltas": { "bestie": -6 }
+      },
+      {
+        "text": "就此别过",
+        "deltas3": { "outlook": 1, "values": -2 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "bestie": -12 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-503",
+    "stage": "midlife",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "54岁",
+    "ageMonths": 648,
+    "text": "出差在高铁站撞见高中同桌。三十年过去，你们互相愣了三秒，然后同时喊出对方的外号。",
+    "options": [
+      {
+        "text": "误了车也要坐下聊",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 3, "money": -1 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "互换名片，改天再约",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 4 }
+      },
+      {
+        "text": "合影发到老同学群",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 5 }
+      }
+    ]
+  },
+  {
+    "id": "elder-501",
+    "stage": "elder",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "63岁",
+    "ageMonths": 756,
+    "text": "老周走了。追悼会回来，阿澈打来电话，两个人在电话两头沉默了很久。",
+    "options": [
+      {
+        "text": "约阿澈每周固定散步",
+        "deltas3": { "values": 2, "worldview": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 9 },
+        "aftermath": "从那以后，周四下午的公园长椅成了你们的老位置。风大的时候，就换你家阳台。"
+      },
+      {
+        "text": "把想说的话写成信，烧了",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "bestie": 5 }
+      },
+      {
+        "text": "独自消化",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "bestie": 2 }
+      }
+    ]
+  },
+  {
+    "id": "elder-502",
+    "stage": "elder",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "68岁",
+    "ageMonths": 816,
+    "text": "小区广场舞队缺个领舞，全队目光望向你和阿澈。那位的第三步就踩错了拍子。",
+    "options": [
+      {
+        "text": "和阿澈一起硬着头皮上",
+        "deltas3": { "values": 2, "outlook": -1 },
+        "resourceDeltas": { "mood": 3, "health": 1 },
+        "bondDeltas": { "bestie": 8 }
+      },
+      {
+        "text": "在旁边拍视频起哄",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "bestie": 7 }
+      },
+      {
+        "text": "婉拒，回家遛弯",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "mood": -1, "health": 1 },
+        "bondDeltas": { "bestie": 3 }
+      }
+    ]
+  },
+  {
+    "id": "elder-503",
+    "stage": "elder",
+    "type": "context",
+    "line": "friend",
+    "ageHint": "74岁",
+    "ageMonths": 888,
+    "text": "阿澈住院了，子女都在外地。你揣着保温桶去送饭，被护士拦下来登记家属关系。",
+    "options": [
+      {
+        "text": "答：五十年的老朋友",
+        "deltas3": { "values": 3 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "bestie": 10 },
+        "aftermath": "护士愣了一下，在关系栏写下'亲属'两个字。阿澈背过身去，擦了擦眼睛。"
+      },
+      {
+        "text": "每天送饭，登记完就走",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": -1, "health": -1 },
+        "bondDeltas": { "bestie": 7 }
+      },
+      {
+        "text": "拜托护工多照应",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "money": -3 },
+        "bondDeltas": { "bestie": 4 }
+      }
+    ]
+  },
+  {
+    "id": "infant-601",
+    "stage": "infant",
+    "type": "context",
+    "line": "health",
+    "ageHint": "5个月",
+    "ageMonths": 5,
+    "text": "疫苗日。针还没碰到胳膊，你先被消毒棉的味道整不会了，整张脸皱成了包子。",
+    "options": [
+      {
+        "text": "哭到全诊室侧目",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "mood": -2 },
+        "bondDeltas": { "mother": 4 }
+      },
+      {
+        "text": "瞪着护士，忘了哭",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 5 }
+      },
+      {
+        "text": "睡着了，扎完才醒",
+        "deltas3": { "worldview": -1 },
+        "resourceDeltas": { "mood": 2 },
+        "bondDeltas": { "mother": 3 }
+      }
+    ]
+  },
+  {
+    "id": "infant-602",
+    "stage": "infant",
+    "type": "context",
+    "line": "health",
+    "ageHint": "1岁3个月",
+    "ageMonths": 15,
+    "text": "辅食添加期。胡萝卜泥被你一口顶出来，碗沿上糊了一圈。",
+    "options": [
+      {
+        "text": "捏着鼻子咽下去",
+        "deltas3": { "values": -1, "outlook": 1 },
+        "resourceDeltas": { "health": 2 },
+        "bondDeltas": { "mother": 4 }
+      },
+      {
+        "text": "全喂给围兜",
+        "deltas3": { "values": 1, "outlook": -1 },
+        "resourceDeltas": { "health": -1 },
+        "bondDeltas": { "mother": 2 }
+      },
+      {
+        "text": "指挥大人换成南瓜泥再战",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "health": 2, "mood": 1 },
+        "bondDeltas": { "mother": 5 }
+      }
+    ]
+  },
+  {
+    "id": "infant-603",
+    "stage": "infant",
+    "type": "context",
+    "line": "health",
+    "ageHint": "2岁4个月",
+    "ageMonths": 28,
+    "text": "你在院子里跑得太欢，膝盖磕出了第一块疤。大人们围过来，气氛很紧张。",
+    "options": [
+      {
+        "text": "看看疤，自己爬起来接着跑",
+        "deltas3": { "outlook": -2, "worldview": 1 },
+        "resourceDeltas": { "health": -1, "mood": 1 },
+        "bondDeltas": { "mother": 3, "father": 4 }
+      },
+      {
+        "text": "大哭，张开手等抱",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 6 }
+      },
+      {
+        "text": "蹲下来认真检查伤口，听大人上药",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 5, "father": 3 }
+      }
+    ]
+  },
+  {
+    "id": "toddler-601",
+    "stage": "toddler",
+    "type": "context",
+    "line": "health",
+    "ageHint": "4岁8个月",
+    "ageMonths": 56,
+    "text": "牙医说你有颗牙被'糖果虫'住了个洞。你攥着妈妈的手，想想睡前那颗奶糖。",
+    "options": [
+      {
+        "text": "认真刷牙，糖改成周末限定",
+        "deltas3": { "values": 1, "worldview": -1 },
+        "resourceDeltas": { "health": 3 },
+        "bondDeltas": { "mother": 6 }
+      },
+      {
+        "text": "讨价还价：一天一颗",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": 1 },
+        "bondDeltas": { "mother": 4 }
+      },
+      {
+        "text": "藏糖被抓现行，哭一场",
+        "deltas3": { "values": -1 },
+        "resourceDeltas": { "mood": -1, "health": -1 },
+        "bondDeltas": { "mother": 3 }
+      }
+    ]
+  },
+  {
+    "id": "toddler-602",
+    "stage": "toddler",
+    "type": "context",
+    "line": "health",
+    "ageHint": "5岁4个月",
+    "ageMonths": 64,
+    "text": "幼儿园班上一半人在咳嗽。你也没躲过去，烧在家里，窗外是别的小孩的笑声。",
+    "options": [
+      {
+        "text": "安心养病，把攒的绘本读完",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "health": 2 },
+        "bondDeltas": { "mother": 5 }
+      },
+      {
+        "text": "烧还没退就吵着要上学",
+        "deltas3": { "outlook": -1, "worldview": 1 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "mother": 4 }
+      },
+      {
+        "text": "指挥奶奶给你炖梨",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "health": 1, "mood": 1 },
+        "bondDeltas": { "mother": 3 }
+      }
+    ]
+  },
+  {
+    "id": "toddler-603",
+    "stage": "toddler",
+    "type": "context",
+    "line": "health",
+    "ageHint": "5岁11个月",
+    "ageMonths": 71,
+    "text": "动画片一集接一集，你看电视越凑越近，妈妈在你身后越站越沉。",
+    "options": [
+      {
+        "text": "主动关电视，出去玩",
+        "deltas3": { "worldview": 1, "outlook": -1 },
+        "resourceDeltas": { "health": 3 },
+        "bondDeltas": { "mother": 7 }
+      },
+      {
+        "text": "讨价还价：每天两集",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": 1 },
+        "bondDeltas": { "mother": 5 }
+      },
+      {
+        "text": "趁大人忙继续看",
+        "deltas3": { "values": -1 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "mother": 2 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-601",
+    "stage": "childhood",
+    "type": "context",
+    "line": "health",
+    "ageHint": "8岁",
+    "ageMonths": 96,
+    "text": "第一颗乳牙晃了半个月，吃饭都躲着用。妈妈问：自己拔还是去医院？",
+    "options": [
+      {
+        "text": "自己对着镜子拔",
+        "deltas3": { "outlook": -2, "worldview": 1 },
+        "resourceDeltas": { "mood": 2, "health": -1 },
+        "bondDeltas": { "mother": 4 },
+        "aftermath": "你把牙扔上屋顶——老规矩，下牙要往上扔才长得正。新牙果然很争气。"
+      },
+      {
+        "text": "去医院让医生来",
+        "deltas3": { "worldview": -1 },
+        "resourceDeltas": { "health": 1 },
+        "bondDeltas": { "mother": 5 }
+      },
+      {
+        "text": "拖着不管",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "mother": 2 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-602",
+    "stage": "childhood",
+    "type": "context",
+    "line": "health",
+    "ageHint": "9岁6个月",
+    "ageMonths": 114,
+    "text": "跳山羊你没助跑够，坐在了垫子边上。校医室里，你盯着那瓶红药水。",
+    "options": [
+      {
+        "text": "咬牙上药，回教室接着上体育课",
+        "deltas3": { "outlook": -2 },
+        "resourceDeltas": { "health": -1, "mood": 1 },
+        "bondDeltas": { "mother": 3 }
+      },
+      {
+        "text": "让老师打电话叫家长",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "mood": -1 },
+        "bondDeltas": { "mother": 6 }
+      },
+      {
+        "text": "从此躲着体育课走",
+        "deltas3": { "outlook": 2 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "mother": 2 }
+      }
+    ]
+  },
+  {
+    "id": "childhood-603",
+    "stage": "childhood",
+    "type": "context",
+    "line": "health",
+    "ageHint": "10岁",
+    "ageMonths": 120,
+    "text": "体检表出来，身高在中线下。妈妈开始变着法儿炖汤：排骨、鱼头，还有你叫不上名的根。",
+    "options": [
+      {
+        "text": "硬着头皮把汤喝了",
+        "deltas3": { "values": -1, "outlook": 1 },
+        "resourceDeltas": { "health": 3 },
+        "bondDeltas": { "mother": 6 }
+      },
+      {
+        "text": "谈条件：喝汤换周末打球",
+        "deltas3": { "worldview": -1, "outlook": -1 },
+        "resourceDeltas": { "health": 2, "mood": 1 },
+        "bondDeltas": { "mother": 5 }
+      },
+      {
+        "text": "把汤倒进花盆",
+        "deltas3": { "values": -2 },
+        "resourceDeltas": { "health": -1 },
+        "bondDeltas": { "mother": 1 }
+      }
+    ]
+  },
+  {
+    "id": "teen-601",
+    "stage": "teen",
+    "type": "context",
+    "line": "health",
+    "ageHint": "14岁6个月",
+    "ageMonths": 174,
+    "text": "新买的游戏到了'最关键的一关'。闹钟显示凌晨一点，你跟自己说'最后十分钟'。",
+    "options": [
+      {
+        "text": "关机睡觉，明天再打",
+        "deltas3": { "values": 1, "worldview": -1 },
+        "resourceDeltas": { "health": 3, "mood": -1 },
+        "bondDeltas": { "mother": 5 }
+      },
+      {
+        "text": "再战一局，就一局",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "mother": 2 }
+      },
+      {
+        "text": "通宵，第二天顶着黑眼圈上学",
+        "deltas3": { "outlook": -2 },
+        "resourceDeltas": { "health": -4, "mood": 2 },
+        "bondDeltas": { "mother": 1 }
+      }
+    ]
+  },
+  {
+    "id": "teen-602",
+    "stage": "teen",
+    "type": "context",
+    "line": "health",
+    "ageHint": "15岁6个月",
+    "ageMonths": 186,
+    "text": "体测成绩单发下来，长跑从及格线上掉了下来。体育老师看了你三秒，没说话。",
+    "options": [
+      {
+        "text": "给自己排一个晨跑计划",
+        "deltas3": { "outlook": -2, "worldview": -1 },
+        "resourceDeltas": { "health": 3 },
+        "bondDeltas": { "mother": 4 }
+      },
+      {
+        "text": "跟自己和解：我不是跑机器",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "mood": 1 },
+        "bondDeltas": { "mother": 3 }
+      },
+      {
+        "text": "考前突击，考完就停",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "health": -1 },
+        "bondDeltas": { "mother": 2 }
+      }
+    ]
+  },
+  {
+    "id": "teen-603",
+    "stage": "teen",
+    "type": "context",
+    "line": "health",
+    "ageHint": "16岁10个月",
+    "ageMonths": 202,
+    "text": "黑板上的字开始长毛边。眼科门口排着队，验光师说你近视两百度了。",
+    "options": [
+      {
+        "text": "配镜，从此注意用眼",
+        "deltas3": { "worldview": -1 },
+        "resourceDeltas": { "health": 2, "money": -3 },
+        "bondDeltas": { "mother": 5 }
+      },
+      {
+        "text": "硬扛，不配",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "mother": 2 }
+      },
+      {
+        "text": "配镜顺便查个散光",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "health": 3, "money": -4 },
+        "bondDeltas": { "mother": 6 }
+      }
+    ]
+  },
+  {
+    "id": "youth-601",
+    "stage": "youth",
+    "type": "context",
+    "line": "health",
+    "ageHint": "21岁4个月",
+    "ageMonths": 256,
+    "text": "工作日的你白天靠咖啡续命，夜里刷手机到两点。周末一觉睡到午饭，起来头疼。",
+    "options": [
+      {
+        "text": "十一点强制熄屏",
+        "deltas3": { "values": 1, "worldview": -1 },
+        "resourceDeltas": { "health": 4, "mood": -1 }
+      },
+      {
+        "text": "买个闹钟，放到够不着的地方",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": 3 }
+      },
+      {
+        "text": "无所谓，年轻扛得住",
+        "deltas3": { "outlook": 2, "values": -1 },
+        "resourceDeltas": { "health": -3 }
+      }
+    ]
+  },
+  {
+    "id": "youth-602",
+    "stage": "youth",
+    "type": "context",
+    "line": "health",
+    "ageHint": "23岁",
+    "ageMonths": 276,
+    "text": "楼下新开的健身房在发传单：年卡五折，送两节私教课。你摸了摸自己久坐的腰。",
+    "options": [
+      {
+        "text": "办年卡，认真练",
+        "deltas3": { "outlook": -2, "worldview": -1 },
+        "resourceDeltas": { "health": 4, "money": -5 }
+      },
+      {
+        "text": "办卡，顺便办成了洗澡卡",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": 1, "money": -5 }
+      },
+      {
+        "text": "跑步不花钱，江边见",
+        "deltas3": { "outlook": -1, "worldview": 1 },
+        "resourceDeltas": { "health": 3 }
+      }
+    ]
+  },
+  {
+    "id": "youth-603",
+    "stage": "youth",
+    "type": "context",
+    "line": "health",
+    "ageHint": "24岁6个月",
+    "ageMonths": 294,
+    "text": "入职第一年体检，报告上有两个小箭头。林医生用笔敲了敲那行：年轻人，少熬夜。",
+    "options": [
+      {
+        "text": "认真问出一套改善方案",
+        "deltas3": { "worldview": -1, "values": 1 },
+        "resourceDeltas": { "health": 3 },
+        "bondDeltas": { "doctor": 10 },
+        "aftermath": "你把那张写满字的报告单夹在了工位隔板上。第二年体检，两个箭头消失了一个。"
+      },
+      {
+        "text": "左耳进右耳出",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "doctor": 3 }
+      },
+      {
+        "text": "当场下单三样保健品",
+        "deltas3": { "worldview": -1, "outlook": -1 },
+        "resourceDeltas": { "health": 1, "money": -4 },
+        "bondDeltas": { "doctor": 5 }
+      }
+    ]
+  },
+  {
+    "id": "adult-601",
+    "stage": "adult",
+    "type": "context",
+    "line": "health",
+    "ageHint": "34岁6个月",
+    "ageMonths": 414,
+    "text": "脖子先于梦想退休了。转个头咔咔响，林医生说是'鼠标手他哥'——鼠标颈。",
+    "options": [
+      {
+        "text": "换升降桌，定闹钟起身",
+        "deltas3": { "worldview": -1 },
+        "resourceDeltas": { "health": 4, "money": -4 },
+        "bondDeltas": { "doctor": 6 }
+      },
+      {
+        "text": "下班拉伸，坚持了三天",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": 2 },
+        "bondDeltas": { "doctor": 4 }
+      },
+      {
+        "text": "贴膏药续命",
+        "deltas3": { "outlook": 2 },
+        "resourceDeltas": { "health": -1 },
+        "bondDeltas": { "doctor": 3 }
+      }
+    ]
+  },
+  {
+    "id": "adult-602",
+    "stage": "adult",
+    "type": "context",
+    "line": "health",
+    "ageHint": "37岁6个月",
+    "ageMonths": 450,
+    "text": "年度复查，林医生翻着报告说：比去年好，但你这熬夜的账，身体都记着呢。",
+    "options": [
+      {
+        "text": "把体检建议贴在冰箱上",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "health": 3 },
+        "bondDeltas": { "doctor": 8 }
+      },
+      {
+        "text": "问出复查清单，逐项执行",
+        "deltas3": { "worldview": -1, "values": 1 },
+        "resourceDeltas": { "health": 4 },
+        "bondDeltas": { "doctor": 9 }
+      },
+      {
+        "text": "'您说啥就是啥'，转身就忘",
+        "deltas3": { "outlook": 1, "values": -1 },
+        "resourceDeltas": { "health": -1 },
+        "bondDeltas": { "doctor": 4 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-601",
+    "stage": "midlife",
+    "type": "context",
+    "line": "health",
+    "ageHint": "49岁",
+    "ageMonths": 588,
+    "text": "体检报告三个箭头排排站。医生的话很简短：管住嘴，迈开腿，酒局能推就推。",
+    "options": [
+      {
+        "text": "告别夜宵，酒局全推",
+        "deltas3": { "values": 1, "worldview": -1 },
+        "resourceDeltas": { "health": 5, "mood": -1 }
+      },
+      {
+        "text": "折中：少吃，不是不吃",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": 2 }
+      },
+      {
+        "text": "换成'健康酒'安慰自己",
+        "deltas3": { "values": -1, "outlook": 2 },
+        "resourceDeltas": { "health": -1 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-602",
+    "stage": "midlife",
+    "type": "context",
+    "line": "health",
+    "ageHint": "52岁",
+    "ageMonths": 624,
+    "text": "降压药正式进驻你家药盒。林医生叮嘱：按时吃，别看血压降了就自己停。",
+    "options": [
+      {
+        "text": "定闹钟，按时按量",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "health": 4 },
+        "bondDeltas": { "doctor": 9 }
+      },
+      {
+        "text": "感觉好了就停两天试试",
+        "deltas3": { "outlook": 1 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "doctor": 4 }
+      },
+      {
+        "text": "研究说明书，换成食补",
+        "deltas3": { "worldview": 1 },
+        "resourceDeltas": { "health": 1 },
+        "bondDeltas": { "doctor": 6 }
+      }
+    ]
+  },
+  {
+    "id": "midlife-603",
+    "stage": "midlife",
+    "type": "context",
+    "line": "health",
+    "ageHint": "55岁",
+    "ageMonths": 660,
+    "text": "烟龄三十年。家人把戒烟贴拍在桌上，你的打火机在口袋里硌了一下。",
+    "options": [
+      {
+        "text": "当场掐掉最后一根",
+        "deltas3": { "outlook": -2, "values": 2 },
+        "resourceDeltas": { "health": 5, "mood": -2 }
+      },
+      {
+        "text": "每周减量，稳步来",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": 3, "mood": -1 }
+      },
+      {
+        "text": "'抽完这盒就戒'",
+        "deltas3": { "outlook": 2 },
+        "resourceDeltas": { "health": -1 }
+      }
+    ]
+  },
+  {
+    "id": "elder-601",
+    "stage": "elder",
+    "type": "context",
+    "line": "health",
+    "ageHint": "64岁",
+    "ageMonths": 768,
+    "text": "药盒被你分成了早中晚三格，像小时候的文具盒。林医生笑：比你乖的病人不多。",
+    "options": [
+      {
+        "text": "按时按量，定期复诊",
+        "deltas3": { "values": 1 },
+        "resourceDeltas": { "health": 5 },
+        "bondDeltas": { "doctor": 10 }
+      },
+      {
+        "text": "身体说了算，不舒服才吃",
+        "deltas3": { "outlook": 2 },
+        "resourceDeltas": { "health": -2 },
+        "bondDeltas": { "doctor": 3 }
+      },
+      {
+        "text": "拉上老伴一起锻炼",
+        "deltas3": { "values": 2 },
+        "resourceDeltas": { "health": 4, "mood": 1 },
+        "bondDeltas": { "doctor": 7 }
+      }
+    ]
+  },
+  {
+    "id": "elder-602",
+    "stage": "elder",
+    "type": "context",
+    "line": "health",
+    "ageHint": "70岁",
+    "ageMonths": 840,
+    "text": "浴室加装的扶手和防滑垫到位了。你扶着墙走了一圈，承认这把年纪得服软。",
+    "options": [
+      {
+        "text": "索性全屋适老化改造",
+        "deltas3": { "worldview": -1, "values": 1 },
+        "resourceDeltas": { "health": 4, "money": -5 }
+      },
+      {
+        "text": "只改浴室重点部位",
+        "deltas3": { "outlook": -1 },
+        "resourceDeltas": { "health": 3, "money": -2 }
+      },
+      {
+        "text": "'我身子骨硬朗着呢'",
+        "deltas3": { "outlook": 2 },
+        "resourceDeltas": { "health": -2 }
       }
     ]
   }

@@ -34,8 +34,8 @@ const EVENT_TYPES = ["main", "context", "critical", "rescue"];
 const VALUES_AXES = ["worldview", "outlook", "values"];
 const RES_KEYS = ["mood", "money", "health"];
 const LINE_KEYS = ["fate", "study", "career", "love", "friend", "health"];
-/** v3-M1'' 分批开启密度的支线（02 §四：M1'' 交付 study+career，M2'' 补 love+friend，M3'' 补 health） */
-const LINE_DENSITY_ON = ["study", "career"];
+/** v3-M3'' 分批开启密度的支线（02 §四：M1'' study+career，M2'' love+friend，M3'' health——本行随批次扩到全开） */
+const LINE_DENSITY_ON = ["study", "career", "love", "friend", "health"];
 /** v3/02 §四 ▸ M1'' 增补：支线每阶段每线 ≥3 */
 const LINE_DENSITY_MIN = 3;
 /** 三观增量口径（v3/02 §二）：常规 |Δ| ≤3 / critical ≤8；rescue 同常规 */
@@ -100,6 +100,31 @@ const portraits = readJson("portraits.json");
 const moodMap = readJson("fish-mood-map.json");
 const stageDrift = readJson("stage-drift.json");
 const monologues = readJson("monologues.json");
+const npcRegistry = readJson("npcs.json");
+
+// ── 〇、NPC 注册表（v3/02 §五 ▸ M3'' 增补：bondDeltas 键与图谱名字/职责的唯一事实源）──
+const NPC_ID_RE = /^[a-z][a-z0-9-]*$/;
+const npcIds = new Set();
+if (npcRegistry && typeof npcRegistry === "object" && !Array.isArray(npcRegistry)) {
+  for (const [id, entry] of Object.entries(npcRegistry)) {
+    if (!NPC_ID_RE.test(id)) fail("N.REG", `npcs.json id 命名非法（应小写 kebab）：${JSON.stringify(id)}`);
+    else npcIds.add(id);
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      fail("N.REG", `npcs.json ${id} 不是对象`);
+      continue;
+    }
+    if (typeof entry.name !== "string" || !entry.name.trim()) fail("N.REG", `npcs.json ${id} 缺非空 name`);
+    if (typeof entry.role !== "string" || !entry.role.trim()) fail("N.REG", `npcs.json ${id} 缺非空 role`);
+    if (!LINE_KEYS.includes(entry.line)) fail("N.REG", `npcs.json ${id} line 非法：${JSON.stringify(entry.line)}`);
+  }
+  // 父母默认在册（v3/02 §八）：mother/father 必须注册且挂 fate 线
+  for (const p of ["mother", "father"]) {
+    const row = npcRegistry?.[p];
+    if (!row || row.line !== "fate") fail("N.REG", `npcs.json 缺父母注册项「${p}」（line=fate，v3/02 §八）`);
+  }
+} else {
+  fail("N.REG", "npcs.json 应为对象（{npcId: {name, role, line}}）");
+}
 
 // ── 一、事件库（plan/02 §二 + plan/v3/02 ▸ M1'' 增补：ageMonths / line / deltas3 / 资源 / ≥3 选项 / 单调）──
 const flagsDefined = new Set(); // 按库内顺序累积：pre 只许引用更早事件定义的 flag（§二第 3 项，防不可达死锁）
@@ -232,6 +257,20 @@ if (Array.isArray(events)) {
             for (const [k, v] of Object.entries(op.requires)) {
               if (!RES_KEYS.includes(k)) fail("E.REQ", `${oat} requires 资源键非法：${k}`);
               else if (!Number.isInteger(v) || v < 1 || v > 100) fail("E.REQ", `${oat} requires ${k} 应为 [1,100] 整数：${JSON.stringify(v)}`);
+            }
+          }
+        }
+        // v3 关系增量（v3/02 §五 ▸ M3'' 增补）：键须在 npcs.json 注册，|Δ| ≤15，零偏移删键
+        if (op.bondDeltas !== undefined) {
+          const bd = op.bondDeltas;
+          if (typeof bd !== "object" || Array.isArray(bd) || Object.keys(bd).length === 0) {
+            fail("N.BOND", `${oat} bondDeltas 应为非空对象`);
+          } else {
+            for (const [k, v] of Object.entries(bd)) {
+              if (!npcIds.has(k)) fail("N.BOND", `${oat} bondDeltas 键「${k}」未在 npcs.json 注册`);
+              else if (!Number.isInteger(v)) fail("N.BOND", `${oat} bondDeltas ${k} 不是整数：${JSON.stringify(v)}`);
+              else if (v === 0) fail("N.BOND", `${oat} bondDeltas ${k}=0（零偏移请删掉该键）`);
+              else if (Math.abs(v) > 15) fail("N.BOND", `${oat} bondDeltas ${k}=${v} 超口径（|Δ| ≤15，v3/02 §五）`);
             }
           }
         }
@@ -592,8 +631,9 @@ out("=".repeat(56));
 
 const areaOk = (p) => !fails.some((f) => f.startsWith(`[${p}`));
 const lines = [
-  ["FILE", "数据文件 8 份可读且 JSON 合法"],
+  ["FILE", "数据文件 9 份可读且 JSON 合法"],
   ["E", `事件库 ${eventCount} 条：id 唯一 / 枚举合法 / 选项 ≥3 / 三观增量口径 / 资源口径 / pre 防死锁 / 月龄单调 / 骨架密度 ≥${SKELETON_MIN_PER_STAGE} / 文案去重`],
+  ["N", `NPC 关系层（v3/02 §五 ▸ M3'' 增补）：npcs.json 注册 schema + 父母在册 + bondDeltas 键/口径（|Δ| ≤15）`],
   ["L", `多线：line 枚举 / main=fate / rescue 每资源 2 条 / 支线密度 ${LINE_DENSITY_ON.join("+")} 每阶段 ≥${LINE_DENSITY_MIN}（分批口径，love/friend/health 随 M2''/M3'' 开启）`],
   ["B", `birth-map ${birthStats ? `${birthStats.combos}/${BIRTH_COMBOS}` : "—"} 组合覆盖 + 初始值全部落域 [0,100]`],
   ["X", `endings ${endingSummary ? `${endingSummary.conditioned} 条件 + ${endingSummary.fallbackCount} 兜底` : "—"}：schema / 末位兜底 / flag 引用闭合`],

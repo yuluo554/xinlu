@@ -1,0 +1,9 @@
+{
+  "mother": { "name": "妈妈", "role": "父母", "line": "fate" },
+  "father": { "name": "爸爸", "role": "父母", "line": "fate" },
+  "partner": { "name": "小满", "role": "伴侣", "line": "love" },
+  "bestie": { "name": "阿澈", "role": "挚友", "line": "friend" },
+  "teacher": { "name": "周老师", "role": "师", "line": "study" },
+  "mentor": { "name": "老康", "role": "上司", "line": "career" },
+  "doctor": { "name": "林医生", "role": "医生", "line": "health" }
+}

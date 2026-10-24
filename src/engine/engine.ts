@@ -12,12 +12,14 @@ import {
   type Dims,
   type Ending,
   type EndingCond,
+  type EventOption,
   type GameEvent,
   type LineKey,
   type ResKey,
   type RunState,
 } from "./model.ts";
 import {
+  applyBonds,
   applyLineGain,
   applyResources,
   applyValues,
@@ -169,14 +171,8 @@ export function optionDimsDelta(event: GameEvent, optionIndex: number): Partial<
   return dimsOffsetOf(event.options[optionIndex]?.deltas3 ?? {});
 }
 
-export function applyChoice(state: RunState, optionIndex: number): RunState {
-  const event = pickEvent(state);
-  if (!event) throw new Error("applyChoice：当前无可应答事件");
-  const option = event.options[optionIndex];
-  if (!option) throw new Error(`applyChoice：选项越界 ${event.id}#${optionIndex}`);
-  if (!optionAvailable(state, event, optionIndex)) {
-    throw new Error(`applyChoice：选项被资源门槛锁定 ${event.id}#${optionIndex}`);
-  }
+/** 选项入账链（v3 传导 + 资源 + 关系 + 线进度 + flag + history），applyChoice / applyCustomChoice 共用。 */
+function settleChoice(state: RunState, event: GameEvent, option: EventOption, optionIndex: number): RunState {
   // v3 传导链（plan/v3/02 §二）：选项 → 三观主效应 → 派生四维偏移；资源增损并行入账。
   const withValues = applyValues(state, option.deltas3 ?? {});
   const offsets = dimsOffsetOf(option.deltas3 ?? {});
@@ -185,7 +181,9 @@ export function applyChoice(state: RunState, optionIndex: number): RunState {
     const off = offsets[dim];
     if (typeof off === "number" && off !== 0) dims[dim] = clamp(dims[dim] + off);
   }
-  const withResources = applyResources(withValues, option.resourceDeltas ?? {});
+  // 关系增量（plan/v3/02 §五 ▸ M3'' 增补）：按本次选择后的 values 轴衰减入账。
+  const withBonds = applyBonds(withValues, option.bondDeltas ?? {});
+  const withResources = applyResources(withBonds, option.resourceDeltas ?? {});
   const lines = applyLineGain(
     withResources.lines,
     event.line,
@@ -205,10 +203,33 @@ export function applyChoice(state: RunState, optionIndex: number): RunState {
     dims,
     values3: withResources.values3,
     resources: withResources.resources,
+    npcs: withResources.npcs,
     lines,
     flags,
     history,
   };
+}
+
+export function applyChoice(state: RunState, optionIndex: number): RunState {
+  const event = pickEvent(state);
+  if (!event) throw new Error("applyChoice：当前无可应答事件");
+  const option = event.options[optionIndex];
+  if (!option) throw new Error(`applyChoice：选项越界 ${event.id}#${optionIndex}`);
+  if (!optionAvailable(state, event, optionIndex)) {
+    throw new Error(`applyChoice：选项被资源门槛锁定 ${event.id}#${optionIndex}`);
+  }
+  return settleChoice(state, event, option, optionIndex);
+}
+
+/**
+ * 自定义第 4 槽（v3/02 §七 ▸ M3'' 增补）：LLM 归一后的选项直入状态机。
+ * 叙事与标签由旁路层产出，数值已过 clampCustomDeltas 本地钳制；自定义选项不参与
+ * requires 门槛（缺省无 requires）。history 记 option = 既有选项数（第 4 槽位约定）。
+ */
+export function applyCustomChoice(state: RunState, option: EventOption): RunState {
+  const event = pickEvent(state);
+  if (!event) throw new Error("applyCustomChoice：当前无可应答事件");
+  return settleChoice(state, event, option, event.options.length);
 }
 
 /** 推进到下一阶段；离开阶段时一次性结算：非选项漂移（三观）+ 自然结算（资源）。
@@ -270,6 +291,24 @@ export function birthEnvOptions(): Record<keyof BirthEnv, string[]> {
     place: Object.keys(BIRTH_MAP.place),
     mood: Object.keys(BIRTH_MAP.mood),
     style: Object.keys(BIRTH_MAP.style),
+  };
+}
+
+/**
+ * 随机出生（v3/02 §六 ▸ M3'' 增补）：seed 确定性派生四要素——同种子必得同一出生环境，
+ * 与后续抽取共用同一无状态种子流（seededDraw），同码复现契约覆盖出生本身。
+ */
+export function randomBirthEnv(seed: number): BirthEnv {
+  const options = birthEnvOptions();
+  const pick = (key: keyof BirthEnv, n: number): string => {
+    const list = options[key];
+    return list[Math.floor(seededDraw(seed, n) * list.length) % list.length]!;
+  };
+  return {
+    era: pick("era", 0),
+    place: pick("place", 1),
+    mood: pick("mood", 2),
+    style: pick("style", 3),
   };
 }
 

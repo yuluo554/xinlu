@@ -5,15 +5,34 @@
 import {
   advanceStage,
   applyChoice,
+  applyCustomChoice,
   birthEnvOptions,
   createRun,
   initialDimsOf,
   optionDimsDelta,
   optionLocks,
   pickEvent,
+  randomBirthEnv,
   resolveEnding,
 } from "../engine/engine";
-import { STAGES, type BirthEnv, type Dims, type Ending, type ResKey, type RunState, type Stage } from "../engine/model";
+import { SEED_MAX, seedCodeOf, seedFromCode } from "../engine/seedcode";
+import {
+  DEFAULT_LLM_SETTINGS,
+  llmUsable,
+  loadLlmSettings,
+  providerById,
+  saveLlmSettings,
+} from "../llm/config";
+import {
+  PRESET_COMMENTARY,
+  customOptionOf,
+  endingCommentary,
+  normalizeCustomOption,
+  rewriteVariant,
+} from "../llm/bypass";
+import type { LlmSettings } from "../llm/config";
+import { STAGES, type BirthEnv, type Dims, type Ending, type LineKey, type ResKey, type RunState, type Stage } from "../engine/model";
+import { deriveEndingV3 } from "../engine/values";
 import { clear, hasSaveKey, load, save } from "../storage/storage";
 import { createFishParams, endingFrame, pickChoiceFrame, renderFish, stageFrame, type DeltaDir } from "../viz/fish";
 import { sceneBackdrop } from "../viz/scene";
@@ -26,18 +45,34 @@ import {
   stageDeltas,
   stageEntries,
 } from "./logic";
-import { timelineVM, choiceFloats, RES_KEYS } from "./timeline";
+import { timelineVM, choiceFloats, RES_KEYS, LINE_META } from "./timeline";
 import { EVENT_ICONS } from "./icons";
+import { renderRelations } from "./relations";
 import { exportShareCard } from "./share-card";
 import { GALLERY_TYPES, loadGallery, recordRun, representativeDims } from "./gallery";
 import portraits from "../data/portraits.json" with { type: "json" };
 import * as S from "./screens";
 
-type View = "start" | "card" | "aftermath" | "summary" | "ending" | "corrupt" | "gallery";
+type View =
+  | "start"
+  | "card"
+  | "aftermath"
+  | "summary"
+  | "ending"
+  | "corrupt"
+  | "gallery"
+  | "relations"
+  | "settings";
 
 let root: HTMLElement;
 let state: RunState | null = null;
 let view: View = "start";
+// 图谱页的返回目标（小结或终局进入时各记一笔）。
+let relationsReturn: View = "summary";
+// 自定义槽错误（渲染时消费一次即清）。
+let customSlotError: string | null = null;
+// context 变体改写缓存（eventId → 改写文本；表现态，重开即弃）。
+const variantCache = new Map<string, string>();
 let pendingAftermath: { stage: Stage; ageHint: string; text: string } | null = null;
 // choice 类表情反馈帧(02 §二):表现态,不进存档(schema v1 冻结,刷新续局回待机态)。
 let choiceFeedback: string | null = null;
@@ -49,6 +84,16 @@ let galleryJustUnlocked = false;
 const NEUTRAL_DIMS = { ei: 50, sn: 50, tf: 50, jp: 50 };
 
 type Boot = { kind: "fresh" } | { kind: "resume"; state: RunState } | { kind: "corrupt" };
+
+/** 新局种子 [0, 2^31)：crypto 源无偏右移取值；不可用环境回退 Math.random（游戏种子，非加密用途）。 */
+function randomSeed(): number {
+  const buf = new Uint32Array(1);
+  if (typeof globalThis.crypto?.getRandomValues === "function") {
+    globalThis.crypto.getRandomValues(buf);
+    return buf[0]! >>> 1;
+  }
+  return Math.floor(Math.random() * SEED_MAX);
+}
 
 function boot(): Boot {
   try {
@@ -106,6 +151,12 @@ function render(): void {
     case "gallery":
       renderGallery();
       break;
+    case "relations":
+      renderRelationsView();
+      break;
+    case "settings":
+      renderSettings();
+      break;
     case "corrupt":
       root.innerHTML = S.corruptScreen();
       bindRestart();
@@ -117,6 +168,12 @@ function renderStart(error?: string): void {
   root.innerHTML = S.startScreen(birthEnvOptions(), error);
   const form = root.querySelector<HTMLFormElement>("[data-env-form]");
   if (!form) return;
+  const begin = (env: BirthEnv, seed: number): void => {
+    state = createRun(env, seed);
+    persist();
+    view = "card";
+    render();
+  };
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const data = new FormData(form);
@@ -127,17 +184,34 @@ function renderStart(error?: string): void {
       style: String(data.get("style") ?? ""),
     };
     try {
-      state = createRun(env, Date.now() % 2147483647);
+      // 手选出生：种子仍生成并随终局展示（v3/02 §六：手选路径不改，码可复现）
+      begin(env, randomSeed());
     } catch {
       renderStart("出生环境无效，请重新选择后再开始。");
+    }
+  });
+  // 随机出生（v3/02 §六 ▸ M3'' 增补）：seed 派生四要素，同码必同人生
+  root.querySelector<HTMLButtonElement>("[data-random-birth]")?.addEventListener("click", () => {
+    begin(randomBirthEnv(randomSeed()), randomSeed());
+  });
+  // 种子码开局：输入码 → 还原 seed → 派生同一出生环境
+  const seedForm = root.querySelector<HTMLFormElement>("[data-seed-form]");
+  seedForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const code = String(new FormData(seedForm).get("seedCode") ?? "");
+    const seed = seedFromCode(code);
+    if (seed === null) {
+      renderStart("种子码没认出来——格式应为 XL-XXXX-XXXX（不含 0、1、O、I）。");
       return;
     }
-    persist();
-    view = "card";
-    render();
+    begin(randomBirthEnv(seed), seed);
   });
   root.querySelector<HTMLButtonElement>("[data-gallery-open]")?.addEventListener("click", () => {
     view = "gallery";
+    render();
+  });
+  root.querySelector<HTMLButtonElement>("[data-settings-open]")?.addEventListener("click", () => {
+    view = "settings";
     render();
   });
 }
@@ -150,6 +224,9 @@ function renderCard(feedback: typeof pendingFeedback): void {
     return;
   }
   const stage = STAGES[state.stageIndex]!;
+  const customError = customSlotError;
+  customSlotError = null;
+  const llm = loadLlmSettings();
   root.innerHTML = S.cardAskScreen({
     stageIndex: state.stageIndex,
     stage,
@@ -166,11 +243,81 @@ function renderCard(feedback: typeof pendingFeedback): void {
     resources: state.resources,
     bump: feedback?.bump ?? [],
     floaters: feedback?.floaters ?? [],
+    custom: llmUsable(llm),
+    customError: customError ?? undefined,
   });
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-option]")) {
     btn.addEventListener("click", () => onChoose(Number(btn.dataset.option)));
   }
+  root.querySelector<HTMLButtonElement>("[data-custom-submit]")?.addEventListener("click", () => {
+    const input = root.querySelector<HTMLInputElement>("[data-custom-slot] .custom-input");
+    void onCustom(input?.value ?? "");
+  });
+  // 用途②变体改写（v3/02 §七）：仅 context 事件、旁路可用；非阻塞——原文先渲染，改写到达后原位替换
+  if (llmUsable(llm) && event.type === "context") {
+    void maybeSwapVariant(event.id);
+  }
   bindRestart();
+}
+
+/** 变体改写异步落位：缓存命中直接换，否则请求；事件已翻页则丢弃。 */
+async function maybeSwapVariant(eventId: string): Promise<void> {
+  if (!state) return;
+  const cached = variantCache.get(eventId);
+  if (cached) {
+    swapEventText(eventId, cached);
+    return;
+  }
+  const settings = loadLlmSettings();
+  const event = pickEvent(state);
+  if (!event || event.id !== eventId) return;
+  const text = await rewriteVariant(event, settings);
+  if (!text) return; // 降级：保持原文（静默）
+  variantCache.set(eventId, text);
+  swapEventText(eventId, text);
+}
+
+function swapEventText(eventId: string, text: string): void {
+  if (!state || view !== "card") return;
+  if (pickEvent(state)?.id !== eventId) return;
+  const el = root.querySelector(".event-text");
+  if (el) el.textContent = text;
+}
+
+/** 用途①自定义槽：LLM 归一 → applyCustomChoice；失败置错误提示重渲染（原文卡仍在）。 */
+async function onCustom(userText: string): Promise<void> {
+  if (!state || !userText.trim()) return;
+  const event = pickEvent(state);
+  if (!event) return;
+  const capturedState = state;
+  const btn = root.querySelector<HTMLButtonElement>("[data-custom-submit]");
+  const input = root.querySelector<HTMLInputElement>("[data-custom-slot] .custom-input");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "AI 裁决中…";
+  }
+  if (input) input.readOnly = true;
+  const settings = loadLlmSettings();
+  const optionView = await normalizeCustomOption(userText, event, settings);
+  // 等待期间玩家可能点了常规选项/重开：状态已推进则丢弃本次裁决
+  if (!optionView || state !== capturedState || view !== "card") {
+    if (state === capturedState && view === "card") {
+      customSlotError = "AI 暂时没答上来——请重试，或先选一个现有选项。";
+      render();
+    }
+    return;
+  }
+  const option = customOptionOf(optionView);
+  // 自定义行动的反馈浮动与常规选项同链路
+  pendingFeedback = {
+    floaters: choiceFloats(option.deltas3 ?? {}, option.resourceDeltas ?? {}),
+    bump: RES_KEYS.filter((k) => (option.resourceDeltas[k] ?? 0) !== 0),
+  };
+  choiceFeedback = pickChoiceFrame("neutral", createFishParams(capturedState.dims).mood, capturedState.seed + capturedState.history.length);
+  state = applyCustomChoice(capturedState, option);
+  persist();
+  view = "card";
+  render();
 }
 
 function onChoose(index: number): void {
@@ -273,8 +420,25 @@ function renderSummary(): void {
   });
   hydrateFish(stageFrame(stage));
   hydrateRadar([dimsAtStageStart(state, stage)]);
+  root.querySelector<HTMLButtonElement>("[data-relations-open]")?.addEventListener("click", () => {
+    relationsReturn = "summary";
+    view = "relations";
+    render();
+  });
   bindContinue();
   bindRestart();
+}
+
+/** 图谱页：SVG 水合进图表槽（与鱼像/雷达同一水合纪律）；返回到进入时的屏幕。 */
+function renderRelationsView(): void {
+  if (!state) return;
+  root.innerHTML = S.relationsScreen();
+  const slot = root.querySelector("[data-relations-chart]");
+  if (slot) slot.innerHTML = renderRelations(state.npcs);
+  root.querySelector<HTMLButtonElement>("[data-relations-back]")?.addEventListener("click", () => {
+    view = relationsReturn;
+    render();
+  });
 }
 
 function renderEnding(): void {
@@ -288,7 +452,7 @@ function renderEnding(): void {
     text: ending.text,
     retrospect: ending.retrospect,
     criticals: criticalChoices(state.history),
-    seed: state.seed,
+    seedCode: seedCodeOf(state.seed),
     resources: state.resources,
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
@@ -299,13 +463,77 @@ function renderEnding(): void {
       isNew: galleryJustUnlocked,
       runs: gallery.runs,
     },
+    relations: state.npcs,
   });
   hydrateFish(endingFrame(ending.id));
   hydrateRadar(STAGES.map((s) => dimsAtStageStart(state!, s)));
   const curveSlot = root.querySelector("[data-slot='curve']");
   if (curveSlot) renderCurve(state.history, curveSlot, initialDimsOf(state.env));
+  hydrateCommentary(ending);
   bindShare(ending);
   bindRestart();
+}
+
+/** 用途③终局点评（v3/02 §七）：可用 → 异步请求（先占位）；不可用/失败 → 预设文案。 */
+function hydrateCommentary(ending: Ending): void {
+  const slot = root.querySelector("[data-llm-commentary]");
+  if (!slot || !state) return;
+  const settings = loadLlmSettings();
+  if (!llmUsable(settings)) {
+    slot.textContent = PRESET_COMMENTARY;
+    return;
+  }
+  slot.textContent = "点评生成中…";
+  const lineSummary = (Object.entries(deriveEndingV3(state, resolveEnding).lineStates) as Array<[string, string]>)
+    .map(([line, st]) => `${LINE_META[line as LineKey].label}${st}`)
+    .join("，");
+  const captured = state;
+  void endingCommentary(
+    { title: ending.title, letters: endingLetters(ending, captured), lineSummary },
+    settings,
+  ).then((text) => {
+    if (!slot.isConnected) return;
+    slot.textContent = text ?? PRESET_COMMENTARY;
+  });
+}
+
+/** 设置页（v3/02 §七）：服务商预选自动填 Base URL；保存回开局屏。 */
+function renderSettings(error?: string): void {
+  const settings = loadLlmSettings();
+  root.innerHTML = S.settingsScreen({ settings, error });
+  const form = root.querySelector<HTMLFormElement>("[data-settings-form]");
+  form?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const next: LlmSettings = {
+      enabled: data.get("enabled") === "on",
+      provider: String(data.get("provider") ?? "openai"),
+      baseUrl: String(data.get("baseUrl") ?? "").trim(),
+      apiKey: String(data.get("apiKey") ?? "").trim(),
+      model: String(data.get("model") ?? "").trim(),
+    };
+    if (!providerById(next.provider)) {
+      renderSettings("服务商预设不认识，请重新选择。");
+      return;
+    }
+    try {
+      saveLlmSettings(next);
+    } catch {
+      renderSettings("本机存储不可用，设置没有保存。");
+      return;
+    }
+    view = "start";
+    render();
+  });
+  form?.querySelector<HTMLSelectElement>('select[name="provider"]')?.addEventListener("change", (e) => {
+    const preset = providerById((e.target as HTMLSelectElement).value);
+    const baseInput = form.querySelector<HTMLInputElement>('input[name="baseUrl"]');
+    if (preset && baseInput && preset.baseUrl) baseInput.value = preset.baseUrl;
+  });
+  root.querySelector<HTMLButtonElement>("[data-settings-back]")?.addEventListener("click", () => {
+    view = "start";
+    render();
+  });
 }
 
 /** 「保存分享卡」(v2/03 §3):终局屏导出 1080×1440 PNG,纯客户端零上传;失败原地提示,不打断复盘。 */
@@ -414,6 +642,8 @@ function restart(): void {
   pendingFeedback = null;
   choiceFeedback = null;
   galleryJustUnlocked = false;
+  customSlotError = null;
+  variantCache.clear();
   view = "start";
   render();
 }

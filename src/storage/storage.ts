@@ -1,6 +1,7 @@
 // 存档：localStorage 单 key 读写 + schema v2 校验 + v1→v2 迁移。损坏/不识别一律返回 null
 // 且绝不静默清档，由 UI 据此给出「存档无法读取，可重新开始」的提示（plan/v3/02 §八、plan/02 §六）。
 import birthMapRaw from "../data/birth-map.json";
+import { seedCodeOf } from "../engine/seedcode";
 import {
   DIM_KEYS,
   NPC_TAGS,
@@ -26,6 +27,7 @@ export const LEGACY_SAVE_KEY = "xinlu.save.v1";
 const SAVE_VERSION = 2;
 
 const ENV_KEYS = ["era", "place", "mood", "style"] as const;
+/** 顶层键集：seedCode 为 v3-M3'' 可选字段（旧 v2 信封 11 键与新 12 键两种形态都合法）。 */
 const TOP_KEYS = [
   "v",
   "seed",
@@ -39,6 +41,7 @@ const TOP_KEYS = [
   "lines",
   "npcs",
 ] as const;
+const OPTIONAL_TOP_KEYS = ["seedCode"] as const;
 const LINE_KEYS = ["study", "career", "love", "friend", "health"] as const;
 
 type BirthMap = Record<(typeof ENV_KEYS)[number], Record<string, unknown>>;
@@ -56,6 +59,8 @@ export function save(state: RunState): void {
     JSON.stringify({
       v: SAVE_VERSION,
       seed: state.seed,
+      // v3-M3'' 种子码（v3/02 §八 ▸ M1'' 增补：可选字段；数值键 seed 为真值，码是它的文本形）
+      seedCode: seedCodeOf(state.seed),
       env: state.env,
       stageIndex: state.stageIndex,
       dims: state.dims,
@@ -119,7 +124,8 @@ function migrate(raw: unknown): RunState | null {
 // ── v2 校验 ──
 
 function validateV2(raw: Record<string, unknown>): RunState | null {
-  if (!exactKeys(raw, TOP_KEYS)) return null;
+  // seedCode 可选（02 §八 ▸ M1'' 增补：读取缺省按 seed 数值键工作；码形非法也当缺省，不清档）
+  if (!exactKeys(raw, TOP_KEYS) && !exactKeys(raw, [...TOP_KEYS, ...OPTIONAL_TOP_KEYS])) return null;
   if (typeof raw.seed !== "number") return null;
   const env = readEnv(raw.env);
   if (!env) return null;

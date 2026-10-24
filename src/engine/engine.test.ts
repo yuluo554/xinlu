@@ -4,6 +4,7 @@ import eventsRaw from "../data/events.json";
 import {
   advanceStage,
   applyChoice,
+  applyCustomChoice,
   createRun,
   mbtiLetters,
   optionAvailable,
@@ -418,6 +419,26 @@ describe("数据口径 ↔ 引擎 ↔ 测试 三方一致", () => {
   });
 });
 
+describe("applyCustomChoice（自定义第 4 槽，v3/02 §七 ▸ M3'' 增补）", () => {
+  it("归一选项直入状态机：bondDeltas 入册 / history 记第 4 槽位 / 数值走同一结算链", () => {
+    const state0 = createRun(ENV, 42);
+    const option = {
+      text: "自定义行动",
+      deltas3: { values: 2 },
+      resourceDeltas: { mood: 3 },
+      bondDeltas: { bestie: 12 },
+    };
+    const next = applyCustomChoice(state0, option);
+    const last = next.history[next.history.length - 1]!;
+    const event = EVENTS.find((e) => e.id === last.eventId)!;
+    expect(last.option).toBe(event.options.length); // 第 4 槽位约定
+    expect(next.npcs.find((n) => n.id === "bestie")).toEqual({ id: "bestie", bond: 62, tag: "亲密" });
+    expect(next.values3.values).toBe(52);
+    expect(next.resources.mood).toBe(63);
+    expect(next.npcs.length).toBe(state0.npcs.length + 1);
+  });
+});
+
 describe("可复现契约：同 seed + 同选项序列 ⇒ 全程逐字段全等", () => {
   type Chooser = (state: RunState) => number;
 
@@ -434,7 +455,17 @@ describe("可复现契约：同 seed + 同选项序列 ⇒ 全程逐字段全等
     states.push(state);
     while (state.stageIndex < STAGES.length) {
       const event = pickEvent(state);
-      state = event ? applyChoice(state, choose(state)) : advanceStage(state);
+      if (!event) {
+        state = advanceStage(state);
+        states.push(state);
+        continue;
+      }
+      // 首选被资源门槛锁定时回退到首个可用项（确定性不变：同 seed 同回退路径）
+      const pref = choose(state);
+      const idx = optionAvailable(state, event, pref)
+        ? pref
+        : event.options.findIndex((_, i) => optionAvailable(state, event, i));
+      state = applyChoice(state, idx);
       states.push(state);
     }
     return states;
@@ -477,6 +508,19 @@ describe("可复现契约：同 seed + 同选项序列 ⇒ 全程逐字段全等
       const final = trace[trace.length - 1]!;
       expect(final.stageIndex).toBe(STAGES.length);
       expect(resolveEnding(final).id).toMatch(/^end-/);
+    }
+  });
+
+  it("全选项驱动跑通后 NPC 已入册（bondDeltas 链路防回退：settleChoice 必须携带 npcs）", () => {
+    // 回归锚：settleChoice 返回对象曾漏 npcs 字段 → 支线消费 117 条仍只有父母（E2E 未拦住，单测必红）
+    for (const seed of [2026, 42]) {
+      const trace = fullTrace(seed, chooseFirst);
+      const final = trace[trace.length - 1]!;
+      expect(final.npcs.length, `seed=${seed}`).toBeGreaterThan(2);
+      for (const npc of final.npcs) {
+        expect(npc.bond).toBeGreaterThanOrEqual(0);
+        expect(npc.bond).toBeLessThanOrEqual(100);
+      }
     }
   });
 });

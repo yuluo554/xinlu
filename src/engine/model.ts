@@ -52,10 +52,17 @@ export type LineProgress = Record<Exclude<LineKey, "fate">, number>;
 export const LINE_STATES = ["圆满", "平顺", "中断", "未启"] as const;
 export type LineState = (typeof LINE_STATES)[number];
 
-// ── v3 NPC（状态层；名字/职责注册表随 M3'' 图谱落数据文件）──
+// ── v3 NPC（状态层；名字/职责注册表 = src/data/npcs.json，validate E.BOND 守门）──
 
 export const NPC_TAGS = ["亲密", "疏离", "决裂", "羁绊"] as const;
 export type NpcTag = (typeof NPC_TAGS)[number];
+
+/** NPC 名字/职责/线别注册表条目（数据文件形状；状态层只存 id/bond/tag）。 */
+export interface NpcProfile {
+  name: string;
+  role: string;
+  line: LineKey;
+}
 
 export interface NpcState {
   id: string;
@@ -101,6 +108,8 @@ export interface EventOption {
   /** v3 主效应（三观增量）；v1 的四维直改 deltas 字段已从 schema 移除。 */
   deltas3: Deltas3;
   resourceDeltas: ResourceDeltas;
+  /** 关系增量（v3/02 §五 ▸ M3'' 增补）：键 = npcs.json 注册 id，|Δ| ≤15，经 values 轴衰减后入账。 */
+  bondDeltas?: Record<string, number>;
   /** 选项可用门槛：所列资源各 ≥ 阈值才可选（仅支线选项使用，plan/v3/02 §三）。 */
   requires?: Partial<Record<ResKey, number>>;
   flag?: string;

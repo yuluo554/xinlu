@@ -1,8 +1,8 @@
 # v3-M2'' · 事件图标对照表（逐张对文案清单）
 
 > 依据 plan/v3/02 §九：Game-Icons（CC-BY 3.0）每事件 1 枚主题图标；本表是「图说的是不是这件事」的对账单。
-> 对照表单源 = [src/data/icon-map.json](../src/data/icon-map.json)（图标名↔事件 id，validate 数据门 I 区断言 175/175 全覆盖 + 图标文件存在性）；
-> 素材溯源 = [assets/game-icons/SOURCES.md](../assets/game-icons/SOURCES.md)；作者目录即署名单位（delapouite×107、lorc×54、caro-asercion×4、skoll×4、sbed×2、seregacthtuf×1、lord-berandas×1、various-artists×1、willdabeast×1）。
+> 对照表单源 = [src/data/icon-map.json](../src/data/icon-map.json)（图标名↔事件 id，validate 数据门 I 区断言 243/243 全覆盖 + 图标文件存在性；M3'' 增补 68 条见文末节）；
+> 素材溯源 = [assets/game-icons/SOURCES.md](../assets/game-icons/SOURCES.md)；作者目录即署名单位（delapouite×148、lorc×77、caro-asercion×7、skoll×4、sbed×3、seregacthtuf×1、lord-berandas×1、various-artists×1、willdabeast×1）。
 > 评审门（04 §v3-M2''）：素材「图说的是不是这件事」逐张抽验记录见文末。
 
 ## 对照表（175 条，事件库序）
@@ -192,3 +192,80 @@
   返聘带新人→teacher 等）；1 条初始配图偏弱：adult-005（后浪新人）配 chess-pawn，语义靠隐喻（棋子换位）成立，保留并在此注记。
 - 全库扫描无「图文明显不符」项；rescue 6 条与资源语义一一对应
   （despair/tear-tracks/despair-friend、health-decrease/medical-pack/health、wallet/mountains/career）。
+
+## v3-M3'' 增补（68 条，事件库序）
+
+> v3-M3'' 3.4 支线补齐：love（-4xx）/ friend（-5xx）/ health（-6xx）三线每阶段 ≥3 入库，
+> 图标仍按 02 §九口径逐张对文案入库（Game-Icons 全量包同批提取，许可与署名口径不变——CC-BY 3.0，
+> 作者目录即署名单位）。validate I 区随事件库扩至 243/243 全覆盖；新增作者 sbed 入署名名单。
+
+| 事件 | 阶段·类型·线 | 图标 | 作者 | 事件文案（摘录） |
+|---|---|---|---|---|
+| infant-401 | 婴儿·日常·情感 | `heart-bottle` | lorc | 妈妈要回去上班了。早上她换好外套，蹲在摇篮边跟你说了很久的话，你没听懂，只看见她… |
+| infant-402 | 婴儿·日常·情感 | `baby-face` | delapouite | 过年，一屋子亲戚轮流抱你。有人胡子扎人，有人香水呛鼻，你被传了一圈。… |
+| infant-403 | 婴儿·日常·情感 | `heart-organ` | lorc | 妈妈病了，躺在床上，说话的声音很小。你第一次踮脚往床上看，有点怕。… |
+| toddler-401 | 幼儿·日常·情感 | `walking-scout` | delapouite | 放学铃响过了，小朋友一个个被接走。你坐在门口的小板凳上，数蚂蚁。… |
+| toddler-402 | 幼儿·日常·情感 | `broken-heart` | lorc | 半夜你被吵架声吵醒。门缝里漏进一条光，你抱着被子听不清词，只听得出气氛很坏。… |
+| toddler-403 | 幼儿·日常·情感 | `passport` | delapouite | 爸爸出差一个月。每天晚饭桌上的椅子空着，妈妈给他留的碗你也认得。… |
+| childhood-401 | 童年·日常·情感 | `heart-necklace` | delapouite | 你翻出美术课剩下的皱纹纸，想给妈妈做一条生日项链。做到一半，胶水粘了满手。… |
+| childhood-402 | 童年·日常·情感 | `chewed-heart` | lorc | 爸妈冷战第三天。饭桌上只有筷子碰碗的声音，你夹的菜不知道该往谁碗里放。… |
+| childhood-403 | 童年·日常·情感 | `film-spool` | delapouite | 影楼搞活动，全家拍一张全家福。拍照师傅喊了三遍'笑一笑'，爸爸的表情还是僵的。… |
+| teen-401 | 少年·日常·情感 | `love-letter` | delapouite | 同桌传来的草稿纸角上，画了一个歪歪的笑脸。你的心跳快了一拍，笔尖停在半空。… |
+| teen-402 | 少年·日常·情感 | `love-mystery` | delapouite | 你俩在走廊说话被班主任看见了。'影响学习'四个字，第二天就传遍了全班。… |
+| teen-403 | 少年·日常·情感 | `tarot-06-the-lovers` | caro-asercion | 志愿表交上去的前一晚，你俩在天台看城市的灯。那边问：报同一个城市吗？… |
+| youth-401 | 青年·日常·情感 | `heart-wings` | delapouite | 那个人又出现在你常去的自习室，占了你旁边的位置，桌上放着两杯奶茶。… |
+| youth-402 | 青年·日常·情感 | `linked-rings` | lorc | 那边去了另一座城市。视频里说'这边下雨了'，你抬头看自己窗外的太阳。… |
+| youth-403 | 青年·日常·情感 | `opposite-hearts` | delapouite | 你们租了第一套一起住的房子。为'牙膏从哪头挤'和'外卖谁下单'，磨合了整整两周。… |
+| adult-401 | 壮年·日常·情感 | `engagement-ring` | lorc | 你把戒指盒藏在常去那家小馆子的甜品下面。手心全是汗，对方的叉子已经伸过来了。… |
+| adult-402 | 壮年·日常·情感 | `eternal-love` | delapouite | 婚期定了。两家老人为'酒席摆几桌'各执一词，你夹在中间翻译，翻译，再翻译。… |
+| adult-403 | 壮年·日常·情感 | `nested-hearts` | delapouite | 婚后哪年都有坎。这次为'过年回谁家'，你俩冷战一周，家里安静得能听见冰箱声。… |
+| midlife-401 | 中年·日常·情感 | `sparkles` | delapouite | 结婚二十周年。你翻出当年的红本本，那边凑过来看：'那时候你头发真多。'… |
+| midlife-402 | 中年·日常·情感 | `heart-battery` | delapouite | 你俩最近像搭伙过日子的同事：一个刷手机，一个看电视，一晚上说不上十句话。… |
+| midlife-403 | 中年·日常·情感 | `heart-shield` | delapouite | 母亲住院，弟弟妹妹在群里装看不见。你和伴侣在床边轮流守夜，累得话都少了。… |
+| elder-401 | 老年·日常·情感 | `heart-inside` | lorc | 老伴体检查出点问题，要住院观察。签字的时候，你的手比当年求婚时抖得还厉害。… |
+| elder-402 | 老年·日常·情感 | `love-song` | lorc | 整理旧物翻出一铁盒：粮票、情书、你俩年轻时的黑白合照。老伴戴上老花镜，一张张认。… |
+| elder-403 | 老年·日常·情感 | `sunrise` | lorc | 清晨你俩在公园分头锻炼：老伴打拳，你遛弯。回来在长椅会合，一人一半豆浆。… |
+| infant-501 | 婴儿·日常·友情 | `three-friends` | delapouite | 邻居家搬来一户带娃的人家，小孩和你差不多大。两个大人把你们并排放在爬行垫上。… |
+| infant-502 | 婴儿·日常·友情 | `balloons` | lorc | 游乐场的滑梯排队排到了第四个。前面的小孩滑一次不走，赖在滑梯口。… |
+| infant-503 | 婴儿·日常·友情 | `mouth-watering` | lorc | 你手里的饼干只剩最后一块。爬行垫对面，那双眼睛直勾勾地盯着。… |
+| toddler-501 | 幼儿·日常·友情 | `blackball` | lorc | 班里有个说话结巴的小孩，大家学他说话，把他学哭了。老师让你过去。… |
+| toddler-502 | 幼儿·日常·友情 | `shaking-hands` | delapouite | 两个小孩为一辆玩具消防车扭作一团，谁也不撒手。吵到最后，都来找你评理。… |
+| toddler-503 | 幼儿·日常·友情 | `two-shadows` | lorc | 你和阿澈约好了'只跟你玩'。可今天新来的小孩，一直跟在你们身后。… |
+| childhood-501 | 童年·日常·友情 | `old-wagon` | delapouite | 阿澈要跟父母去南方了。行李箱立在门口，那边塞给你一把弹珠，说'替我留着'。… |
+| childhood-502 | 童年·日常·友情 | `star-formation` | delapouite | 班里的'核心小组'向你招手，条件是别再跟'那个成绩差的'玩。… |
+| childhood-503 | 童年·日常·友情 | `prank-glasses` | caro-asercion | 你俩翻墙进工地捡球，被保安逮个正着，要请家长。阿澈攥紧了拳头。… |
+| teen-501 | 少年·日常·友情 | `sport-medal` | delapouite | 保送推荐名额只有一个。名单出来，你和阿澈的名字排在一块儿，中间隔着一条线。… |
+| teen-502 | 少年·日常·友情 | `envelope` | lorc | 你在杂志上交了个笔友，回了三封信。阿澈酸溜溜：写的哪句比我说的好听？… |
+| youth-501 | 青年·日常·友情 | `keyring` | delapouite | 毕业合租，你挑了阿澈。两周后发现：那位的袜子会飞过客厅，你的锅从来不洗。… |
+| youth-502 | 青年·日常·友情 | `gold-stack` | delapouite | 阿澈开口借三个月工资，说家里出了急事。没细说，你也没多问。… |
+| youth-503 | 青年·日常·友情 | `musical-notes` | delapouite | 阿澈的婚礼定在五一，点名你当伴郎。可你手头项目正卡在节骨眼上。… |
+| adult-501 | 壮年·日常·友情 | `pouring-chalice` | lorc | 十年没聚的老同学组了局。包厢里有人谈上市，有人谈脱发，阿澈给你留着主位旁边的座。… |
+| adult-502 | 壮年·日常·友情 | `network-bars` | delapouite | 你发现和阿澈的聊天记录停在三个月前，朋友圈互相点了三年赞。… |
+| midlife-501 | 中年·日常·友情 | `team-idea` | delapouite | 阿澈辞职创业，第一件事就是来找你：缺个懂行的，股份好商量。… |
+| midlife-502 | 中年·日常·友情 | `shattered-heart` | delapouite | 为一笔说不清的账，你俩吵了三十年来的第一架。那扇门摔上的时候，烟灰缸都震倒了。… |
+| midlife-503 | 中年·日常·友情 | `sundial` | lorc | 出差在高铁站撞见高中同桌。三十年过去，你们互相愣了三秒，然后同时喊出对方的外号。… |
+| elder-501 | 老年·日常·友情 | `candle-holder` | lorc | 老周走了。追悼会回来，阿澈打来电话，两个人在电话两头沉默了很久。… |
+| elder-502 | 老年·日常·友情 | `ballerina-shoes` | delapouite | 小区广场舞队缺个领舞，全队目光望向你和阿澈。那位的第三步就踩错了拍子。… |
+| elder-503 | 老年·日常·友情 | `cooking-glove` | delapouite | 阿澈住院了，子女都在外地。你揣着保温桶去送饭，被护士拦下来登记家属关系。… |
+| infant-601 | 婴儿·日常·健康 | `syringe` | lorc | 疫苗日。针还没碰到胳膊，你先被消毒棉的味道整不会了，整张脸皱成了包子。… |
+| infant-602 | 婴儿·日常·健康 | `baby-bottle` | delapouite | 辅食添加期。胡萝卜泥被你一口顶出来，碗沿上糊了一圈。… |
+| infant-603 | 婴儿·日常·健康 | `walking-boot` | lorc | 你在院子里跑得太欢，膝盖磕出了第一块疤。大人们围过来，气氛很紧张。… |
+| toddler-601 | 幼儿·日常·健康 | `tooth` | lorc | 牙医说你有颗牙被'糖果虫'住了个洞。你攥着妈妈的手，想想睡前那颗奶糖。… |
+| toddler-602 | 幼儿·日常·健康 | `thermometer-cold` | delapouite | 幼儿园班上一半人在咳嗽。你也没躲过去，烧在家里，窗外是别的小孩的笑声。… |
+| toddler-603 | 幼儿·日常·健康 | `3d-glasses` | delapouite | 动画片一集接一集，你看电视越凑越近，妈妈在你身后越站越沉。… |
+| childhood-601 | 童年·日常·健康 | `toothbrush` | caro-asercion | 第一颗乳牙晃了半个月，吃饭都躲着用。妈妈问：自己拔还是去医院？… |
+| childhood-602 | 童年·日常·健康 | `ambulance` | delapouite | 跳山羊你没助跑够，坐在了垫子边上。校医室里，你盯着那瓶红药水。… |
+| childhood-603 | 童年·日常·健康 | `carrot` | delapouite | 体检表出来，身高在中线下。妈妈开始变着法儿炖汤：排骨、鱼头，还有你叫不上名的根。… |
+| teen-601 | 少年·日常·健康 | `brain-freeze` | lorc | 新买的游戏到了'最关键的一关'。闹钟显示凌晨一点，你跟自己说'最后十分钟'。… |
+| teen-602 | 少年·日常·健康 | `pulse` | sbed | 体测成绩单发下来，长跑从及格线上掉了下来。体育老师看了你三秒，没说话。… |
+| teen-603 | 少年·日常·健康 | `protection-glasses` | delapouite | 黑板上的字开始长毛边。眼科门口排着队，验光师说你近视两百度了。… |
+| youth-601 | 青年·日常·健康 | `tired-eye` | delapouite | 工作日的你白天靠咖啡续命，夜里刷手机到两点。周末一觉睡到午饭，起来头疼。… |
+| youth-602 | 青年·日常·健康 | `basketball-ball` | delapouite | 楼下新开的健身房在发传单：年卡五折，送两节私教课。你摸了摸自己久坐的腰。… |
+| youth-603 | 青年·日常·健康 | `hospital-cross` | lorc | 入职第一年体检，报告上有两个小箭头。林医生用笔敲了敲那行：年轻人，少熬夜。… |
+| adult-601 | 壮年·日常·健康 | `spring` | delapouite | 脖子先于梦想退休了。转个头咔咔响，林医生说是'鼠标手他哥'——鼠标颈。… |
+| adult-602 | 壮年·日常·健康 | `medicines` | delapouite | 年度复查，林医生翻着报告说：比去年好，但你这熬夜的账，身体都记着呢。… |
+| midlife-601 | 中年·日常·健康 | `steak` | delapouite | 体检报告三个箭头排排站。医生的话很简短：管住嘴，迈开腿，酒局能推就推。… |
+| midlife-602 | 中年·日常·健康 | `pill` | lorc | 降压药正式进驻你家药盒。林医生叮嘱：按时吃，别看血压降了就自己停。… |
+| midlife-603 | 中年·日常·健康 | `cigarette` | delapouite | 烟龄三十年。家人把戒烟贴拍在桌上，你的打火机在口袋里硌了一下。… |
+| elder-601 | 老年·日常·健康 | `medicine-pills` | delapouite | 药盒被你分成了早中晚三格，像小时候的文具盒。林医生笑：比你乖的病人不多。… |
+| elder-602 | 老年·日常·健康 | `walk` | delapouite | 浴室加装的扶手和防滑垫到位了。你扶着墙走了一圈，承认这把年纪得服软。… |
