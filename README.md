@@ -81,7 +81,7 @@ npm run dev      # 浏览器打开 http://localhost:5173
 | v2-M1' 回归基线与内容修复（E2E / B1 / assets 策略） | ✅（2026-10-24） |
 | v2-M2' 人格鱼 avatar（fish.ts + 常驻 mascot + 表情映射） | ✅（2026-10-24） |
 | v2-M3' 分享卡 + 场景氛围 + 双门禁 | ✅（2026-10-24） |
-| v2-M4' 图鉴 + 发布 v2.0.0 | ⬜ 待开工（套件待评审） |
+| v2-M4' 图鉴 + 发布 v2.0.0 | ✅（2026-10-24，[tag v2.0.0](https://github.com/yuluo554/xinlu/releases/tag/v2.0.0)） |
 
 ## 许可
 
