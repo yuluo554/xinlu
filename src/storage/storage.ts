@@ -49,6 +49,11 @@ export function clear(): void {
   store().removeItem(SAVE_KEY);
 }
 
+/** key 是否在位（无论内容合法与否）：UI 据此区分「无档」与「有档但损坏」，损坏提示绝不静默清档。 */
+export function hasSaveKey(): boolean {
+  return store().getItem(SAVE_KEY) !== null;
+}
+
 /** 版本迁移链：v1 为首版（透传校验）。今后破坏性改动 v+1 时在此追加迁移函数，迁入新 key 后清理旧 key。 */
 function migrate(raw: unknown): RunState | null {
   if (!isRecord(raw) || raw.v !== SAVE_VERSION) return null;

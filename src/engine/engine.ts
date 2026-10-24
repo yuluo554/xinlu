@@ -150,3 +150,25 @@ export function mbtiLetters(dims: Dims, env: BirthEnv): string {
     letter(dims.jp, init.jp, "J", "P"),
   ].join("");
 }
+
+// —— M3 只读访问器（plan/03 §2 附件导出）：供视图/可视化消费，不改冻结五签名 ——
+
+/** 四要素可选枚举（从 birth-map 键读出）。开局屏枚举清单的唯一来源，UI 不得内联。 */
+export function birthEnvOptions(): Record<keyof BirthEnv, string[]> {
+  return {
+    era: Object.keys(BIRTH_MAP.era),
+    place: Object.keys(BIRTH_MAP.place),
+    mood: Object.keys(BIRTH_MAP.mood),
+    style: Object.keys(BIRTH_MAP.style),
+  };
+}
+
+/** 出生初始四维（K8 合成）。阶段小结淡影与演化曲线的起点取 here。 */
+export function initialDimsOf(env: BirthEnv): Dims {
+  return initialDims(env);
+}
+
+/** 按 id 取事件；阶段聚合（history 无阶段字段）与终局关键抉择回顾取 here。未知 id 返回 undefined。 */
+export function eventById(eventId: string): GameEvent | undefined {
+  return EVENTS.find((e) => e.id === eventId);
+}

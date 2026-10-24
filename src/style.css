@@ -1,29 +1,537 @@
-/* M0 骨架占位样式：仅保证空页可开不破相。设计规范（浅色、大留白、单一强调色）在 M3 落地。 */
+/* 心路 · 设计规范落地（DESIGN.md / plan 04 §M3）：浅色纸面、大留白、单一强调色、圆角卡片、轻动效。
+   色板三角色：ground / ink / accent（玉青 #2f7d6d）；表面用音调步进区分，不用分隔线与投影。 */
 :root {
   color-scheme: light;
-  font-family: system-ui, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --ground: #fafaf7;
+  --surface: #ffffff;
+  --surface-2: #f1efe9;
+  --ink: #2b2b28;
+  --ink-2: #6f6f66;
+  --ink-3: #a6a69b;
+  --accent: #2f7d6d;
+  --accent-deep: #26655a;
+  --accent-soft: rgba(47, 125, 109, 0.12);
+  --radius: 16px;
+  --radius-item: 12px;
+  --radius-pill: 999px;
+  font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: #fafaf7;
-  color: #2b2b28;
+  background: var(--ground);
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
 }
 
-.shell {
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* —— 屏骨架：移动单列，桌面加宽 —— */
+.screen {
+  width: 100%;
   max-width: 640px;
-  margin: 18vh auto 0;
-  padding: 0 24px;
+  margin: 0 auto;
+  padding: 20px 20px 56px;
+  flex: 1;
+  animation: rise 0.28s ease-out both;
+}
+
+@media (min-width: 768px) {
+  .screen {
+    max-width: 760px;
+    padding-top: 40px;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* —— 顶栏与进度点 —— */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.wordmark {
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.35em;
+  margin-right: auto;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--surface-2);
+}
+
+.dot.done {
+  background: var(--accent);
+}
+
+.dot.now {
+  background: var(--ground);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* —— 按钮层级：主行动一色填充，次级静音 —— */
+.btn {
+  min-height: 48px;
+  padding: 0 32px;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--accent-deep);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-ghost {
+  min-height: 40px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* —— 开局屏 —— */
+.screen-start {
   text-align: center;
 }
 
-.shell h1 {
-  font-size: 2rem;
-  letter-spacing: 0.1em;
+.screen-start h1 {
+  font-size: 2.6rem;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  margin: 12vh 0 8px;
+}
+
+.lede {
+  color: var(--ink-2);
+  max-width: 30em;
+  margin: 0 auto 40px;
+}
+
+.env-form {
+  display: grid;
+  gap: 24px;
+  justify-items: start;
+  text-align: left;
+  margin: 0 0 32px;
+}
+
+.env-group {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.env-group legend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+}
+
+.chip input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.chip span {
+  display: inline-block;
+  padding: 8px 18px;
+  min-height: 44px;
+  line-height: 1.9;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--ink);
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.chip input:checked + span {
+  background: var(--accent);
+  color: #fff;
+}
+
+.chip input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.chip:hover span {
+  background: var(--accent-soft);
+}
+
+.chip input:checked:hover + span {
+  background: var(--accent-deep);
+}
+
+.form-error {
+  color: #a5484a;
+  font-size: 0.9rem;
+}
+
+.btn-start {
+  justify-self: center;
+}
+
+.fine-print {
+  color: var(--ink-3);
+  font-size: 0.82rem;
+  margin-top: 32px;
+}
+
+/* —— 卡片流 —— */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+}
+
+.stage-tag {
+  margin: 0 0 14px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+}
+
+.event-text {
+  margin: 0 0 24px;
+  font-size: 1.08rem;
+  line-height: 1.85;
+}
+
+.options {
+  display: grid;
+  gap: 12px;
+}
+
+.option {
+  min-height: 48px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.6;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.option:hover {
+  background: var(--accent-soft);
+}
+
+.option:active {
+  transform: scale(0.99);
+}
+
+.aftermath {
+  margin: 0 0 24px;
+  color: var(--ink-2);
+  line-height: 1.85;
+}
+
+/* —— 阶段小结 / 终局 —— */
+.screen h2 {
+  font-size: 1.5rem;
+  margin: 8px 0 6px;
+}
+
+.screen h3 {
+  font-size: 1.05rem;
+  margin: 32px 0 12px;
 }
 
 .muted {
-  color: #8a8a82;
-  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.viz-row {
+  margin: 20px 0;
+  display: grid;
+  gap: 24px;
+  align-items: center;
+  justify-items: center;
+}
+
+@media (min-width: 768px) {
+  .viz-row.two {
+    grid-template-columns: 300px 1fr;
+    justify-items: stretch;
+  }
+  .viz-row.two .radar-slot {
+    justify-self: center;
+  }
+}
+
+.deltas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.delta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+}
+
+.delta b {
+  font-variant-numeric: tabular-nums;
+}
+
+.delta .up {
+  color: var(--accent);
+}
+
+.delta .down {
+  color: var(--ink-2);
+}
+
+.delta .flat {
+  color: var(--ink-3);
+}
+
+.ending-type {
+  display: inline-block;
+  margin: 4px 0 16px;
+  padding: 6px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: #fff;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+}
+
+.ending-text {
+  line-height: 1.9;
+  margin: 0 0 8px;
+}
+
+.retrospect {
+  margin: 0;
+  padding-left: 1.3em;
+  color: var(--ink-2);
+}
+
+.retrospect li {
+  margin-bottom: 6px;
+}
+
+.retrospect li::marker {
+  color: var(--accent);
+}
+
+.criticals {
+  display: grid;
+  gap: 12px;
+}
+
+.critical-item {
+  padding: 14px 16px;
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+}
+
+.critical-item p {
+  margin: 0;
+}
+
+.critical-q {
   line-height: 1.8;
+}
+
+.critical-a {
+  margin-top: 6px !important;
+  color: var(--accent);
+  font-size: 0.92rem;
+}
+
+.screen-ending .btn-primary {
+  margin-top: 32px;
+}
+
+/* —— 存档损坏 —— */
+.screen-corrupt h2 {
+  margin-top: 14vh;
+}
+
+.screen-corrupt .btn-primary {
+  margin-top: 24px;
+}
+
+/* —— SVG 可视化（viz/ 输出的类名） —— */
+.viz-radar,
+.viz-curve {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.viz-radar {
+  max-width: 300px;
+}
+
+.viz-radar .radar-ring {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-opacity: 0.4;
+}
+
+.viz-radar .radar-ring.neutral {
+  stroke-dasharray: 4 5;
+  stroke-opacity: 0.55;
+}
+
+.viz-radar .radar-spoke {
+  stroke: var(--ink-3);
+  stroke-opacity: 0.25;
+}
+
+.viz-radar .radar-ghost {
+  fill: none;
+  stroke: var(--ink-3);
+  stroke-dasharray: 3 5;
+}
+
+.viz-radar .radar-now {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.viz-radar .radar-dot {
+  fill: var(--accent);
+}
+
+.viz-radar text {
+  fill: var(--ink-2);
+  font-size: 11px;
+}
+
+.viz-curve .curve-grid {
+  stroke: var(--ink-3);
+  stroke-opacity: 0.3;
+}
+
+.viz-curve text {
+  fill: var(--ink-2);
+  font-size: 10px;
+}
+
+.viz-curve .curve-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.viz-curve .curve-ei {
+  stroke: var(--accent);
+  fill: var(--accent);
+}
+
+.viz-curve .curve-sn {
+  stroke: #6f6f66;
+  fill: #6f6f66;
+}
+
+.viz-curve .curve-tf {
+  stroke: #9a9a8f;
+  fill: #9a9a8f;
+}
+
+.viz-curve .curve-jp {
+  stroke: #c0c0b4;
+  fill: #c0c0b4;
+}
+
+/* 轻动效兜底：偏好减弱动效时保留内容、去掉位移动画 */
+@media (prefers-reduced-motion: reduce) {
+  .screen {
+    animation: none;
+  }
+
+  .btn,
+  .option,
+  .chip span,
+  .btn-ghost {
+    transition: none;
+  }
 }

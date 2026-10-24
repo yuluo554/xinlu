@@ -7,7 +7,7 @@ import {
   seededDraw,
 } from "../engine/engine";
 import { STAGES, type RunState } from "../engine/model";
-import { clear, load, SAVE_KEY, save } from "./storage";
+import { clear, hasSaveKey, load, SAVE_KEY, save } from "./storage";
 
 const ENV = { era: "90s", place: "小城", mood: "和睦", style: "权威" };
 
@@ -145,6 +145,23 @@ describe("版本迁移链", () => {
     delete raw.v;
     putRaw(raw);
     expect(load()).toBeNull();
+  });
+});
+
+describe("hasSaveKey（损坏判定辅助：区分「无档」与「有档但损坏」）", () => {
+  it("无 key → false；key 在位（哪怕内容损坏）→ true", () => {
+    expect(hasSaveKey()).toBe(false);
+    backing.set(SAVE_KEY, "{oops");
+    expect(hasSaveKey()).toBe(true);
+    expect(load()).toBeNull();
+    expect(hasSaveKey()).toBe(true);
+  });
+
+  it("合法存档 → true；clear 后 → false", () => {
+    save(sampleState());
+    expect(hasSaveKey()).toBe(true);
+    clear();
+    expect(hasSaveKey()).toBe(false);
   });
 });
 
