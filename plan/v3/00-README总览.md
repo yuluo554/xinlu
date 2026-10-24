@@ -12,7 +12,7 @@
 | 02 | [02-数据与口径.md](02-数据与口径.md) | v3 口径单源：年龄键 / 三观层 / 多线 / 资源 / NPC / LLM 旁路 / 存档 v2 | ✅ 已定稿 |
 | 03 | [03-模块清单与验收.md](03-模块清单与验收.md) | 6 个 v3 模块 × 职责 / 契约 / 验收 | ✅ 已定稿 |
 | 04 | [04-里程碑任务分解.md](04-里程碑任务分解.md) | v3-M1''–M4'' 任务块 / 验证命令 / 评审门 | ✅ 已定稿 |
-| 05 | [05-发布留档.md](05-发布留档.md) | v3.0.0 三件套留档骨架 | ⬜ 待 v3-M4'' 撰写主体 |
+| 05 | [05-发布留档.md](05-发布留档.md) | v3.0.0 三件套留档骨架（主体并入 [../05-发布留档.md](../05-发布留档.md) §八，单源不双写） | ✅ 已定稿（2026-10-25，v3-M4''） |
 | 06 | [06-运维节奏.md](06-运维节奏.md) | 沿用十类缺口 + v3 扩展 | ✅ 规则已定稿 |
 | — | [backlog.md](backlog.md) | v3 迭代队列（证据制） | ✅ 已启用（2026-10-24，v3-M1'' 收尾启用） |
 
@@ -77,7 +77,7 @@
 | 关系图谱 | 08 §三.5 | 图谱页+终局 | 单测 + 渲染断言 | ✅（2026-10-25，npcs.json 注册表 7 位 + bondDeltas 传导（衰减 0.5/tag 阈值 30/60/90）+ 环形图谱页（小结入口）+ 终局快照内联；单测 20 项 + E2E 双端；E2E 实测抓出 settleChoice 漏带 npcs 真缺陷并修复留防回退锚，[docs/v3-M3-gates.md](../../docs/v3-M3-gates.md) §三） |
 | 随机出生种子码 | 08 §三.1 | 开局屏 | 复现断言 | ✅（2026-10-25，XL-XXXX-XXXX 码表去 0/1/O/I + crypto 源种子 + randomBirthEnv 派生四要素 + 存档信封可选 seedCode + 开局屏随机出生/码输入/终局展示；同码复现断言 + 变异自检必红，[docs/v3-M3-gates.md](../../docs/v3-M3-gates.md) §四） |
 | LLM 旁路（D2=a） | 08 §六 | 设置页+自定义槽 | 降级测试 + 过网隔离断言 | ✅（2026-10-25，src/llm 三件单层 + 设置页（BYO Key 明文提示）+ 自定义第 4 槽（本地规则表 12 标签 + 钳制，不触 flags）+ 变体改写 + 终局点评（预设兜底）+ 三路降级单测 + 过网隔离 grep（engine/ui/storage/viz 全禁网）；管线抽检 11 条留痕（桩响应，真实端点入 backlog），[docs/v3-M3-gates.md](../../docs/v3-M3-gates.md) §五） |
-| 历史存档重开声明 | 双层版本规则 | Release 说明 | CHANGELOG 核对 | ⬜ 待 v3-M4'' 实现 |
+| 历史存档重开声明 | 双层版本规则 | Release 说明 | CHANGELOG 核对 | ✅（2026-10-25，CHANGELOG v3.0.0 节 + Release v3.0.0 五部分说明均含「三观层改变判定传导 → 历史存档建议重开」声明（判定层重写 + 3 条结局重映射）；旧档读取自动迁移 `xinlu.save.v2` 不清档；留档 [plan/05 §八](../05-发布留档.md)） |
 
 ## 里程碑总表（DoD 只加不减；要减必须在本档决策记录留行）
 
@@ -95,4 +95,4 @@
 | v3-M1'' | ✅（2026-10-24，175 条事件库 + 传导链 + 单调调度 + 存档 v2 迁移 + 9/9 可达；验证记录 [docs/v3-M1-gates.md](../../docs/v3-M1-gates.md)，dogfooding [docs/v3-M1-dogfooding.md](../../docs/v3-M1-dogfooding.md)，交接 [HANDOFF-v3-M2.md](HANDOFF-v3-M2.md)） |
 | v3-M2'' | ✅（2026-10-24，时间轴画卷（D4=B 桌面双栏/移动竖轴 + 卡片重排）+ 175 枚 Game-Icons 图标层（icon-map.json 对照表 + 逐张对文案 docs/v3-M2-icons.md + validate I 区）+ CC0 纹理 + 状态条/critical 分级/后果浮动微反馈 + 许可门白名单扩展 + 预算线重审 650KB；验证记录 [docs/v3-M2-gates.md](../../docs/v3-M2-gates.md) + 动效验收 [docs/v3-M2-feel.md](../../docs/v3-M2-feel.md)，交接 [HANDOFF-v3-M3.md](HANDOFF-v3-M3.md)） |
 | v3-M3'' | ✅（2026-10-25，关系图谱（npcs.json 注册表 + bondDeltas 衰减/tag 阈值 + 环形图谱页 + 终局快照）+ 随机出生种子码（XL-XXXX-XXXX 去易混字符 + 派生四要素 + 信封可选字段 + 同码复现断言）+ LLM 旁路（src/llm 单层 + 设置页 + 自定义第 4 槽本地钳制 + 变体/点评 + 三路降级 + 过网隔离 grep）+ love/friend/health 68 条入库密度门五线全开（事件库 243）+ 声音择项不做（决策记录）；E2E 实测抓出 settleChoice 漏带 npcs 真缺陷修复留锚；验证记录 [docs/v3-M3-gates.md](../../docs/v3-M3-gates.md)，交接 [HANDOFF-v3-M4.md](HANDOFF-v3-M4.md)） |
-| v3-M4'' | ⬜ |
+| v3-M4'' | ✅（2026-10-25，**tag v3.0.0 @ 819e6ee** + Release 五部分附 dist.zip 669,663 字节（sha256 `7f641a85…df731` 自 Release 下载复核一致 + 解压纯静态双端一键通关 exit 0）+ [plan/05 §八](../05-发布留档.md) 留档（主体 tag 前定稿 + 追加事实分栏）；CHANGELOG v3.0.0 含历史存档建议重开声明（数据口径 243/9/16/288 对账）；README 增量 109 行 ≤120 门过（AI 旁路默认关闭提示在位）；发布链全绿：代码态 0b0c2a6 全套门 + 干净静态双端冒烟 + deploy run 40113677108 / ci run 40113677118 双 success + 线上实开双端通关 exit 0；交接 [HANDOFF-v3-M5.md](HANDOFF-v3-M5.md)） |

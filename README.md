@@ -103,6 +103,7 @@ npm run dev      # 浏览器打开 http://localhost:5173
 | v3-M1'' 引擎与数据 v3（年龄单调/三观层/多线/资源/选项≥3/存档 v2 迁移） | ✅（2026-10-24，[docs/v3-M1-gates.md](docs/v3-M1-gates.md)） |
 | v3-M2'' 时间轴画卷 + 叙事美术 + 游戏感三件（图标层/状态条/重量分级/微反馈） | ✅（2026-10-24，[docs/v3-M2-gates.md](docs/v3-M2-gates.md)） |
 | v3-M3'' 图谱 + 种子码 + LLM 旁路 + 支线补齐（关系图谱/随机出生/自定义槽/密度门全开） | ✅（2026-10-25，[docs/v3-M3-gates.md](docs/v3-M3-gates.md)） |
+| v3-M4'' 发布 v3.0.0（时间轴画卷/三观传导/AI 旁路） | ✅（2026-10-25，[tag v3.0.0](https://github.com/yuluo554/xinlu/releases/tag/v3.0.0)） |
 
 ## 许可
 
