@@ -10,7 +10,9 @@ import {
   birthEnvOptions,
   createRun,
   envFromBirth,
+  eraEventById,
   eraEventFor,
+  eventById,
   initialDimsOf,
   optionDimsDelta,
   optionLocks,
@@ -47,10 +49,15 @@ import {
   criticalChoices,
   dimsAtStageStart,
   endingLetters,
+  stageCriticals,
   stageDeltas,
   stageEntries,
+  stageSpan,
+  valuesNotes,
 } from "./logic";
 import { timelineVM, choiceFloats, RES_KEYS, LINE_META } from "./timeline";
+import { moneyBandOf, type MoneyBand } from "./resources";
+import { applyTheme, loadTheme, saveTheme, type ThemeId } from "./theme";
 import { EVENT_ICONS } from "./icons";
 import { renderRelations } from "./relations";
 import { exportShareCard } from "./share-card";
@@ -122,6 +129,8 @@ function persist(): void {
 
 export function mountApp(el: HTMLElement): void {
   root = el;
+  // 主题先于首屏（v4/02 §五：默认米纸；键独立于存档）
+  applyTheme(loadTheme());
   const started = boot();
   if (started.kind === "resume") {
     state = started.state;
@@ -130,6 +139,22 @@ export function mountApp(el: HTMLElement): void {
     view = started.kind === "corrupt" ? "corrupt" : "start";
   }
   render();
+}
+
+/** 换算档（v4/02 §四 ▸ M2''' 增补）：按运行年份归段——卡片流取本卡年份，小结/终局取最近一张卡的年份。 */
+function bandForYear(year: number): MoneyBand {
+  return moneyBandOf(year);
+}
+
+function bandOfState(s: RunState): MoneyBand {
+  const last = s.history[s.history.length - 1];
+  if (!last) return moneyBandOf(s.birthYear);
+  if (last.kind === "era") {
+    const year = eraEventById(last.eventId)?.year ?? s.birthYear;
+    return moneyBandOf(year);
+  }
+  const months = eventById(last.eventId)?.ageMonths ?? 0;
+  return moneyBandOf(runYearOf(s.birthYear, months));
 }
 
 function render(): void {
@@ -270,6 +295,7 @@ function renderEraCard(): void {
     backdrop: sceneBackdrop(state.env),
     timeline: timelineVM(state),
     resources: state.resources,
+    band: bandForYear(event.year),
   });
   bindFamilyOpen();
   root.querySelector<HTMLButtonElement>("[data-continue]")?.addEventListener("click", () => {
@@ -317,6 +343,7 @@ function renderCard(feedback: typeof pendingFeedback): void {
     floaters: feedback?.floaters ?? [],
     custom: llmUsable(llm),
     customError: customError ?? undefined,
+    band: bandForYear(runYearOf(state.birthYear, event.ageMonths)),
   });
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-option]")) {
     btn.addEventListener("click", () => onChoose(Number(btn.dataset.option)));
@@ -381,9 +408,9 @@ async function onCustom(userText: string): Promise<void> {
     return;
   }
   const option = customOptionOf(optionView);
-  // 自定义行动的反馈浮动与常规选项同链路
+  // 自定义行动的反馈浮动与常规选项同链路（换算档按本卡年份）
   pendingFeedback = {
-    floaters: choiceFloats(option.deltas3 ?? {}, option.resourceDeltas ?? {}),
+    floaters: choiceFloats(option.deltas3 ?? {}, option.resourceDeltas ?? {}, bandForYear(runYearOf(capturedState.birthYear, event.ageMonths))),
     bump: RES_KEYS.filter((k) => (option.resourceDeltas[k] ?? 0) !== 0),
   };
   choiceFeedback = pickChoiceFrame("neutral", createFishParams(capturedState.dims).mood, capturedState.seed + capturedState.history.length);
@@ -401,9 +428,10 @@ function onChoose(index: number): void {
     return;
   }
   // 后果微反馈(v3/02 §三 浮动 + dogfooding 结论 1):按所选选项的三观/资源增量装配,下一屏消费
+  // (积蓄浮动按本卡年份换算档走「元」口径,v4/02 §四)
   const option = event.options[index];
   pendingFeedback = {
-    floaters: choiceFloats(option?.deltas3 ?? {}, option?.resourceDeltas ?? {}),
+    floaters: choiceFloats(option?.deltas3 ?? {}, option?.resourceDeltas ?? {}, bandForYear(runYearOf(state.birthYear, event.ageMonths))),
     bump: RES_KEYS.filter((k) => (option?.resourceDeltas[k] ?? 0) !== 0),
   };
   // choice 表情反馈(02 §二):按本次派生 tf 偏移方向 + 选择前 mood 抽帧,同种子可复现
@@ -438,6 +466,7 @@ function renderAftermath(feedback: typeof pendingFeedback): void {
     resources: state.resources,
     bump: feedback?.bump ?? [],
     floaters: feedback?.floaters ?? [],
+    band: bandForYear(runYearOf(state.birthYear, pendingAftermath.ageMonths)),
   });
   hydrateFish(choiceFeedback ?? undefined);
   bindFamilyOpen();
@@ -484,6 +513,7 @@ function renderSummary(): void {
     return;
   }
   const stage = STAGES[state.stageIndex - 1]!;
+  const span = stageSpan(state, stage);
   root.innerHTML = S.summaryScreen({
     stageIndex: state.stageIndex,
     stage,
@@ -492,6 +522,11 @@ function renderSummary(): void {
     resources: state.resources,
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
+    band: bandOfState(state),
+    yearRange: span.yearRange,
+    ageRange: span.ageRange,
+    valuesNotes: valuesNotes(state, stage),
+    stageCriticals: stageCriticals(state, stage),
   });
   hydrateFish(stageFrame(stage));
   hydrateRadar([dimsAtStageStart(state, stage)]);
@@ -540,6 +575,7 @@ function renderEnding(): void {
       runs: gallery.runs,
     },
     relations: state.npcs,
+    band: bandOfState(state),
   });
   hydrateFish(endingFrame(ending.id));
   hydrateRadar(STAGES.map((s) => dimsAtStageStart(state!, s)));
@@ -573,10 +609,18 @@ function hydrateCommentary(ending: Ending): void {
   });
 }
 
-/** 设置页（v3/02 §七）：服务商预选自动填 Base URL；保存回开局屏。 */
+/** 设置页（v3/02 §七 + v4/02 §五）：服务商预选自动填 Base URL；主题四款即时切换（独立键，不随表单提交）；保存回开局屏。 */
 function renderSettings(error?: string): void {
   const settings = loadLlmSettings();
-  root.innerHTML = S.settingsScreen({ settings, error });
+  root.innerHTML = S.settingsScreen({ settings, theme: loadTheme(), error });
+  // 主题即时切换（02 §五「设置页即时切换」）：CSS variables 全局接管，无需重渲染
+  for (const input of root.querySelectorAll<HTMLInputElement>("[data-theme-choice]")) {
+    input.addEventListener("change", () => {
+      const id = input.value as ThemeId;
+      applyTheme(id);
+      saveTheme(id);
+    });
+  }
   const form = root.querySelector<HTMLFormElement>("[data-settings-form]");
   form?.addEventListener("submit", (e) => {
     e.preventDefault();

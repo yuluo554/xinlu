@@ -14,9 +14,11 @@ import {
   type Stage,
 } from "../engine/model";
 import type { SceneBackdrop } from "../viz/scene";
-import { DIM_SHORT, STAGE_LABEL, type ChoiceReview } from "./logic";
+import { DIM_SHORT, STAGE_LABEL, type ChoiceReview, type ValuesNote } from "./logic";
 import { ENDING_META, GALLERY_TYPES, type GalleryData } from "./gallery";
 import { LINE_META, RES_META, RES_KEYS, type Floater, type TimelineSegment } from "./timeline";
+import { moneyDisplay, resTier, type MoneyBand } from "./resources";
+import { THEMES, type ThemeId } from "./theme";
 import { iconStyle } from "./icons";
 import { NPC_PROFILES, TAG_COLORS, renderRelations } from "./relations";
 import { PROVIDERS, type LlmSettings } from "../llm/config";
@@ -61,15 +63,24 @@ const PROFILE_META: Array<{ key: "region" | "structure" | "parentsJob" | "wealth
   { key: "wealth", label: "家境" },
 ];
 
-/** 常驻状态条（v3/02 §三：图标+数值，无进度条堆砌）；bump = 本步有增损的资源键，渲染即触发数值弹跳。 */
-function statebar(resources: Resources | null, bump: readonly ResKey[]): string {
+/** 常驻状态条（v4/02 §四 ▸ M2''' 增补）：mood/health 五档词 + 细色条（数值只在浮动层出现），
+ *  money 换算「元」口语；bump = 本步有增损的资源键，渲染即触发词弹跳。 */
+function statebar(resources: Resources | null, bump: readonly ResKey[], band: MoneyBand): string {
   if (!resources) return "";
   const items = RES_KEYS.map((key) => {
     const meta = RES_META[key];
     const bumpCls = bump.includes(key) ? " bump" : "";
-    return `<span class="res res-${key}${bumpCls}" data-res="${key}" title="${meta.label}">
+    if (key === "money") {
+      return `<span class="res res-money${bumpCls}" data-res="money" title="${meta.label}">
+        <span class="res-icon" data-res-icon="${meta.icon}" style="${esc(iconStyle(meta.icon))}" aria-hidden="true"></span>
+        <span class="res-word" data-res-word>${esc(moneyDisplay(resources.money, band))}</span>
+      </span>`;
+    }
+    const tier = resTier(resources[key]);
+    return `<span class="res res-${key} tier-${tier.tier}${bumpCls}" data-res="${key}" data-tier="${tier.tier}" title="${meta.label}">
       <span class="res-icon" data-res-icon="${meta.icon}" style="${esc(iconStyle(meta.icon))}" aria-hidden="true"></span>
-      <span class="statebar-value">${resources[key]}</span>
+      <span class="res-word" data-res-word>${meta.label} · ${esc(tier.word)}</span>
+      <span class="res-tier-bar" aria-hidden="true"><i style="width:${resources[key]}%"></i></span>
     </span>`;
   }).join("");
   return `<div class="statebar" role="status" aria-label="状态">${items}</div>`;
@@ -80,6 +91,7 @@ function topbar(
   resources: Resources | null = null,
   bump: readonly ResKey[] = [],
   family = false,
+  band: MoneyBand = "90s",
 ): string {
   const dots = STAGES.map((_, i) =>
     `<span class="dot${i < stageIndex ? " done" : i === stageIndex ? " now" : ""}"></span>`,
@@ -88,22 +100,23 @@ function topbar(
     <header class="topbar">
       <span class="wordmark">心路</span>
       <div class="dots" aria-label="人生进度">${dots}</div>
-      ${statebar(resources, bump)}
+      ${statebar(resources, bump, band)}
       ${family ? '<button type="button" class="btn-ghost btn-family" data-family-open>我的家庭</button>' : ""}
       <button type="button" class="btn-ghost" data-restart>重开</button>
     </header>`;
 }
 
-/** 八段时间轴轨道（D4=B 左栏）：线别色点按发生序，critical 加环；done/now/future 三态。 */
+/** 人生轨道（D6=A 阶段级聚合）：移动端 = 顶部固定八段阶段条（小点 ≤5 封顶）；
+ *  桌面 = 左轨竖列每段计数徽标；两形态同 VM，CSS 按断点切换。 */
 function timelineRail(segments: readonly TimelineSegment[]): string {
   const rows = segments
     .map((seg) => {
-      const dots = seg.nodes
-        .map((n) => `<span class="tl-dot ${LINE_META[n.line].cls}${n.critical ? " tl-critical" : ""}"></span>`)
-        .join("");
-      return `<div class="timeline-segment status-${seg.status}" data-stage="${seg.stage}">
+      const dots = Array.from({ length: seg.dots }, () => `<span class="tl-dot"></span>`).join("");
+      const ring = seg.criticalCount > 0 ? " has-critical" : "";
+      return `<div class="timeline-segment status-${seg.status}${ring}" data-stage="${seg.stage}" data-count="${seg.count}" data-critical="${seg.criticalCount}">
         <div class="tl-head"><span class="tl-node" aria-hidden="true"></span><span class="tl-label tl-full">${seg.label}</span><span class="tl-label tl-short" aria-hidden="true">${seg.short}</span></div>
-        <div class="tl-dots"${seg.nodes.length === 0 ? ' data-empty="1"' : ""}>${dots}</div>
+        <div class="tl-dots"${seg.dots === 0 ? ' data-empty="1"' : ""}>${dots}</div>
+        <span class="tl-count" aria-hidden="true">${seg.count}</span>
       </div>`;
     })
     .join("");
@@ -216,6 +229,8 @@ export function cardAskScreen(vm: {
   /** AI 自定义第 4 槽（v3/02 §七）：仅旁路可用时渲染（离线隐藏口径）。 */
   custom: boolean;
   customError?: string;
+  /** 积蓄换算档（v4/02 §四：按本卡运行年份归段）。 */
+  band: MoneyBand;
 }): string {
   const line = LINE_META[vm.line];
   const head = `
@@ -230,7 +245,7 @@ export function cardAskScreen(vm: {
   return `
     <section class="screen screen-card layout-timeline">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, vm.bump, true)}
+      ${topbar(vm.stageIndex, vm.resources, vm.bump, true, vm.band)}
       ${floatLayer(vm.floaters)}
       <div class="timeline-body">
         ${timelineRail(vm.timeline)}
@@ -273,11 +288,12 @@ export function eraCardScreen(vm: {
   backdrop: SceneBackdrop;
   timeline: readonly TimelineSegment[];
   resources: Resources;
+  band: MoneyBand;
 }): string {
   return `
     <section class="screen screen-card layout-timeline" data-era-card="1">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, [], true)}
+      ${topbar(vm.stageIndex, vm.resources, [], true, vm.band)}
       <div class="timeline-body">
         ${timelineRail(vm.timeline)}
         <div class="stage-main">
@@ -310,11 +326,12 @@ export function cardAftermathScreen(vm: {
   resources: Resources;
   bump: readonly ResKey[];
   floaters: readonly Floater[];
+  band: MoneyBand;
 }): string {
   return `
     <section class="screen screen-card layout-timeline">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, vm.bump, true)}
+      ${topbar(vm.stageIndex, vm.resources, vm.bump, true, vm.band)}
       ${floatLayer(vm.floaters)}
       <div class="timeline-body">
         ${timelineRail(vm.timeline)}
@@ -332,6 +349,8 @@ export function cardAftermathScreen(vm: {
     </section>`;
 }
 
+/** 阶段小结（v4/02 §七五段结构 + ▸ M2''' 增补）：主题头（年代区间+年龄段）/ 三观三轴说明（区间词+位移箭头+独白）/
+ *  四维雷达淡影对比（沿 v3，四维增量并排小字）/ 资源五档状态 / 关键抉择回顾。配图位留 v4-M3''' 3.2。 */
 export function summaryScreen(vm: {
   stageIndex: number;
   stage: Stage;
@@ -340,6 +359,11 @@ export function summaryScreen(vm: {
   resources: Resources;
   fishRadius: number;
   backdrop: SceneBackdrop;
+  band: MoneyBand;
+  yearRange: string;
+  ageRange: string;
+  valuesNotes: readonly ValuesNote[];
+  stageCriticals: ChoiceReview[];
 }): string {
   const items = DIM_KEYS.map((d: DimKey) => {
     const v = vm.deltas[d];
@@ -347,17 +371,52 @@ export function summaryScreen(vm: {
     const sign = v > 0 ? "+" : "";
     return `<div class="delta"><span>${DIM_SHORT[d]}</span><b class="${cls}">${sign}${v}</b></div>`;
   }).join("");
+  const notes = vm.valuesNotes
+    .map((n) => {
+      const shiftText = n.shift === 0 ? "→0" : `${n.arrow}${Math.abs(n.shift)}`;
+      const shiftCls = n.shift > 0 ? "up" : n.shift < 0 ? "down" : "flat";
+      return `<div class="values-note" data-values-note data-axis="${n.axis}">
+        <span class="vn-band">${esc(n.label)} · ${esc(n.bandWord)}</span>
+        <b class="vn-shift ${shiftCls}">${shiftText}</b>
+        <span class="vn-monologue">${esc(n.monologue)}</span>
+      </div>`;
+    })
+    .join("");
+  const resItems = RES_KEYS.map((key) => {
+    const meta = RES_META[key];
+    if (key === "money") {
+      return `<span class="sum-res sum-money"><span class="res-icon" data-res-icon="${meta.icon}" style="${esc(iconStyle(meta.icon))}" aria-hidden="true"></span>${meta.label} <b data-sum-money>${esc(moneyDisplay(vm.resources.money, vm.band))}</b></span>`;
+    }
+    const tier = resTier(vm.resources[key]);
+    return `<span class="sum-res tier-${tier.tier}"><span class="res-icon" data-res-icon="${meta.icon}" style="${esc(iconStyle(meta.icon))}" aria-hidden="true"></span>${meta.label} <b>${esc(tier.word)}</b></span>`;
+  }).join("");
+  const criticals =
+    vm.stageCriticals.length > 0
+      ? vm.stageCriticals
+          .map(
+            (c) =>
+              `<div class="critical-item"><p class="critical-q">${esc(c.event.text)}</p><p class="critical-a">你选择了：${esc(c.optionText)}</p></div>`,
+          )
+          .join("")
+      : `<p class="muted">这个阶段没有触发重大抉择。</p>`;
   return `
     <section class="screen screen-summary">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources)}
+      ${topbar(vm.stageIndex, vm.resources, [], false, vm.band)}
       <h2>${STAGE_LABEL[vm.stage]} · 小结<img class="stage-icon" src="${jellyfishSvg}" alt="" aria-hidden="true"></h2>
-      <p class="muted">本阶段经历了 ${vm.count} 次抉择，四维悄然挪动：</p>
+      <p class="sum-theme muted" data-stage-span>${vm.yearRange ? `${esc(vm.yearRange)} · ${esc(vm.ageRange)}` : STAGE_LABEL[vm.stage]}</p>
       <div class="fish-slot fish-slot-stage" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
+      <h3 class="sum-h">三观刻度</h3>
+      <div class="values-notes">${notes}</div>
       <div class="viz-row two">
         <div class="radar-slot" data-slot="radar"></div>
         <div class="deltas">${items}</div>
       </div>
+      <h3 class="sum-h">身家状态</h3>
+      <div class="sum-res-row">${resItems}</div>
+      <p class="muted sum-count">本阶段经历了 ${vm.count} 次抉择。</p>
+      <h3 class="sum-h">关键抉择回顾</h3>
+      <div class="criticals sum-criticals">${criticals}</div>
       <div class="options options-row">
         <button type="button" class="btn btn-primary" data-continue>继续人生</button>
         <button type="button" class="btn btn-ghost" data-relations-open>关系图谱</button>
@@ -379,6 +438,7 @@ export function endingScreen(vm: {
   relations: RunState["npcs"];
   /** v4 历法迁移局提示（plan/v4/02 §九 ▸ M1''' 增补）：一句，不抢戏。 */
   migrated: boolean;
+  band: MoneyBand;
 }): string {
   const criticals =
     vm.criticals.length > 0
@@ -392,7 +452,7 @@ export function endingScreen(vm: {
   return `
     <section class="screen screen-ending">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(STAGES.length, vm.resources)}
+      ${topbar(STAGES.length, vm.resources, [], false, vm.band)}
       <h2>${esc(vm.title)}</h2>
       <p class="ending-type">${esc(vm.letters)}</p>
       <div class="fish-slot fish-slot-ending" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
@@ -498,14 +558,23 @@ export function relationsScreen(): string {
     </section>`;
 }
 
-/** 设置页（v3/02 §七，D2=a）：BYO Key 明文存本机；未启用时全部字段不生效（离线口径）。 */
-export function settingsScreen(vm: { settings: LlmSettings; error?: string }): string {
+/** 设置页（v3/02 §七 D2=a + v4/02 §五）：界面主题四款（即时切换，独立键 xinlu.theme.v1）；
+ *  BYO Key 明文存本机；未启用时全部字段不生效（离线口径）。 */
+export function settingsScreen(vm: { settings: LlmSettings; theme: ThemeId; error?: string }): string {
   const providerOptions = PROVIDERS.map(
     (p) => `<option value="${esc(p.id)}"${p.id === vm.settings.provider ? " selected" : ""}>${esc(p.label)}</option>`,
+  ).join("");
+  const themeChips = THEMES.map(
+    (t) =>
+      `<label class="chip"><input type="radio" name="theme" value="${t.id}" data-theme-choice${t.id === vm.theme ? " checked" : ""}><span>${esc(t.label)}<i class="theme-note">${esc(t.note)}</i></span></label>`,
   ).join("");
   return `
     <section class="screen screen-settings">
       <h2>设置</h2>
+      <fieldset class="env-group theme-group">
+        <legend>界面主题</legend>
+        <div class="chips theme-chips">${themeChips}</div>
+      </fieldset>
       <form class="settings-form" data-settings-form>
         <label class="settings-check">
           <input type="checkbox" name="enabled"${vm.settings.enabled ? " checked" : ""}>

@@ -1,6 +1,8 @@
 /* 心路 · 设计规范落地（DESIGN.md / plan 04 §M3）：浅色纸面、大留白、单一强调色、圆角卡片、轻动效。
-   v3-M2'' D4=B 时间轴画卷：暖纸底（CC0 parchment 纹理铺底）+ 六线别色 + 墨色描边分级。
-   色板三角色：ground / ink / accent（玉青 #2f7d6d）；线别色语义见 plan/v3/02 §四（枚举名，非新口径）。 */
+   v3-M2'' D4=B 时间轴画卷：暖纸底 + 六线别色 + 墨色描边分级。
+   v4-M2''' 主题四款（plan/v4/02 §五，色板单源本文件）：米纸（默认，:root 即米纸）/月白/夜航/青瓷
+   ——html[data-theme] 切换，全部配色走 CSS variables；五档色阶 --tier-1..5 同步联动。
+   色板三角色：ground / ink / accent（米纸玉青 #2f7d6d）；线别色语义见 plan/v3/02 §四（枚举名，非新口径）。 */
 :root {
   color-scheme: light;
   --ground: #f2ecdd;
@@ -12,6 +14,7 @@
   --accent: #2f7d6d;
   --accent-deep: #26655a;
   --accent-soft: rgba(47, 125, 109, 0.12);
+  --on-accent: #fff;
   --line-fate: #955539;
   --line-study: #47679e;
   --line-career: #b0812a;
@@ -23,7 +26,109 @@
   --radius: 16px;
   --radius-item: 12px;
   --radius-pill: 999px;
+  --line: #c9bda4;
+  --border: rgba(51, 48, 42, 0.14);
+  --border-soft: rgba(51, 48, 42, 0.1);
+  --border-strong: rgba(51, 48, 42, 0.22);
+  --ink-veil: rgba(51, 48, 42, 0.05);
+  --ink-veil-strong: rgba(51, 48, 42, 0.1);
+  --ev-icon-bg: rgba(51, 48, 42, 0.07);
+  --shadow: rgba(51, 48, 42, 0.14);
+  /* 五档色阶（02 §四：深→浅 = 萎靡→高涨；主题联动同 variables） */
+  --tier-1: #a54040;
+  --tier-2: #a5702f;
+  --tier-3: #6e6a5f;
+  --tier-4: #2e7d4f;
+  --tier-5: #2f7d6d;
+  /* 米纸纹理洗弱层（02 §五：现 parchment 调淡 40%） */
+  --tex-wash: rgba(242, 236, 221, 0.4);
   font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* ── 主题四款（v4/02 §五）：月白纯色极简 / 夜航深色（WCAG AA 抽验见 theme-contrast 测试）/ 青瓷低饱和青 ── */
+
+[data-theme="moon"] {
+  color-scheme: light;
+  --ground: #f7f8fa;
+  --surface: #ffffff;
+  --surface-2: #eef0f4;
+  --ink: #2b2f36;
+  --ink-2: #5f6570;
+  --ink-3: #9aa1ab;
+  --accent: #46648f;
+  --accent-deep: #375176;
+  --accent-soft: rgba(70, 100, 143, 0.12);
+  --line: #d5d9e0;
+  --border: rgba(43, 47, 54, 0.16);
+  --border-soft: rgba(43, 47, 54, 0.11);
+  --border-strong: rgba(43, 47, 54, 0.26);
+  --ink-veil: rgba(43, 47, 54, 0.05);
+  --ink-veil-strong: rgba(43, 47, 54, 0.1);
+  --ev-icon-bg: rgba(43, 47, 54, 0.07);
+  --shadow: rgba(43, 47, 54, 0.14);
+  --tier-3: #5f6570;
+  --tier-5: #46648f;
+  --tex-wash: rgba(247, 248, 250, 1);
+}
+
+[data-theme="night"] {
+  color-scheme: dark;
+  --ground: #14181f;
+  --surface: #1c222c;
+  --surface-2: #262e3a;
+  --ink: #e3e7ec;
+  --ink-2: #aab4c0;
+  --ink-3: #8a95a2;
+  --accent: #62b5a2;
+  --accent-deep: #7acbb7;
+  --accent-soft: rgba(98, 181, 162, 0.16);
+  --on-accent: #0b211b;
+  --line-fate: #c98873;
+  --line-study: #8aa8dd;
+  --line-career: #d4b06a;
+  --line-love: #d98ba0;
+  --line-friend: #93bd97;
+  --line-health: #7db3bd;
+  --up: #6fc48b;
+  --down: #d98080;
+  --line: #3a4450;
+  --border: rgba(227, 231, 236, 0.16);
+  --border-soft: rgba(227, 231, 236, 0.11);
+  --border-strong: rgba(227, 231, 236, 0.26);
+  --ink-veil: rgba(227, 231, 236, 0.06);
+  --ink-veil-strong: rgba(227, 231, 236, 0.12);
+  --ev-icon-bg: rgba(227, 231, 236, 0.09);
+  --shadow: rgba(0, 0, 0, 0.42);
+  --tier-1: #d98a8a;
+  --tier-2: #d9ad72;
+  --tier-3: #aab4c0;
+  --tier-4: #7ed49a;
+  --tier-5: #7acbb7;
+  --tex-wash: rgba(20, 24, 31, 1);
+}
+
+[data-theme="celadon"] {
+  color-scheme: light;
+  --ground: #e7ede9;
+  --surface: #f5f9f6;
+  --surface-2: #dde7e1;
+  --ink: #2c3a34;
+  --ink-2: #5c6d64;
+  --ink-3: #84978d;
+  --accent: #3d7d7d;
+  --accent-deep: #2f6363;
+  --accent-soft: rgba(61, 125, 125, 0.12);
+  --line: #c2d2ca;
+  --border: rgba(44, 58, 52, 0.16);
+  --border-soft: rgba(44, 58, 52, 0.11);
+  --border-strong: rgba(44, 58, 52, 0.26);
+  --ink-veil: rgba(44, 58, 52, 0.05);
+  --ink-veil-strong: rgba(44, 58, 52, 0.1);
+  --ev-icon-bg: rgba(44, 58, 52, 0.07);
+  --shadow: rgba(44, 58, 52, 0.14);
+  --tier-3: #5c6d64;
+  --tier-5: #3d7d7d;
+  --tex-wash: rgba(231, 237, 233, 0.78);
 }
 
 * {
@@ -33,14 +138,24 @@
 body {
   margin: 0;
   background-color: var(--ground);
-  /* CC0 parchment 纹理铺底（assets/cc0/，soft-light 融入纸色，画卷质感） */
-  background-image: url("../assets/cc0/parchment/parchment-bg.webp");
+  /* CC0 parchment 纹理铺底（assets/cc0/）：洗弱层 --tex-wash 之上 soft-light 融入纸色；
+     非米纸主题把 wash 调成不透明主题色 = 纯色底（米纸 0.4 = 调淡 40%，青瓷 0.78 留极淡瓷感） */
+  background-image: linear-gradient(var(--tex-wash), var(--tex-wash)), url("../assets/cc0/parchment/parchment-bg.webp");
   background-size: 300px;
-  background-blend-mode: soft-light;
+  background-blend-mode: normal, soft-light;
   color: var(--ink);
   font-size: 16px;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+}
+
+/* 夜航下场景氛围层压暗（装饰层适配，不改变 sceneBackdrop 判定） */
+[data-theme="night"] .scene-water {
+  opacity: 0.08;
+}
+
+[data-theme="night"] .scene-clouds {
+  opacity: 0.1;
 }
 
 #app {
@@ -125,7 +240,8 @@ body {
   box-shadow: inset 0 0 0 2px var(--accent);
 }
 
-/* 状态条（v3/02 §三：图标+数值，无进度条堆砌）；bump = 本步有增损，数值弹跳一次 */
+/* 状态条（v4/02 §四 ▸ M2''' 增补）：mood/health 五档词 + 细色条（数值只在浮动层出现）、money 换算「元」；
+   bump = 本步有增损，词弹跳一次 */
 .statebar {
   display: flex;
   gap: 6px;
@@ -138,7 +254,7 @@ body {
   padding: 3px 9px;
   border-radius: var(--radius-pill);
   background: var(--surface);
-  border: 1px solid rgba(51, 48, 42, 0.12);
+  border: 1px solid var(--border-soft);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
@@ -149,6 +265,65 @@ body {
   -webkit-mask: var(--gi) center / contain no-repeat;
   mask: var(--gi) center / contain no-repeat;
   background-color: currentColor;
+}
+
+.res-word {
+  white-space: nowrap;
+}
+
+/* 五档细色条 + 档词着色（tier-N 同时驱动条色与词色，主题经 --tier-* 联动） */
+.res-tier-bar {
+  width: 42px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-soft);
+  overflow: hidden;
+}
+
+.res-tier-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.res.tier-1 .res-word {
+  color: var(--tier-1);
+}
+
+.res.tier-2 .res-word {
+  color: var(--tier-2);
+}
+
+.res.tier-3 .res-word {
+  color: var(--tier-3);
+}
+
+.res.tier-4 .res-word {
+  color: var(--tier-4);
+}
+
+.res.tier-5 .res-word {
+  color: var(--tier-5);
+}
+
+.res.tier-1 .res-tier-bar i {
+  background: var(--tier-1);
+}
+
+.res.tier-2 .res-tier-bar i {
+  background: var(--tier-2);
+}
+
+.res.tier-3 .res-tier-bar i {
+  background: var(--tier-3);
+}
+
+.res.tier-4 .res-tier-bar i {
+  background: var(--tier-4);
+}
+
+.res.tier-5 .res-tier-bar i {
+  background: var(--tier-5);
 }
 
 .res-mood .res-icon {
@@ -163,7 +338,7 @@ body {
   color: var(--line-health);
 }
 
-.res.bump .statebar-value {
+.res.bump .res-word {
   display: inline-block;
   animation: res-bump 0.6s ease-out;
 }
@@ -209,7 +384,7 @@ body {
 
 .btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .btn-primary:hover {
@@ -345,11 +520,13 @@ body {
   margin-top: 32px;
 }
 
-/* —— 时间轴画卷（D4=B）：桌面双栏（左八段轨道+右事件卡），移动单列竖轴 —— */
+/* —— 人生轨道（v4-M2''' D6=A 阶段级聚合，02 §十 ▸ M2''' 增补）——
+   移动：撤竖轴 → 顶部固定八段阶段条（小点 ≤5 封顶，不随事件增长）+ 纯事件流；
+   桌面：左轨竖列保留，逐事件色点云收敛为阶段计数徽标。 */
 .timeline-body {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
   align-items: start;
 }
 
@@ -369,43 +546,38 @@ body {
   margin: 0 auto;
 }
 
-/* 左栏八段轨道：竖向连线 + 线别色点云（done/now/future 三态） */
+/* 移动端阶段条：横排八段、吸顶固定；高度恒定（选多少张卡都不再长高） */
 .timeline {
-  position: relative;
+  position: sticky;
+  top: 8px;
+  z-index: 8;
   display: flex;
-  flex-direction: column;
   gap: 2px;
-  padding-left: 20px;
-}
-
-.timeline::before {
-  content: "";
-  position: absolute;
-  left: 5px;
-  top: 10px;
-  bottom: 12px;
-  width: 2px;
-  border-radius: 1px;
-  background: rgba(51, 48, 42, 0.14);
+  padding: 8px 10px;
+  border-radius: var(--radius-item);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 4px 14px var(--shadow);
 }
 
 .timeline-segment {
-  position: relative;
-  padding: 4px 0 10px;
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
 }
 
 .tl-head {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
 }
 
 .tl-node {
-  position: absolute;
-  left: -20px;
-  top: 9px;
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--surface);
   box-shadow: inset 0 0 0 2px var(--ink-3);
@@ -413,7 +585,7 @@ body {
 
 .timeline-segment.status-now .tl-node {
   background: var(--accent);
-  box-shadow: inset 0 0 0 2px var(--accent-deep), 0 0 0 4px var(--accent-soft);
+  box-shadow: inset 0 0 0 2px var(--accent-deep), 0 0 0 3px var(--accent-soft);
 }
 
 .timeline-segment.status-future {
@@ -421,9 +593,9 @@ body {
 }
 
 .tl-label {
-  font-size: 0.82rem;
+  font-size: 0.66rem;
   color: var(--ink-2);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
 }
 
 .timeline-segment.status-now .tl-label {
@@ -435,18 +607,21 @@ body {
   display: none;
 }
 
+/* 段内已历事件小点：移动端 ≤5 封顶（渲染层 slice），重大抉择段末点加环 */
 .tl-dots {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 6px;
+  flex-direction: row;
+  justify-content: center;
+  gap: 2px;
+  height: 5px;
+  margin-top: 0;
 }
 
 .tl-dot {
-  width: 9px;
-  height: 9px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  background: var(--dot, var(--ink-3));
+  background: var(--ink-3);
   animation: dot-in 0.32s ease-out both;
 }
 
@@ -461,37 +636,74 @@ body {
   }
 }
 
-.tl-dot.line-fate {
-  --dot: var(--line-fate);
+.tl-dot.tl-critical,
+.timeline-segment.has-critical .tl-dot:last-child {
+  width: 6px;
+  height: 6px;
+  box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 2.5px var(--ink);
 }
 
-.tl-dot.line-study {
-  --dot: var(--line-study);
-}
-
-.tl-dot.line-career {
-  --dot: var(--line-career);
-}
-
-.tl-dot.line-love {
-  --dot: var(--line-love);
-}
-
-.tl-dot.line-friend {
-  --dot: var(--line-friend);
-}
-
-.tl-dot.line-health {
-  --dot: var(--line-health);
-}
-
-.tl-dot.tl-critical {
-  width: 11px;
-  height: 11px;
-  box-shadow: 0 0 0 2.5px var(--ground), 0 0 0 4px var(--dot, var(--ink));
+/* 桌面计数徽标：阶段级聚合（「23」= 该段已历事件数，含时代卡） */
+.tl-count {
+  display: none;
 }
 
 @media (min-width: 768px) {
+  .timeline {
+    position: relative;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 0 0 20px;
+    background: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    bottom: 12px;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--border);
+  }
+
+  .timeline-segment {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0 10px;
+  }
+
+  .tl-head {
+    position: relative;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .tl-node {
+    position: absolute;
+    left: -20px;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .timeline-segment.status-now .tl-node {
+    box-shadow: inset 0 0 0 2px var(--accent-deep), 0 0 0 4px var(--accent-soft);
+  }
+
+  .timeline-segment.has-critical .tl-node {
+    box-shadow: inset 0 0 0 2px var(--accent-deep), 0 0 0 4px var(--accent-soft), 0 0 0 7px var(--border-strong);
+  }
+
+  .tl-label {
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+  }
+
   .tl-full {
     display: inline;
   }
@@ -501,9 +713,25 @@ body {
   }
 
   .tl-dots {
-    flex-direction: row;
-    flex-wrap: wrap;
+    display: none;
+  }
+
+  .tl-count {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    padding: 0 7px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    color: var(--ink-2);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timeline-segment.status-now .tl-count {
+    background: var(--accent-soft);
+    color: var(--ink);
   }
 }
 
@@ -512,7 +740,7 @@ body {
   background: var(--surface);
   border-radius: var(--radius);
   padding: 28px 24px;
-  border: 1px solid rgba(51, 48, 42, 0.1);
+  border: 1px solid var(--border-soft);
 }
 
 .card-head {
@@ -528,7 +756,7 @@ body {
   height: 48px;
   padding: 10px;
   border-radius: var(--radius-item);
-  background-color: rgba(51, 48, 42, 0.07);
+  background-color: var(--ev-icon-bg);
 }
 
 .ev-icon.line-fate {
@@ -586,7 +814,7 @@ body {
 
 .chip-age {
   color: var(--ink-2);
-  border-color: rgba(51, 48, 42, 0.22);
+  border-color: var(--border-strong);
 }
 
 .chip-line.line-fate {
@@ -616,7 +844,7 @@ body {
 /* 抉择重量分级（08 §四）：critical 深色描边 + 徽章 + 更重的入场 */
 .event-card.critical {
   border: 2px solid var(--ink);
-  box-shadow: 0 12px 32px rgba(51, 48, 42, 0.14);
+  box-shadow: 0 12px 32px var(--shadow);
   animation: rise-critical 0.42s ease-out both;
 }
 
@@ -681,11 +909,11 @@ body {
 }
 
 .event-card.critical .option {
-  background: rgba(51, 48, 42, 0.05);
+  background: var(--ink-veil);
 }
 
 .event-card.critical .option:hover {
-  background: rgba(51, 48, 42, 0.1);
+  background: var(--ink-veil-strong);
 }
 
 .option-locked {
@@ -698,7 +926,7 @@ body {
 }
 
 .event-card.critical .option-locked:hover {
-  background: rgba(51, 48, 42, 0.05);
+  background: var(--ink-veil);
 }
 
 .aftermath {
@@ -725,8 +953,8 @@ body {
   padding: 4px 13px;
   border-radius: var(--radius-pill);
   background: var(--surface);
-  border: 1px solid rgba(51, 48, 42, 0.18);
-  box-shadow: 0 4px 14px rgba(51, 48, 42, 0.12);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 14px var(--shadow);
   font-size: 0.88rem;
   font-variant-numeric: tabular-nums;
   opacity: 0;
@@ -1003,7 +1231,7 @@ body {
     animation-delay: 0s;
   }
 
-  .res.bump .statebar-value {
+  .res.bump .res-word {
     animation: none;
   }
 }
@@ -1454,4 +1682,164 @@ body {
 .migrated-note {
   color: var(--ink-soft, #8a7a62);
   font-style: italic;
+}
+
+/* ── v4-M2''' 资源实感 / 主题 / 小结五段（plan/v4/02 §四·§五·§七）── */
+
+/* 设置页主题 chips：选中态沿 .chip 体系；note 小字不换行省略 */
+.theme-group {
+  max-width: 640px;
+  margin: 0 auto 20px;
+  text-align: left;
+}
+
+.theme-chips {
+  justify-content: center;
+}
+
+.theme-chips .chip span {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 44px;
+}
+
+.theme-note {
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--ink-3);
+}
+
+.theme-chips .chip input:checked + span .theme-note {
+  color: inherit;
+  opacity: 0.82;
+}
+
+/* 阶段小结五段结构（02 §七）：主题头跨度句 / 三观三轴说明 / 资源五档行 */
+.sum-theme {
+  margin: 0 0 8px;
+  letter-spacing: 0.04em;
+}
+
+.sum-h {
+  margin: 26px 0 10px;
+}
+
+.values-notes {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.values-note {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-item);
+  background: var(--surface-2);
+  text-align: left;
+}
+
+.vn-band {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vn-shift {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.vn-shift.up {
+  color: var(--up);
+}
+
+.vn-shift.down {
+  color: var(--down);
+}
+
+.vn-shift.flat {
+  color: var(--ink-3);
+}
+
+.vn-monologue {
+  color: var(--ink-2);
+  font-size: 0.9rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 480px) {
+  .values-note {
+    grid-template-columns: auto auto;
+  }
+
+  .vn-monologue {
+    grid-column: 1 / -1;
+  }
+}
+
+/* 身家状态行：五档词着色沿 tier 变量；积蓄为换算后金额 */
+.sum-res-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.sum-res {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  font-size: 0.92rem;
+}
+
+.sum-res b {
+  font-variant-numeric: tabular-nums;
+}
+
+.sum-res.tier-1 b {
+  color: var(--tier-1);
+}
+
+.sum-res.tier-2 b {
+  color: var(--tier-2);
+}
+
+.sum-res.tier-3 b {
+  color: var(--tier-3);
+}
+
+.sum-res.tier-4 b {
+  color: var(--tier-4);
+}
+
+.sum-res.tier-5 b {
+  color: var(--tier-5);
+}
+
+.sum-money .res-icon {
+  color: var(--line-career);
+}
+
+.sum-res .res-icon {
+  width: 14px;
+  height: 14px;
+  -webkit-mask: var(--gi) center / contain no-repeat;
+  mask: var(--gi) center / contain no-repeat;
+  background-color: currentColor;
+}
+
+.sum-count {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+}
+
+.sum-criticals {
+  margin-bottom: 20px;
 }

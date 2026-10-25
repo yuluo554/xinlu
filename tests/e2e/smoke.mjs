@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // ═══ E2E 双端一键通关冒烟（v2-M1' 1.1 · v2/03 §1 契约；v3-M2'' 增时间轴/状态条/分级/浮动断言 + 768 中档截图）═══
+// v4-M2''' 增量（plan/v4/02 §十）：状态条五档词+积蓄换算元 / D6=A 顶部八段阶段条（移动）+阶段计数徽标（桌面）/
+//   主题四款切换（夜航即时生效+独立键）/ 小结三观三轴说明（区间词+箭头+独白）+ 身家状态五档行。
 // 零新增依赖：node 24 内置 WebSocket 直连 CDP，驱动本机 Edge 无头实例。
 // 流程：vite build → vite preview（静态服务）→ Edge headless（CDP 9223）→
 //       375/1280 两档视口各完整通关一局（同步 evaluate 连点，套路 = plan/HANDOFF-M7 §五）→
@@ -233,6 +235,9 @@ async function main() {
 
       const startSeen = await cdp.evaluate("!!document.querySelector('.screen-start')");
       if (!startSeen) throw new Error("开局屏未出现");
+      // v4-M2''' 主题默认：无存储时挂 <html data-theme="paper">（02 §五）
+      const themeDefault = await cdp.evaluate("document.documentElement.dataset.theme ?? '(none)'");
+      if (themeDefault !== "paper") throw new Error(`默认主题应为米纸（实得 ${themeDefault}）`);
 
       // v2-M3' 场景氛围:双端用不同出生环境,断言水域背景随之变化(scene-water filter / scene-clouds opacity)
       if (vp.env) {
@@ -277,15 +282,25 @@ async function main() {
         const icon = card?.querySelector(".ev-icon[data-icon]");
         const res = [...document.querySelectorAll(".statebar .res")].map((r) => ({
           key: r.dataset.res,
-          v: Number(r.querySelector(".statebar-value")?.textContent ?? NaN),
+          word: r.querySelector(".res-word")?.textContent ?? "",
+          tier: Number(r.dataset.tier ?? 0),
+          bar: r.querySelector(".res-tier-bar i")?.style.width ?? "",
         }));
+        const railBox = document.querySelector(".timeline")?.getBoundingClientRect();
         return {
           card: !!card,
           iconName: icon?.dataset.icon ?? "",
           iconMasked: icon ? (icon.style.getPropertyValue("--gi") || "").includes("url(") : false,
           statebar: res,
           railSegs: document.querySelectorAll(".timeline .timeline-segment").length,
-          railWidth: document.querySelector(".timeline")?.getBoundingClientRect().width ?? 0,
+          railW: railBox?.width ?? 0,
+          railH: railBox?.height ?? 0,
+          railDots: [...document.querySelectorAll(".timeline-segment")].map(
+            (s) => s.querySelectorAll(".tl-dot").length,
+          ),
+          railCounts: [...document.querySelectorAll(".timeline-segment")].map(
+            (s) => Number(s.dataset.count ?? 0),
+          ),
           fishOnCard: !!document.querySelector(".screen-card .fish-mascot"),
         };
       })()`);
@@ -293,12 +308,36 @@ async function main() {
       if (!cardInfo.iconName) throw new Error(`${vp.width} 档：事件卡图标位缺失（icon-map 未接线）`);
       if (!cardInfo.iconMasked) throw new Error(`${vp.width} 档：事件卡图标未挂 SVG mask URL`);
       if (cardInfo.statebar.length !== 3) throw new Error(`${vp.width} 档：状态条非 3 项（实得 ${cardInfo.statebar.length}）`);
+      // v4-M2''' 五档词 + 换算元（02 §四）：mood/health「标签 · 档词」+tier+细色条；money「¥N,nnn」
+      const TIER_WORDS = /^(萎靡|低落|平稳|良好|高涨)$/;
       for (const r of cardInfo.statebar) {
-        if (!Number.isInteger(r.v) || r.v < 0 || r.v > 100) throw new Error(`${vp.width} 档：状态条 ${r.key} 值非法（${r.v}）`);
+        if (r.key === "money") {
+          if (!/^¥[\d,]+$/.test(r.word)) throw new Error(`${vp.width} 档：积蓄未换算元（实得「${r.word}」）`);
+          if (r.tier !== 0 || r.bar !== "") throw new Error(`${vp.width} 档：积蓄不应带档色（${r.tier}/${r.bar}）`);
+        } else {
+          const label = r.key === "mood" ? "心境" : "健康";
+          const hit = new RegExp("^" + label + " · (.+)$").exec(r.word);
+          if (!hit || !TIER_WORDS.test(hit[1])) throw new Error(`${vp.width} 档：${label}五档词非法（实得「${r.word}」）`);
+          if (!(r.tier >= 1 && r.tier <= 5)) throw new Error(`${vp.width} 档：${label}档位非法（${r.tier}）`);
+          if (!/^\d+%$/.test(r.bar)) throw new Error(`${vp.width} 档：${label}细色条缺失（${r.bar}）`);
+        }
       }
-      if (cardInfo.railSegs !== 8) throw new Error(`${vp.width} 档：时间轴轨道非 8 段（实得 ${cardInfo.railSegs}）`);
-      if (vp.width >= 768 ? cardInfo.railWidth < 200 : cardInfo.railWidth > 100) {
-        throw new Error(`${vp.width} 档：轨道宽度 ${cardInfo.railWidth.toFixed(0)}px 不符合${vp.width >= 768 ? "桌面双栏" : "移动窄轨"}口径`);
+      if (cardInfo.railSegs !== 8) throw new Error(`${vp.width} 档：人生轨道非 8 段（实得 ${cardInfo.railSegs}）`);
+      if (vp.width >= 768) {
+        if (cardInfo.railW < 200 || cardInfo.railH <= cardInfo.railW) {
+          throw new Error(`${vp.width} 档：桌面竖轨未生效（${cardInfo.railW.toFixed(0)}×${cardInfo.railH.toFixed(0)}px）`);
+        }
+        if (!cardInfo.railCounts.every((c) => Number.isInteger(c))) {
+          throw new Error(`${vp.width} 档：阶段计数徽标缺失`);
+        }
+      } else {
+        // D6=A：移动端顶部固定八段阶段条（横向矮条，不随事件增长）+ 小点 ≤5 封顶
+        if (cardInfo.railH > 90 || cardInfo.railW <= cardInfo.railH) {
+          throw new Error(`${vp.width} 档：顶部阶段条非横向固定形态（${cardInfo.railW.toFixed(0)}×${cardInfo.railH.toFixed(0)}px）`);
+        }
+        if (!cardInfo.railDots.every((d) => d <= 5)) {
+          throw new Error(`${vp.width} 档：阶段条小点未封顶 ≤5（${cardInfo.railDots.join(",")}）`);
+        }
       }
       if (cardInfo.fishOnCard) throw new Error(`${vp.width} 档：事件卡上仍有 mascot（08 §四降级口径：三类出场，卡由图标承担）`);
       // v3-M3'' 自定义第 4 槽离线隐藏口径（v3/02 §七）：默认无 Key/未启用 → 槽不渲染
@@ -324,8 +363,9 @@ async function main() {
 
       // 同步 evaluate 连点：卡片点第 0 项 / 小结与 aftermath 继续 / 开局提交默认组合
       // v3-M1'':全程采集 data-age-months 序列与选项数（年龄不回退 + ≥3 选项断言）
-      // v3-M2'':增采状态条值域 / 图标覆盖 / critical 分级 / 轨道色点增长 / 浮动层
+      // v3-M2'':增采状态条值域 / 图标覆盖 / critical 分级 / 浮动层
       // v4-M1''':增采年份徽章（YYYY 年 · N 岁，格式 + 年份随月龄单调）与时代卡出现计数
+      // v4-M2''':增采五档词格式 / 阶段计数徽标增长（桌面）/ 阶段条高度恒定（移动 D6=A）/ 小结三观三轴
       const ageSeq = [];
       const yearSeq = [];
       let minOptions = Infinity;
@@ -333,13 +373,29 @@ async function main() {
       let cardActions = 0;
       let criticalSeen = 0;
       let floatSeen = false;
-      let dotsGrew = false;
+      let countGrew = false;
+      let railFixed = true;
       let relationsChecked = false;
       let eraCards = 0;
+      let summarySeen = null;
       for (let step = 0; step < MAX_STEPS; step++) {
         const acted = await cdp.evaluate(`(() => {
           if (document.querySelector(".screen-ending")) return "ending";
           if (document.querySelector("[data-era-card]")) { window.__era = (window.__era ?? 0) + 1; }
+          // v4-M2''' 小结三观三轴说明：首个阶段小结一次性采集（区间词/箭头/独白/身家状态/阶段跨度）
+          if (!window.__sumDone && document.querySelector(".screen-summary [data-values-note]")) {
+            window.__sumDone = true;
+            window.__sum = {
+              notes: [...document.querySelectorAll(".values-note")].map((n) => ({
+                band: n.querySelector(".vn-band")?.textContent ?? "",
+                shift: n.querySelector(".vn-shift")?.textContent ?? "",
+                mono: n.querySelector(".vn-monologue")?.textContent ?? "",
+              })),
+              span: document.querySelector("[data-stage-span]")?.textContent ?? "",
+              resRow: [...document.querySelectorAll(".sum-res b")].map((e) => e.textContent ?? ""),
+              criticals: !!document.querySelector(".sum-criticals"),
+            };
+          }
           // v3-M3'' 图谱页：首个阶段小结时绕道图谱断言一圈（入口 → 渲染 → 返回）
           if (!window.__relDone && document.querySelector(".screen-summary [data-relations-open]")) {
             window.__relDone = true;
@@ -367,6 +423,7 @@ async function main() {
         })()`);
         if (acted === "ending") {
           endingSeen = true;
+          summarySeen = await cdp.evaluate("window.__sum ?? null");
           break;
         }
         if (acted === "relations") {
@@ -386,15 +443,21 @@ async function main() {
         }
         if (acted === "card") {
           cardActions++;
-          const sample = await cdp.evaluate(`(() => ({
-            age: window.__age,
-            opts: window.__opts,
-            badge: window.__badge ?? "",
-            card: window.__card,
-            res: [...document.querySelectorAll(".statebar .statebar-value")].map((e) => Number(e.textContent)),
-            dots0: document.querySelectorAll(".timeline-segment")[0]?.querySelectorAll(".tl-dot").length ?? 0,
-            floats: !!document.querySelector(".float-layer"),
-          }))()`);
+          const sample = await cdp.evaluate(`(() => {
+            const box = document.querySelector(".timeline")?.getBoundingClientRect();
+            if (window.__railH === undefined && box) window.__railH = box.height;
+            return {
+              age: window.__age,
+              opts: window.__opts,
+              badge: window.__badge ?? "",
+              card: window.__card,
+              words: [...document.querySelectorAll(".statebar .res-word")].map((e) => e.textContent ?? ""),
+              cnt0: Number(document.querySelectorAll(".timeline-segment")[0]?.dataset.count ?? 0),
+              railH: box?.height ?? 0,
+              railH0: window.__railH ?? 0,
+              floats: !!document.querySelector(".float-layer"),
+            };
+          })()`);
           ageSeq.push(sample.age);
           const yearMatch = /^(19|20|21)\d{2} 年 · /.exec(sample.badge);
           if (!yearMatch) throw new Error(`${vp.width} 档：年份徽章格式非法「${sample.badge}」（v4/02 §一）`);
@@ -403,18 +466,40 @@ async function main() {
           if (!sample.card.icon) throw new Error(`${vp.width} 档：第 ${cardActions} 张卡无图标位`);
           if (sample.card.critical) criticalSeen++;
           if (sample.floats) floatSeen = true;
-          for (const v of sample.res) {
-            if (!Number.isInteger(v) || v < 0 || v > 100) throw new Error(`${vp.width} 档：状态条值越界 ${v}（第 ${cardActions} 卡）`);
+          // v4-M2'''：状态条三词格式（五档词 ×2 + 换算元 ×1）
+          if (sample.words.length !== 3) throw new Error(`${vp.width} 档：状态词条数 ${sample.words.length} ≠ 3`);
+          if (!/^心境 · (萎靡|低落|平稳|良好|高涨)$/.test(sample.words[0] ?? "")) {
+            throw new Error(`${vp.width} 档：心境五档词非法「${sample.words[0]}」`);
           }
-          if (cardActions >= 2 && sample.dots0 >= 1) dotsGrew = true;
+          if (!/^¥[\d,]+$/.test(sample.words[1] ?? "")) {
+            throw new Error(`${vp.width} 档：积蓄换算元非法「${sample.words[1]}」`);
+          }
+          if (!/^健康 · (萎靡|低落|平稳|良好|高涨)$/.test(sample.words[2] ?? "")) {
+            throw new Error(`${vp.width} 档：健康五档词非法「${sample.words[2]}」`);
+          }
+          // D6=A：阶段级聚合——桌面计数徽标增长；移动阶段条高度恒定（选多少张卡都不长高）
+          if (cardActions >= 2 && sample.cnt0 >= 1) countGrew = true;
+          if (sample.railH0 > 0 && Math.abs(sample.railH - sample.railH0) > 1) railFixed = false;
         }
         if (String(acted).startsWith("stuck:")) throw new Error(`页面卡在未知屏：${acted}`);
       }
       if (!endingSeen) throw new Error(`${vp.width} 档：${MAX_STEPS} 步内未到终局`);
       if (minOptions < 3) throw new Error(`${vp.width} 档：出现选项数 ${minOptions} < 3 的卡片（v3 口径 ≥3）`);
       if (!floatSeen) throw new Error(`${vp.width} 档：全程未观察到后果浮动层（微反馈缺失）`);
-      if (!dotsGrew) throw new Error(`${vp.width} 档：时间轴轨道色点未随抉择增长`);
+      if (vp.width >= 768 && !countGrew) throw new Error(`${vp.width} 档：桌面阶段计数徽标未随抉择增长`);
+      if (vp.width < 768 && !railFixed) throw new Error(`${vp.width} 档：移动阶段条高度发生变化（D6=A 固定口径）`);
       if (criticalSeen < 1) throw new Error(`${vp.width} 档：全程未出现 critical 分级卡`);
+      // v4-M2''' 小结三观呈现（02 §七）：三轴各一行 = 区间词 + 箭头 + 独白；身家状态行 + 阶段跨度句
+      if (!summarySeen) throw new Error(`${vp.width} 档：全程未采集到阶段小结三观说明`);
+      if (summarySeen.notes.length !== 3) throw new Error(`${vp.width} 档：三观说明非 3 轴（实得 ${summarySeen.notes.length}）`);
+      for (const n of summarySeen.notes) {
+        if (!/ · /.test(n.band) || !n.band.trim()) throw new Error(`${vp.width} 档：区间词行非法「${n.band}」`);
+        if (!/^[↑↓→]\d+$/.test(n.shift)) throw new Error(`${vp.width} 档：位移箭头非法「${n.shift}」`);
+        if ((n.mono ?? "").length < 8) throw new Error(`${vp.width} 档：独白未接线（「${n.mono}」）`);
+      }
+      if (!/[0-9]{4}/.test(summarySeen.span)) throw new Error(`${vp.width} 档：小结主题头缺年代区间（「${summarySeen.span}」）`);
+      if (summarySeen.resRow.length !== 3) throw new Error(`${vp.width} 档：身家状态非 3 项（实得 ${summarySeen.resRow.length}）`);
+      if (!summarySeen.criticals) throw new Error(`${vp.width} 档：小结关键抉择回顾段缺失`);
       for (let i = 1; i < yearSeq.length; i++) {
         if (yearSeq[i] < yearSeq[i - 1]) {
           throw new Error(`${vp.width} 档：年份回退 ${yearSeq[i - 1]} → ${yearSeq[i]}（第 ${i} 张卡，v4/02 §一）`);
@@ -563,10 +648,38 @@ async function main() {
           screen: !!document.querySelector(".screen-settings"),
           enabled: document.querySelector(".settings-check input")?.checked ?? null,
           providers: document.querySelectorAll(".settings-form select[name=provider] option").length,
+          themeChips: document.querySelectorAll("[data-theme-choice]").length,
         }))()`);
         if (!settingsSeen.screen) throw new Error(`${vp.width} 档：设置页未渲染`);
         if (settingsSeen.enabled !== false) throw new Error(`${vp.width} 档：旁路开关默认应为关`);
         if (settingsSeen.providers < 4) throw new Error(`${vp.width} 档：服务商预设 < 4`);
+        if (settingsSeen.themeChips !== 4) throw new Error(`${vp.width} 档：主题 chips 非 4 款（实得 ${settingsSeen.themeChips}）`);
+        // v4-M2''' 主题四款（02 §五）：切夜航即时生效（data-theme + 深底）+ 独立键落盘；切回米纸复原
+        const themeSwitch = await cdp.evaluate(`(() => {
+          const night = document.querySelector('[data-theme-choice][value="night"]');
+          if (!night) return { ok: false };
+          night.click();
+          const nightAttr = document.documentElement.dataset.theme;
+          const nightBg = getComputedStyle(document.body).backgroundColor;
+          const saved = localStorage.getItem("xinlu.theme.v1");
+          const paper = document.querySelector('[data-theme-choice][value="paper"]');
+          if (paper) paper.click();
+          return {
+            ok: true,
+            nightAttr,
+            nightBg,
+            saved,
+            backAttr: document.documentElement.dataset.theme,
+            backBg: getComputedStyle(document.body).backgroundColor,
+          };
+        })()`);
+        if (!themeSwitch.ok) throw new Error(`${vp.width} 档：主题选项缺失`);
+        if (themeSwitch.nightAttr !== "night") throw new Error(`${vp.width} 档：夜航未即时生效（${themeSwitch.nightAttr}）`);
+        if (themeSwitch.saved !== "night") throw new Error(`${vp.width} 档：主题键未落盘（${themeSwitch.saved}）`);
+        if (themeSwitch.nightBg === themeSwitch.backBg) {
+          throw new Error(`${vp.width} 档：主题切换背景色未变（${themeSwitch.nightBg}）`);
+        }
+        if (themeSwitch.backAttr !== "paper") throw new Error(`${vp.width} 档：米纸未复原（${themeSwitch.backAttr}）`);
         await cdp.evaluate(`document.querySelector("[data-settings-back]").click()`);
         if (!(await cdp.evaluate("!!document.querySelector('.screen-start')"))) {
           throw new Error(`${vp.width} 档：设置返回未回开局屏`);
@@ -577,8 +690,8 @@ async function main() {
       out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄；年份徽章 ${yearSeq[0]}→${yearSeq[yearSeq.length - 1]} 单调；时代卡轮询 ${eraCards} 次`);
     }
 
-    // ── v3-M2'' 768 中档（三档截图口径：375/768/1280）：桌面双栏布局断言 + 截图留痕，不重复全量通关 ──
-    out("[4.5/5] 768 中档截图 + 双栏布局断言 …");
+    // ── v3-M2'' 768 中档（三档截图口径：375/768/1280）：桌面竖轨布局断言 + 截图留痕，不重复全量通关 ──
+    out("[4.5/5] 768 中档截图 + 桌面竖轨断言 …");
     await cdp.send("Emulation.setDeviceMetricsOverride", {
       width: 768,
       height: 900,
@@ -597,10 +710,13 @@ async function main() {
     }
     const mid = await cdp.evaluate(`(() => {
       const rail = document.querySelector(".timeline");
+      const railBox = rail?.getBoundingClientRect();
       const card = document.querySelector(".screen-card .event-card[data-age-months]");
       return {
-        railWidth: rail?.getBoundingClientRect().width ?? 0,
+        railW: railBox?.width ?? 0,
+        railH: railBox?.height ?? 0,
         railVisible: !!rail?.offsetParent,
+        countChip: !!rail?.querySelector(".tl-count"),
         card: !!card,
         icon: !!card?.querySelector(".ev-icon[data-icon]"),
         statebar: document.querySelectorAll(".statebar .res").length,
@@ -609,13 +725,14 @@ async function main() {
     if (!mid.card) throw new Error("768 档：事件卡未渲染");
     if (!mid.icon) throw new Error("768 档：事件卡图标位缺失");
     if (mid.statebar !== 3) throw new Error(`768 档：状态条非 3 项（实得 ${mid.statebar}）`);
-    if (!mid.railVisible || mid.railWidth < 200) {
-      throw new Error(`768 档：桌面双栏轨道未生效（宽 ${mid.railWidth.toFixed(0)}px）`);
+    if (!mid.railVisible || mid.railW < 200 || mid.railH <= mid.railW) {
+      throw new Error(`768 档：桌面竖轨未生效（${mid.railW.toFixed(0)}×${mid.railH.toFixed(0)}px）`);
     }
+    if (!mid.countChip) throw new Error("768 档：阶段计数徽标缺失（D6=A 桌面收敛口径）");
     await cdp.send("Page.captureScreenshot", { format: "png" });
     const shot768 = await cdp.send("Page.captureScreenshot", { format: "png" });
     writeFileSync(join(ROOT, "docs", "assets", "e2e-smoke-768.png"), Buffer.from(shot768.data, "base64"));
-    out(`      ✓ 768 档：双栏轨道 ${mid.railWidth.toFixed(0)}px + 图标 + 状态条，截图 e2e-smoke-768.png`);
+    out(`      ✓ 768 档：桌面竖轨 ${mid.railW.toFixed(0)}px + 阶段计数徽标 + 图标 + 状态条，截图 e2e-smoke-768.png`);
 
     // ── v4-M1''' 自定义出生全流程：三页签切换 → 六因素表单 → 首屏时代卡 → 年份徽章 → 「我的家庭」图谱 ──
     out("[4.7/5] v4 自定义出生全流程（1956 · 南方 · 大城 · 双孩 · 教师医生 · 一般）…");
@@ -690,7 +807,7 @@ async function main() {
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项≥3 图标全覆盖 critical分级/状态条/轨道色点/浮动层/图谱页/种子码/自定义槽离线隐藏已断言`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项≥3 图标全覆盖 critical分级/五档词状态条/阶段条聚合(D6=A)/浮动层/小结三观三轴/图谱页/种子码/自定义槽离线隐藏/主题四款切换已断言`);
     }
     out("PASS  v4 自定义出生全流程：三页签/六因素表单/1956 时代卡首屏/年份徽章/我的家庭图谱(本局姓名)/存档 v3 形状");
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);

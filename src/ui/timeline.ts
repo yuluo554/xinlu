@@ -1,7 +1,8 @@
 // 时间轴画卷 + 游戏感反馈的视图模型（纯函数，无 DOM）。表现口径单源 plan/v3/02（§四 线别 / §三 资源 / §二 三观），
 // 本档只承载 UI 语汇（线别中文名 / 资源图标 / 浮动文案），不复写数值口径。
+// v4-M2''' D6=A（02 §十 ▸ M2''' 增补）：轨道收敛阶段级聚合——移动端顶部固定八段阶段条（段内小点 ≤5 封顶），
+// 桌面左轨改阶段计数徽标；不再逐事件铺色点。
 import {
-  LINE_KEYS,
   RES_KEYS,
   STAGES,
   type Deltas3,
@@ -13,7 +14,8 @@ import {
   type ValuesAxis,
 } from "../engine/model";
 import { eventById } from "../engine/engine";
-import { STAGE_LABEL } from "./logic";
+import { entryStages, STAGE_LABEL } from "./logic";
+import { moneyDeltaDisplay, type MoneyBand } from "./resources";
 
 export { RES_KEYS };
 
@@ -46,42 +48,45 @@ export const STAGE_SHORT: Record<Stage, string> = {
   elder: "老",
 };
 
-export interface TimelineNode {
-  line: LineKey;
-  critical: boolean;
-}
-
 export interface TimelineSegment {
   stage: Stage;
   label: string;
   short: string;
   status: "done" | "now" | "future";
-  nodes: TimelineNode[];
+  /** 本阶段已历事件数（含时代卡）。 */
+  count: number;
+  /** 其中重大抉择数（阶段条末点加环的依据）。 */
+  criticalCount: number;
+  /** 移动端阶段条小点渲染数 = min(count, 5)（D6=A 封顶口径，09 §四.3）。 */
+  dots: number;
 }
 
-/** 人生画卷轨道：八段 × 已消费事件（线别色点，critical 加环）。阶段信息沿 logic.ts 纪律由 history 反查派生；
- *  v4 时代卡（kind:"era"）计入命运线普通色点（02 §二：命运线注入）。 */
+/** 人生轨道视图模型（D6=A 阶段级聚合）：八段 × 每段已历计数；时代卡按 entryStages 归段准确计入。 */
 export function timelineVM(state: RunState): TimelineSegment[] {
-  const nodes: Record<Stage, TimelineNode[]> = {} as Record<Stage, TimelineNode[]>;
-  for (const s of STAGES) nodes[s] = [];
-  for (const h of state.history) {
-    if (h.kind === "era") {
-      // 时代卡不属八阶段事件表：按「当前推进阶段」归段（history 末段所处阶段的口径与引擎注入一致）。
-      const stage = STAGES[Math.min(state.stageIndex, STAGES.length - 1)]!;
-      nodes[stage]!.push({ line: "fate", critical: false });
-      continue;
-    }
-    const ev = eventById(h.eventId);
-    if (!ev) continue;
-    nodes[ev.stage]!.push({ line: ev.line, critical: ev.type === "critical" });
-  }
-  return STAGES.map((stage, i) => ({
-    stage,
-    label: STAGE_LABEL[stage],
-    short: STAGE_SHORT[stage],
-    status: i < state.stageIndex ? ("done" as const) : i === state.stageIndex ? ("now" as const) : ("future" as const),
-    nodes: nodes[stage]!,
-  }));
+  const stages = entryStages(state);
+  const counts: Record<Stage, { count: number; critical: number }> = {} as Record<
+    Stage,
+    { count: number; critical: number }
+  >;
+  for (const s of STAGES) counts[s] = { count: 0, critical: 0 };
+  state.history.forEach((h, i) => {
+    const slot = counts[stages[i]!];
+    if (!slot) return;
+    slot.count += 1;
+    if (h.kind !== "era" && eventById(h.eventId)?.type === "critical") slot.critical += 1;
+  });
+  return STAGES.map((stage, i) => {
+    const { count, critical } = counts[stage]!;
+    return {
+      stage,
+      label: STAGE_LABEL[stage],
+      short: STAGE_SHORT[stage],
+      status: i < state.stageIndex ? ("done" as const) : i === state.stageIndex ? ("now" as const) : ("future" as const),
+      count,
+      criticalCount: critical,
+      dots: Math.min(count, 5),
+    };
+  });
 }
 
 // ── 后果微反馈（v3/02 §三「增损时数值浮动」+ dogfooding 结论 1「选择可感」）──
@@ -94,14 +99,16 @@ export interface Floater {
 
 const RES_LABEL: Record<ResKey, string> = { mood: "心境", money: "积蓄", health: "健康" };
 
-/** 资源浮动：非零项 → 「心境 −5」样式带符号文案。 */
-export function resourceFloats(deltas: ResourceDeltas): Floater[] {
+/** 资源浮动：非零项带符号；mood/health 为原始点数（数值只在浮动层示人，v3/02 §三），
+ *  money 按当前年代段换算「元」（02 §四：文案引用积蓄用换算后口语）。 */
+export function resourceFloats(deltas: ResourceDeltas, band: MoneyBand): Floater[] {
   const out: Floater[] = [];
   for (const key of RES_KEYS) {
     const v = deltas[key] ?? 0;
     if (v === 0) continue;
     const sign = v > 0 ? "+" : "−";
-    out.push({ text: `${RES_LABEL[key]} ${sign}${Math.abs(v)}`, cls: v > 0 ? "up" : "down" });
+    const body = key === "money" ? moneyDeltaDisplay(v, band) : `${sign}${Math.abs(v)}`;
+    out.push({ text: `${RES_LABEL[key]} ${body}`, cls: v > 0 ? "up" : "down" });
   }
   return out;
 }
@@ -127,6 +134,6 @@ export function valueFloats(deltas: Deltas3): Floater[] {
 }
 
 /** 一次选择的全部浮动文案（资源 + 三观合并，动效预算内 ≤6 条，渲染层做 stagger）。 */
-export function choiceFloats(deltas3: Deltas3, resources: ResourceDeltas): Floater[] {
-  return [...resourceFloats(resources), ...valueFloats(deltas3)];
+export function choiceFloats(deltas3: Deltas3, resources: ResourceDeltas, band: MoneyBand): Floater[] {
+  return [...resourceFloats(resources, band), ...valueFloats(deltas3)];
 }
