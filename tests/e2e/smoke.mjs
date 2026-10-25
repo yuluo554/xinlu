@@ -223,7 +223,7 @@ async function main() {
       });
       if (v > 0) {
         // 二局只清存档键（图鉴 xinlu.gallery.v2 保留：跨局累计是其本意），从开局屏起跑
-        await cdp.evaluate("localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
+        await cdp.evaluate("localStorage.removeItem('xinlu.save.v3'); localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
         await cdp.send("Page.navigate", { url: pageUrl });
         await cdp.waitEvent("Page.loadEventFired");
       } else {
@@ -247,18 +247,31 @@ async function main() {
         if (!switched) throw new Error(`${vp.width} 档:改选出生环境失败`);
       }
 
-      // v3-M3'' 开局屏三入口：随机出生 / 种子码 / 设置（提交开局前断言）
+      // v3-M3'' 开局屏三入口 + v4 三页签（随机/手选/自定义）：提交开局前断言
       const startTools = await cdp.evaluate(`(() => ({
         random: !!document.querySelector("[data-random-birth]"),
         seed: !!document.querySelector("[data-seed-form] .seed-input"),
         settings: !!document.querySelector("[data-settings-open]"),
+        tabs: document.querySelectorAll(".start-tablist label").length,
+        customForm: !!document.querySelector("[data-custom-form]"),
+        yearSelect: !!document.querySelector("[data-custom-form] select[name=birthYear]"),
       }))()`);
       if (!startTools.random || !startTools.seed || !startTools.settings) {
         throw new Error(`${vp.width} 档：开局屏种子码/随机出生/设置入口缺失（${JSON.stringify(startTools)}）`);
       }
+      if (startTools.tabs !== 3 || !startTools.customForm || !startTools.yearSelect) {
+        throw new Error(`${vp.width} 档：开局屏三页签/自定义表单缺失（${JSON.stringify(startTools)}）`);
+      }
 
       // v3-M2' 时间轴画卷断言:提交开局进入首卡——图标位/状态条/八段轨道在位,mascot 已按 08 §四降级(卡上无鱼)
+      // v4-M1''':出生年命中锚年时首屏是时代卡（锚先于首事件注入），先穿过再断言事件卡
       await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
+      for (let guard = 0; guard < 4; guard++) {
+        const eraFirst = await cdp.evaluate(`!!document.querySelector("[data-era-card]")`);
+        if (!eraFirst) break;
+        await cdp.evaluate(`document.querySelector("[data-era-card] [data-continue]").click()`);
+        await sleep(120);
+      }
       const cardInfo = await cdp.evaluate(`(() => {
         const card = document.querySelector(".screen-card .event-card[data-age-months]");
         const icon = card?.querySelector(".ev-icon[data-icon]");
@@ -312,7 +325,9 @@ async function main() {
       // 同步 evaluate 连点：卡片点第 0 项 / 小结与 aftermath 继续 / 开局提交默认组合
       // v3-M1'':全程采集 data-age-months 序列与选项数（年龄不回退 + ≥3 选项断言）
       // v3-M2'':增采状态条值域 / 图标覆盖 / critical 分级 / 轨道色点增长 / 浮动层
+      // v4-M1''':增采年份徽章（YYYY 年 · N 岁，格式 + 年份随月龄单调）与时代卡出现计数
       const ageSeq = [];
+      const yearSeq = [];
       let minOptions = Infinity;
       let endingSeen = false;
       let cardActions = 0;
@@ -320,9 +335,11 @@ async function main() {
       let floatSeen = false;
       let dotsGrew = false;
       let relationsChecked = false;
+      let eraCards = 0;
       for (let step = 0; step < MAX_STEPS; step++) {
         const acted = await cdp.evaluate(`(() => {
           if (document.querySelector(".screen-ending")) return "ending";
+          if (document.querySelector("[data-era-card]")) { window.__era = (window.__era ?? 0) + 1; }
           // v3-M3'' 图谱页：首个阶段小结时绕道图谱断言一圈（入口 → 渲染 → 返回）
           if (!window.__relDone && document.querySelector(".screen-summary [data-relations-open]")) {
             window.__relDone = true;
@@ -334,6 +351,7 @@ async function main() {
           if (card && opt) {
             window.__age = Number(card.dataset.ageMonths);
             window.__opts = document.querySelectorAll("[data-option]").length;
+            window.__badge = document.querySelector("[data-year-badge]")?.textContent ?? "";
             window.__card = {
               critical: card.classList.contains("critical"),
               icon: !!card.querySelector(".ev-icon[data-icon]"),
@@ -371,12 +389,16 @@ async function main() {
           const sample = await cdp.evaluate(`(() => ({
             age: window.__age,
             opts: window.__opts,
+            badge: window.__badge ?? "",
             card: window.__card,
             res: [...document.querySelectorAll(".statebar .statebar-value")].map((e) => Number(e.textContent)),
             dots0: document.querySelectorAll(".timeline-segment")[0]?.querySelectorAll(".tl-dot").length ?? 0,
             floats: !!document.querySelector(".float-layer"),
           }))()`);
           ageSeq.push(sample.age);
+          const yearMatch = /^(19|20|21)\d{2} 年 · /.exec(sample.badge);
+          if (!yearMatch) throw new Error(`${vp.width} 档：年份徽章格式非法「${sample.badge}」（v4/02 §一）`);
+          yearSeq.push(Number(sample.badge.slice(0, 4)));
           minOptions = Math.min(minOptions, sample.opts);
           if (!sample.card.icon) throw new Error(`${vp.width} 档：第 ${cardActions} 张卡无图标位`);
           if (sample.card.critical) criticalSeen++;
@@ -393,6 +415,13 @@ async function main() {
       if (!floatSeen) throw new Error(`${vp.width} 档：全程未观察到后果浮动层（微反馈缺失）`);
       if (!dotsGrew) throw new Error(`${vp.width} 档：时间轴轨道色点未随抉择增长`);
       if (criticalSeen < 1) throw new Error(`${vp.width} 档：全程未出现 critical 分级卡`);
+      for (let i = 1; i < yearSeq.length; i++) {
+        if (yearSeq[i] < yearSeq[i - 1]) {
+          throw new Error(`${vp.width} 档：年份回退 ${yearSeq[i - 1]} → ${yearSeq[i]}（第 ${i} 张卡，v4/02 §一）`);
+        }
+      }
+      // 时代卡出现观察量（每张时代卡至少占一轮询轮次；硬断言在 [4.7/5] 自定义段做）
+      eraCards = await cdp.evaluate("window.__era ?? 0");
       for (let i = 1; i < ageSeq.length; i++) {
         if (ageSeq[i] < ageSeq[i - 1]) {
           throw new Error(`${vp.width} 档：年龄回退 ${ageSeq[i - 1]} → ${ageSeq[i]}（第 ${i} 张卡，v3 单调口径）`);
@@ -544,8 +573,8 @@ async function main() {
         }
       }
 
-      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share, cards: ageSeq.length, ageSpan: `${ageSeq[0]}–${ageSeq[ageSeq.length - 1]}` });
-      out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄`);
+      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share, cards: ageSeq.length, ageSpan: `${ageSeq[0]}–${ageSeq[ageSeq.length - 1]}`, eraPolls: eraCards });
+      out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄；年份徽章 ${yearSeq[0]}→${yearSeq[yearSeq.length - 1]} 单调；时代卡轮询 ${eraCards} 次`);
     }
 
     // ── v3-M2'' 768 中档（三档截图口径：375/768/1280）：桌面双栏布局断言 + 截图留痕，不重复全量通关 ──
@@ -556,10 +585,16 @@ async function main() {
       deviceScaleFactor: 1,
       mobile: false,
     });
-    await cdp.evaluate("localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
+    await cdp.evaluate("localStorage.removeItem('xinlu.save.v3'); localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
     await cdp.send("Page.navigate", { url: pageUrl });
     await cdp.waitEvent("Page.loadEventFired");
     await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
+    for (let guard = 0; guard < 4; guard++) {
+      const eraFirst = await cdp.evaluate(`!!document.querySelector("[data-era-card]")`);
+      if (!eraFirst) break;
+      await cdp.evaluate(`document.querySelector("[data-era-card] [data-continue]").click()`);
+      await sleep(120);
+    }
     const mid = await cdp.evaluate(`(() => {
       const rail = document.querySelector(".timeline");
       const card = document.querySelector(".screen-card .event-card[data-age-months]");
@@ -582,14 +617,85 @@ async function main() {
     writeFileSync(join(ROOT, "docs", "assets", "e2e-smoke-768.png"), Buffer.from(shot768.data, "base64"));
     out(`      ✓ 768 档：双栏轨道 ${mid.railWidth.toFixed(0)}px + 图标 + 状态条，截图 e2e-smoke-768.png`);
 
+    // ── v4-M1''' 自定义出生全流程：三页签切换 → 六因素表单 → 首屏时代卡 → 年份徽章 → 「我的家庭」图谱 ──
+    out("[4.7/5] v4 自定义出生全流程（1956 · 南方 · 大城 · 双孩 · 教师医生 · 一般）…");
+    await cdp.evaluate("localStorage.removeItem('xinlu.save.v3'); localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
+    await cdp.send("Page.navigate", { url: pageUrl });
+    await cdp.waitEvent("Page.loadEventFired");
+    const tabSwitched = await cdp.evaluate(`(() => {
+      document.querySelector("label[for='birth-tab-custom']").click();
+      const panel = document.querySelector("[data-panel='custom']");
+      return { visible: !!panel && panel.offsetParent !== null, form: !!document.querySelector("[data-custom-form]") };
+    })()`);
+    if (!tabSwitched.visible || !tabSwitched.form) throw new Error(`自定义页签切换失败（${JSON.stringify(tabSwitched)}）`);
+    const customSet = await cdp.evaluate(`(() => {
+      const form = document.querySelector("[data-custom-form]");
+      const year = form.querySelector("select[name=birthYear]");
+      year.value = "1956";
+      const picks = { place: "大城", region: "南方", structure: "双孩", parentsJob: "教师医生", wealth: "一般" };
+      let ok = true;
+      for (const [name, value] of Object.entries(picks)) {
+        const el = form.querySelector('input[name="' + name + '"][value="' + value + '"]');
+        if (el) el.click(); else ok = false;
+      }
+      form.querySelector("button[type=submit]").click();
+      return ok;
+    })()`);
+    if (!customSet) throw new Error("自定义六因素表单装配失败（枚举值缺项）");
+    // 首屏 = 1956 时代卡（锚先于首事件注入）：无选项、年份徽章 1956 年 · 0 岁
+    const eraFirst = await waitFor(async () => {
+      const card = await cdp.evaluate(`(() => {
+        const era = document.querySelector("[data-era-card]");
+        if (!era) return null;
+        return { badge: era.querySelector("[data-year-badge]")?.textContent ?? "", title: era.querySelector(".era-title")?.textContent ?? "", options: era.querySelectorAll("[data-option]").length };
+      })()`);
+      return card;
+    }, "1956 时代卡首屏");
+    if (!/^1956 年 · 0 岁$/.test(eraFirst.badge)) throw new Error(`时代卡徽章非法「${eraFirst.badge}」`);
+    if (eraFirst.options !== 0) throw new Error("时代卡不应有选项（02 §二无选项口径）");
+    await cdp.evaluate(`document.querySelector("[data-era-card] [data-continue]").click()`);
+    // 首事件卡（infant-011 · 3 个月 → 1956 年）年份徽章
+    const firstCard = await waitFor(async () => {
+      const badge = await cdp.evaluate(`document.querySelector(".event-card[data-age-months] [data-year-badge]")?.textContent ?? ""`);
+      return badge || null;
+    }, "自定义局首事件卡");
+    if (!/^1956 年 · /.test(firstCard)) throw new Error(`自定义局首卡徽章非法「${firstCard}」`);
+    // 「我的家庭」入口 → 图谱节点 = 生成器输出（双孩：父母 2 + 同辈 ≥1，中心外 ≥3 节点）且家庭 NPC 有本局姓名
+    await cdp.evaluate(`document.querySelector("[data-family-open]").click()`);
+    const family = await waitFor(async () => {
+      const rel = await cdp.evaluate(`(() => {
+        const screen = document.querySelector(".screen-relations");
+        if (!screen) return null;
+        const labels = [...screen.querySelectorAll("[data-relations-chart] svg g text")].map((t) => t.textContent);
+        return { screen: true, nodes: screen.querySelectorAll("[data-relations-chart] svg g").length, labels };
+      })()`);
+      return rel?.screen ? rel : null;
+    }, "我的家庭图谱页");
+    if (family.nodes < 4) throw new Error(`开局图谱节点 ${family.nodes} < 4（中心 + 父母 + 双孩同辈）`);
+    const namedCount = family.labels.filter((t) => t.length >= 3 && t !== "你").length;
+    if (namedCount < 3) throw new Error(`家庭 NPC 本局姓名未上图谱（≥3 字名实得 ${namedCount} 个：${family.labels.join(",")}）`);
+    await cdp.evaluate(`document.querySelector("[data-relations-back]").click()`);
+    const backToCard = await cdp.evaluate(`!!document.querySelector(".event-card[data-age-months]")`);
+    if (!backToCard) throw new Error("家庭图谱返回未回事件卡");
+    // 存档 v3 落盘形状（birthYear/profile 键在位）
+    const savedShape = await cdp.evaluate(`(() => {
+      const raw = JSON.parse(localStorage.getItem("xinlu.save.v3") ?? "{}");
+      return { v: raw.v, birthYear: raw.birthYear, profile: raw.profile, eraCard: Array.isArray(raw.history) && raw.history.some((h) => h.kind === "era") };
+    })()`);
+    if (savedShape.v !== 3 || savedShape.birthYear !== 1956 || !savedShape.profile || savedShape.profile.structure !== "双孩" || !savedShape.eraCard) {
+      throw new Error(`存档 v3 形状非法（${JSON.stringify(savedShape)}）`);
+    }
+    out("      ✓ 自定义六因素开局：1956 时代卡首屏 + 年份徽章 + 我的家庭图谱（本局姓名）+ 存档 v3 含 era 条目");
+
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 选项≥3 图标全覆盖 critical分级/状态条/轨道色点/浮动层/图谱页/种子码/自定义槽离线隐藏已断言`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项≥3 图标全覆盖 critical分级/状态条/轨道色点/浮动层/图谱页/种子码/自定义槽离线隐藏已断言`);
     }
+    out("PASS  v4 自定义出生全流程：三页签/六因素表单/1956 时代卡首屏/年份徽章/我的家庭图谱(本局姓名)/存档 v3 形状");
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
     out("=".repeat(56));
-    out("结论: e2e 冒烟全绿（375/1280 双端一键通关）");
+    out("结论: e2e 冒烟全绿（375/1280 双端一键通关 + v4 自定义出生全流程）");
   } finally {
     killAll();
     // Edge 退出后句柄释放有延迟：清理失败可容忍（profile 在系统临时目录，不碍事）

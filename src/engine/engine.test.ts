@@ -6,12 +6,14 @@ import {
   applyChoice,
   applyCustomChoice,
   createRun,
+  deriveBirth,
   mbtiLetters,
   optionAvailable,
   pickEvent,
   resolveEnding,
   seededDraw,
 } from "./engine";
+import { generateFamily } from "./family";
 import {
   DIM_KEYS,
   STAGES,
@@ -42,25 +44,29 @@ const historyOf = (pred: (e: GameEvent) => boolean): HistoryEntry[] =>
   }));
 
 describe("createRun", () => {
-  it("K8 合成初始四维：50 + 四要素修正量之和，不做钳制", () => {
+  it("K8 合成初始四维（v4 八因素版）：50 + 全部八组修正量之和，不做钳制", () => {
     const run = createRun(ENV, 2026);
-    expect(run.dims).toEqual(dimsOf(51, 52, 50, 54));
+    // seed2026 派生画像 {北方,多孩,公职,宽裕}：手算 50 + era/place/mood/style + 四因素修正量
+    expect(run.dims).toEqual(dimsOf(50, 51, 47, 57));
     expect(run.stageIndex).toBe(0);
     expect(run.history).toEqual([]);
     expect(run.flags).toEqual([]);
     expect(run.seed).toBe(2026);
     expect(run.env).toEqual(ENV);
+    expect(run.birthYear).toBe(deriveBirth(ENV, 2026).birthYear);
+    expect(run.profile).toEqual(deriveBirth(ENV, 2026).profile);
   });
 
-  it("v3 状态层初始值：三观 50 中位 / 资源 60 / 线进度 0 / 父母在册（v3/02 §八）", () => {
+  it("v3 状态层初始值：三观 50 中位 / 资源 60 / 线进度 0；v4 家庭生成器在册（02 §三 ▸ M1'''）", () => {
     const run = createRun(ENV, 2026);
     expect(run.values3).toEqual({ worldview: 50, outlook: 50, values: 50 });
     expect(run.resources).toEqual({ mood: 60, money: 60, health: 60 });
     expect(run.lines).toEqual({ study: 0, career: 0, love: 0, friend: 0, health: 0 });
-    expect(run.npcs).toEqual([
-      { id: "mother", bond: 70, tag: "亲密" },
-      { id: "father", bond: 70, tag: "亲密" },
-    ]);
+    expect(run.npcs).toEqual(generateFamily(run.env, run.birthYear, run.profile, 2026));
+    const ids = run.npcs.map((n) => n.id);
+    expect(ids).toContain("mother");
+    expect(ids).toContain("father");
+    for (const n of run.npcs) expect(n.name, `${n.id} 应有本局姓名`).toBeTruthy();
   });
 
   it("两次 createRun 状态独立，无共享引用", () => {
@@ -69,7 +75,7 @@ describe("createRun", () => {
     a.dims.ei = 99;
     a.values3.values = 99;
     a.history.push({ eventId: "x", option: 0, dimsAfter: a.dims });
-    expect(b.dims.ei).toBe(51);
+    expect(b.dims.ei).toBe(50);
     expect(b.values3.values).toBe(50);
     expect(b.history).toEqual([]);
   });
@@ -108,8 +114,8 @@ describe("seededDraw", () => {
 describe("applyChoice（v3 传导链：选项 → 三观 → 派生四维 + 资源/线进度）", () => {
   it("infant-011 o0（outlook −3）：派生 ei+1/jp+1，三观与资源同步入账", () => {
     const after = applyChoice(createRun(ENV, 7), 0);
-    // 待答 = 开卷窗口最早档 infant-011（3个月）；o0 deltas3 {outlook:-3}
-    expect(after.dims).toEqual(dimsOf(52, 52, 50, 55));
+    // 待答 = 开卷窗口最早档 infant-011（3个月）；seed7 初始 {ei:55,sn:50,tf:50,jp:51}；o0 deltas3 {outlook:-3}
+    expect(after.dims).toEqual(dimsOf(56, 50, 50, 52));
     expect(after.values3).toEqual({ worldview: 50, outlook: 47, values: 50 });
     expect(after.resources).toEqual({ mood: 59, money: 60, health: 60 });
     expect(after.history).toHaveLength(1);
@@ -119,14 +125,14 @@ describe("applyChoice（v3 传导链：选项 → 三观 → 派生四维 + 资�
 
   it("infant-011 o1（worldview+3/outlook+3）：sn+1 与 ei−1/jp−1 同算（方向表 02 §二）", () => {
     const after = applyChoice(createRun(ENV, 7), 1);
-    expect(after.dims).toEqual(dimsOf(50, 53, 50, 53));
+    expect(after.dims).toEqual(dimsOf(54, 51, 50, 50));
     expect(after.values3).toEqual({ worldview: 53, outlook: 53, values: 50 });
   });
 
   it("小增量只动三观不动性格：round(0.4×1)=0（性格是慢变量）", () => {
     const after = applyChoice(createRun(ENV, 7), 2);
     // o2 {worldview:2} → sn+1，且偏移键零值不落盘（dimsOffsetOf 不产生 0 值键）
-    expect(after.dims).toEqual(dimsOf(51, 53, 50, 54));
+    expect(after.dims).toEqual(dimsOf(55, 51, 50, 51));
     expect(after.values3).toEqual({ worldview: 52, outlook: 50, values: 50 });
   });
 
@@ -385,20 +391,24 @@ describe("resolveEnding", () => {
 });
 
 describe("mbtiLetters", () => {
+  // v4：画像第三参 = createRun 同 seed 派生（确定性，初始四维含八因素合成）
+  const PROFILE = createRun(ENV, 7).profile;
+  const PROFILE_LOW = createRun(ENV_LOW_EI, 7).profile;
+
   it("高于 50 取高侧字母，低于 50 取低侧字母", () => {
-    expect(mbtiLetters(dimsOf(60, 40, 70, 30), ENV)).toBe("ENFP");
-    expect(mbtiLetters(dimsOf(40, 60, 30, 70), ENV)).toBe("ISTJ");
+    expect(mbtiLetters(dimsOf(60, 40, 70, 30), ENV, PROFILE)).toBe("ENFP");
+    expect(mbtiLetters(dimsOf(40, 60, 30, 70), ENV, PROFILE)).toBe("ISTJ");
   });
 
   it("当前值恰为 50 时按出生初始值符号裁定", () => {
-    // ENV 初始值 {ei:51, sn:52, tf:50, jp:54}：ei/sn/jp 的 50 依初始符号取高侧，tf 初始亦 50 取低侧
-    expect(mbtiLetters(dimsOf(50, 50, 50, 50), ENV)).toBe("ESTJ");
-    // ENV_LOW_EI 初始 ei=49：ei 的 50 取低侧 I
-    expect(mbtiLetters(dimsOf(50, 50, 50, 50), ENV_LOW_EI)).toBe("ISTJ");
+    // ENV + seed7 画像实测初始 {ei:55, sn:50, tf:50, jp:51}：ei/jp 的 50 依初始符号取高侧；sn/tf 初始恰 50 取低侧（sn→N、tf→T）
+    expect(mbtiLetters(dimsOf(50, 50, 50, 50), ENV, PROFILE)).toBe("ENTJ");
+    // ENV_LOW_EI + seed7 画像实测初始 {ei:50, sn:53, tf:49, jp:54}：ei 初始 50 无符号取低侧 I
+    expect(mbtiLetters(dimsOf(50, 50, 50, 50), ENV_LOW_EI, PROFILE_LOW)).toBe("ISTJ");
   });
 
-  it("混合情形：实测初始值 {51,52,50,54} 的当值为 {60,40,50,30}", () => {
-    expect(mbtiLetters(dimsOf(60, 40, 50, 30), ENV)).toBe("ENTP");
+  it("混合情形：实测初始值的当值为 {60,40,50,30}", () => {
+    expect(mbtiLetters(dimsOf(60, 40, 50, 30), ENV, PROFILE)).toBe("ENTP");
   });
 });
 
@@ -414,7 +424,7 @@ describe("数据口径 ↔ 引擎 ↔ 测试 三方一致", () => {
       }
       const state: RunState = { ...createRun(ENV, 7), dims, flags: ending.cond.flags ?? [] };
       expect(resolveEnding(state).id).toBe(ending.id);
-      expect(mbtiLetters(state.dims, state.env), `${ending.id} 字母不符`).toBe(ending.typeText);
+      expect(mbtiLetters(state.dims, state.env, state.profile), `${ending.id} 字母不符`).toBe(ending.typeText);
     }
   });
 });

@@ -53,6 +53,14 @@ const ELEMENT_META: Array<{ key: keyof BirthEnv; label: string }> = [
   { key: "style", label: "教养方式" },
 ];
 
+/** 自定义页签六因素中非 env 的四因素（城乡 place 复用 env 枚举）。 */
+const PROFILE_META: Array<{ key: "region" | "structure" | "parentsJob" | "wealth"; label: string }> = [
+  { key: "region", label: "南北" },
+  { key: "structure", label: "家庭结构" },
+  { key: "parentsJob", label: "父母职业" },
+  { key: "wealth", label: "家境" },
+];
+
 /** 常驻状态条（v3/02 §三：图标+数值，无进度条堆砌）；bump = 本步有增损的资源键，渲染即触发数值弹跳。 */
 function statebar(resources: Resources | null, bump: readonly ResKey[]): string {
   if (!resources) return "";
@@ -67,7 +75,12 @@ function statebar(resources: Resources | null, bump: readonly ResKey[]): string 
   return `<div class="statebar" role="status" aria-label="状态">${items}</div>`;
 }
 
-function topbar(stageIndex: number, resources: Resources | null = null, bump: readonly ResKey[] = []): string {
+function topbar(
+  stageIndex: number,
+  resources: Resources | null = null,
+  bump: readonly ResKey[] = [],
+  family = false,
+): string {
   const dots = STAGES.map((_, i) =>
     `<span class="dot${i < stageIndex ? " done" : i === stageIndex ? " now" : ""}"></span>`,
   ).join("");
@@ -76,6 +89,7 @@ function topbar(stageIndex: number, resources: Resources | null = null, bump: re
       <span class="wordmark">心路</span>
       <div class="dots" aria-label="人生进度">${dots}</div>
       ${statebar(resources, bump)}
+      ${family ? '<button type="button" class="btn-ghost btn-family" data-family-open>我的家庭</button>' : ""}
       <button type="button" class="btn-ghost" data-restart>重开</button>
     </header>`;
 }
@@ -105,32 +119,73 @@ function floatLayer(floaters: readonly Floater[]): string {
   return `<div class="float-layer" aria-hidden="true">${items}</div>`;
 }
 
-export function startScreen(options: Record<keyof BirthEnv, string[]>, error?: string): string {
-  const groups = ELEMENT_META.map(({ key, label }) => {
-    const chips = options[key]
-      .map(
-        (value, i) =>
-          `<label class="chip"><input type="radio" name="${key}" value="${esc(value)}"${i === 0 ? " checked" : ""}><span>${esc(value)}</span></label>`,
-      )
-      .join("");
-    return `<fieldset class="env-group"><legend>${label}</legend><div class="chips">${chips}</div></fieldset>`;
-  }).join("");
+/** 单选 chip 组（手选/自定义页签共用）。 */
+function chipGroup(name: string, values: readonly string[], label: string): string {
+  const chips = values
+    .map(
+      (value, i) =>
+        `<label class="chip"><input type="radio" name="${name}" value="${esc(value)}"${i === 0 ? " checked" : ""}><span>${esc(value)}</span></label>`,
+    )
+    .join("");
+  return `<fieldset class="env-group"><legend>${esc(label)}</legend><div class="chips">${chips}</div></fieldset>`;
+}
+
+export interface StartScreenVM {
+  env: Record<keyof BirthEnv, string[]>;
+  profile: Record<"region" | "structure" | "parentsJob" | "wealth", string[]>;
+  years: number[];
+  error?: string;
+}
+
+/** 开局屏（v4 三页签：随机 / 手选 / 自定义六因素；plan/v4/02 §三 ▸ M1''' 增补）。 */
+export function startScreen(vm: StartScreenVM): string {
+  const manualGroups = ELEMENT_META.map(({ key, label }) => chipGroup(key, vm.env[key], label)).join("");
+  const customGroups = PROFILE_META.map(({ key, label }) => chipGroup(key, vm.profile[key], label)).join("");
+  const yearOptions = vm.years
+    .map((y, i) => `<option value="${y}"${i === Math.floor(vm.years.length / 2) ? " selected" : ""}>${y} 年</option>`)
+    .join("");
   return `
     <section class="screen screen-start">
       <h1>心路</h1>
-      <p class="lede">从一段出生环境出发，做出一路选择，看着 E-I / S-N / T-F / J-P 四维倾向值慢慢长成人格。</p>
-      <form class="env-form" data-env-form>
-        ${groups}
-        ${error ? `<p class="form-error">${esc(error)}</p>` : ""}
-        <button type="submit" class="btn btn-primary btn-start">开始这一生</button>
-      </form>
-      <div class="seed-tools">
-        <button type="button" class="btn btn-ghost" data-random-birth>随机出生</button>
-        <form class="seed-form" data-seed-form>
-          <input class="seed-input" name="seedCode" placeholder="或输入种子码，重走同一段人生" autocomplete="off" spellcheck="false" aria-label="种子码">
-          <button type="submit" class="btn btn-ghost">以此码开局</button>
-        </form>
+      <p class="lede">从一段出生出发，做出一路选择，看着 E-I / S-N / T-F / J-P 四维倾向值慢慢长成人格。</p>
+      <div class="start-tabs">
+        <input type="radio" name="birthTab" id="birth-tab-random" class="birth-tab-input" checked>
+        <input type="radio" name="birthTab" id="birth-tab-manual" class="birth-tab-input">
+        <input type="radio" name="birthTab" id="birth-tab-custom" class="birth-tab-input">
+        <div class="start-tablist" role="tablist" aria-label="出生方式">
+          <label for="birth-tab-random">随机出生</label>
+          <label for="birth-tab-manual">手选环境</label>
+          <label for="birth-tab-custom">自定义六因素</label>
+        </div>
+        <section class="start-panel" data-panel="random">
+          <p class="muted">出生年、家境、家庭结构……全部交给种子：同一种子码，重走同一段人生。</p>
+          <div class="seed-tools">
+            <button type="button" class="btn btn-primary" data-random-birth>随机出生</button>
+            <form class="seed-form" data-seed-form>
+              <input class="seed-input" name="seedCode" placeholder="或输入种子码 XL-XXXX-XXXX" autocomplete="off" spellcheck="false" aria-label="种子码">
+              <button type="submit" class="btn btn-ghost">以此码开局</button>
+            </form>
+          </div>
+        </section>
+        <section class="start-panel" data-panel="manual">
+          <form class="env-form" data-env-form>
+            ${manualGroups}
+            <p class="fine-print">其余因素（出生年/南北/家庭结构/父母职业/家境）按年代概率自动派生。</p>
+            <button type="submit" class="btn btn-primary btn-start">开始这一生</button>
+          </form>
+        </section>
+        <section class="start-panel" data-panel="custom">
+          <form class="env-form" data-custom-form>
+            <fieldset class="env-group"><legend>出生年</legend>
+              <select class="year-select" name="birthYear" aria-label="出生年">${yearOptions}</select>
+            </fieldset>
+            ${chipGroup("place", vm.env.place, "城乡")}
+            ${customGroups}
+            <button type="submit" class="btn btn-primary btn-start">以这副牌开始一生</button>
+          </form>
+        </section>
       </div>
+      ${vm.error ? `<p class="form-error">${esc(vm.error)}</p>` : ""}
       <p class="fine-print">单机运行，进度保存在本机浏览器，无需网络与账号。</p>
       <p class="fine-print about-links">
         <button type="button" class="btn-ghost" data-gallery-open>人格图鉴</button>
@@ -145,6 +200,8 @@ export function cardAskScreen(vm: {
   stage: Stage;
   ageHint: string;
   ageMonths: number;
+  /** v4 年份徽章「YYYY 年 · N 岁」（runYearOf 派生，02 §一 ▸ M1''' 增补）。 */
+  yearBadge: string;
   text: string;
   options: string[];
   locks: boolean[];
@@ -166,14 +223,14 @@ export function cardAskScreen(vm: {
       ${vm.iconName ? `<span class="ev-icon ${line.cls}" data-icon="${esc(vm.iconName)}" style="${esc(iconStyle(vm.iconName))}" aria-hidden="true"></span>` : ""}
       <div class="card-meta">
         <span class="chip chip-line ${line.cls}">${line.label}</span>
-        <span class="chip chip-age">${esc(vm.ageHint)}</span>
+        <span class="chip chip-age" data-year-badge>${esc(vm.yearBadge)}</span>
         ${vm.critical ? '<span class="critical-badge">重大抉择</span>' : ""}
       </div>
     </header>`;
   return `
     <section class="screen screen-card layout-timeline">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, vm.bump)}
+      ${topbar(vm.stageIndex, vm.resources, vm.bump, true)}
       ${floatLayer(vm.floaters)}
       <div class="timeline-body">
         ${timelineRail(vm.timeline)}
@@ -206,10 +263,47 @@ export function cardAskScreen(vm: {
     </section>`;
 }
 
+/** 时代卡屏（plan/v4/02 §二 ▸ M1''' 增补）：无选项、固定增量；「继续」回事件流。 */
+export function eraCardScreen(vm: {
+  stageIndex: number;
+  stage: Stage;
+  yearBadge: string;
+  titleHint: string;
+  text: string;
+  backdrop: SceneBackdrop;
+  timeline: readonly TimelineSegment[];
+  resources: Resources;
+}): string {
+  return `
+    <section class="screen screen-card layout-timeline" data-era-card="1">
+      ${sceneLayer(vm.backdrop)}
+      ${topbar(vm.stageIndex, vm.resources, [], true)}
+      <div class="timeline-body">
+        ${timelineRail(vm.timeline)}
+        <div class="stage-main">
+          <article class="card event-card era-card">
+            <header class="card-head">
+              <div class="card-meta">
+                <span class="chip chip-line line-fate">时代</span>
+                <span class="chip chip-age" data-year-badge>${esc(vm.yearBadge)}</span>
+              </div>
+            </header>
+            <h3 class="era-title">${esc(vm.titleHint)}</h3>
+            <p class="event-text">${esc(vm.text)}</p>
+            <div class="options">
+              <button type="button" class="btn btn-primary" data-continue>继续</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>`;
+}
+
 export function cardAftermathScreen(vm: {
   stageIndex: number;
   stage: Stage;
   ageHint: string;
+  yearBadge: string;
   aftermath: string;
   backdrop: SceneBackdrop;
   timeline: readonly TimelineSegment[];
@@ -220,13 +314,13 @@ export function cardAftermathScreen(vm: {
   return `
     <section class="screen screen-card layout-timeline">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, vm.bump)}
+      ${topbar(vm.stageIndex, vm.resources, vm.bump, true)}
       ${floatLayer(vm.floaters)}
       <div class="timeline-body">
         ${timelineRail(vm.timeline)}
         <div class="stage-main">
           <article class="card event-card">
-            <p class="stage-tag">${STAGE_LABEL[vm.stage]} · ${esc(vm.ageHint)}</p>
+            <p class="stage-tag">${STAGE_LABEL[vm.stage]} · <span data-year-badge>${esc(vm.yearBadge)}</span></p>
             <div class="fish-slot" data-slot="fish"></div>
             <p class="aftermath">${esc(vm.aftermath)}</p>
             <div class="options">
@@ -283,6 +377,8 @@ export function endingScreen(vm: {
   backdrop: SceneBackdrop;
   gallery: GalleryHint | null;
   relations: RunState["npcs"];
+  /** v4 历法迁移局提示（plan/v4/02 §九 ▸ M1''' 增补）：一句，不抢戏。 */
+  migrated: boolean;
 }): string {
   const criticals =
     vm.criticals.length > 0
@@ -301,6 +397,7 @@ export function endingScreen(vm: {
       <p class="ending-type">${esc(vm.letters)}</p>
       <div class="fish-slot fish-slot-ending" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
       <p class="ending-text">${esc(vm.text)}</p>
+      ${vm.migrated ? '<p class="fine-print migrated-note">这段人生由旧版存档迁移而来（历法迁移）：出生年与家庭按现行口径补派生。</p>' : ""}
       <div class="ending-commentary" data-llm-commentary aria-live="polite"></div>
       <div class="viz-row two">
         <div class="radar-slot" data-slot="radar"></div>

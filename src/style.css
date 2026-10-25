@@ -1378,3 +1378,80 @@ body {
   align-items: center;
   gap: 8px !important;
 }
+
+/* ── v4-M1''' 开局三页签 / 年份徽章 / 时代卡 / 家庭入口 ── */
+
+.birth-tab-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-tablist {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin: 6px 0 14px;
+}
+
+.start-tablist label {
+  padding: 7px 14px;
+  border: 1px solid var(--line, #c9bda4);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.92rem;
+  color: var(--ink-soft, #6b5d48);
+  background: var(--surface-2, #f4ecd9);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.start-panel {
+  display: none;
+}
+
+#birth-tab-random:checked ~ .start-tablist label[for="birth-tab-random"],
+#birth-tab-manual:checked ~ .start-tablist label[for="birth-tab-manual"],
+#birth-tab-custom:checked ~ .start-tablist label[for="birth-tab-custom"] {
+  background: var(--ink, #4a3b2a);
+  color: var(--paper, #f7f1e3);
+  border-color: var(--ink, #4a3b2a);
+}
+
+#birth-tab-random:checked ~ [data-panel="random"],
+#birth-tab-manual:checked ~ [data-panel="manual"],
+#birth-tab-custom:checked ~ [data-panel="custom"] {
+  display: block;
+}
+
+.year-select {
+  padding: 8px 12px;
+  border: 1px solid var(--line, #c9bda4);
+  border-radius: var(--radius-item, 10px);
+  background: var(--surface-2, #f4ecd9);
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.chip-age {
+  font-variant-numeric: tabular-nums;
+}
+
+.era-card {
+  border-style: dashed;
+}
+
+.era-title {
+  margin: 4px 0 10px;
+  font-size: 1.12rem;
+  letter-spacing: 0.04em;
+}
+
+.btn-family {
+  white-space: nowrap;
+}
+
+.migrated-note {
+  color: var(--ink-soft, #8a7a62);
+  font-style: italic;
+}

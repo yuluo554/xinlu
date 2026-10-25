@@ -1,6 +1,11 @@
 {
   "mother": { "name": "妈妈", "role": "父母", "line": "fate" },
   "father": { "name": "爸爸", "role": "父母", "line": "fate" },
+  "grandma": { "name": "祖母", "role": "祖辈", "line": "fate" },
+  "grandpa": { "name": "祖父", "role": "祖辈", "line": "fate" },
+  "sibling-1": { "name": "兄姊", "role": "同辈", "line": "fate" },
+  "sibling-2": { "name": "同辈", "role": "同辈", "line": "fate" },
+  "sibling-3": { "name": "同辈", "role": "同辈", "line": "fate" },
   "partner": { "name": "小满", "role": "伴侣", "line": "love" },
   "bestie": { "name": "阿澈", "role": "挚友", "line": "friend" },
   "teacher": { "name": "周老师", "role": "师", "line": "study" },

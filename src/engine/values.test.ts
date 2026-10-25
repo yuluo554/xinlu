@@ -254,7 +254,8 @@ describe("applyBonds（入册 / 衰减 / 钳制 / 重 tag）", () => {
   it("已入册 NPC 增量按当前 values 轴衰减（values=100 → 减半）", () => {
     const state = { ...createRun(ENV, 42), values3: { worldview: 50, outlook: 50, values: 100 } };
     const next = applyBonds(state, { mother: 15 });
-    expect(next.npcs.find((n) => n.id === "mother")?.bond).toBe(70 + 8);
+    // v4：和睦×权威 派生表初始 bond 72（v4/02 §三 ▸ M1''' 增补），衰减后 15×0.5 → 72+8
+    expect(next.npcs.find((n) => n.id === "mother")?.bond).toBe(72 + 8);
   });
 
   it("bond 钳制 [0,100]；tag 随钳制翻转", () => {

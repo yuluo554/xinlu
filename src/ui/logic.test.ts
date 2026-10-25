@@ -57,7 +57,7 @@ describe("stageOf / stageEntries（history 无阶段字段，靠 eventById 反�
 describe("dimsAtStageStart / stageDeltas（阶段小结数据源）", () => {
   it("第 0 阶段起点 = 出生初始值；第 k 阶段起点 = 上一阶段末次 dimsAfter", () => {
     const state = driveToEnd(createRun(ENV, 7));
-    expect(dimsAtStageStart(state, "infant")).toEqual(initialDimsOf(ENV));
+    expect(dimsAtStageStart(state, "infant")).toEqual(initialDimsOf(state));
     for (let k = 1; k < STAGES.length; k++) {
       const prev = STAGES[k - 1]!;
       const entries = stageEntries(state.history, prev);
@@ -101,7 +101,7 @@ describe("endingLetters（终局字母口径，plan/02 §一）", () => {
 
   it("兜底结局（无 typeText）按四维实算字母", () => {
     const state = driveToEnd(createRun(ENV, 3));
-    expect(endingLetters(bare, state)).toBe(mbtiLetters(state.dims, state.env));
+    expect(endingLetters(bare, state)).toBe(mbtiLetters(state.dims, state.env, state.profile));
   });
 });
 

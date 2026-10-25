@@ -59,11 +59,18 @@ export interface TimelineSegment {
   nodes: TimelineNode[];
 }
 
-/** 人生画卷轨道：八段 × 已消费事件（线别色点，critical 加环）。阶段信息沿 logic.ts 纪律由 history 反查派生。 */
+/** 人生画卷轨道：八段 × 已消费事件（线别色点，critical 加环）。阶段信息沿 logic.ts 纪律由 history 反查派生；
+ *  v4 时代卡（kind:"era"）计入命运线普通色点（02 §二：命运线注入）。 */
 export function timelineVM(state: RunState): TimelineSegment[] {
   const nodes: Record<Stage, TimelineNode[]> = {} as Record<Stage, TimelineNode[]>;
   for (const s of STAGES) nodes[s] = [];
   for (const h of state.history) {
+    if (h.kind === "era") {
+      // 时代卡不属八阶段事件表：按「当前推进阶段」归段（history 末段所处阶段的口径与引擎注入一致）。
+      const stage = STAGES[Math.min(state.stageIndex, STAGES.length - 1)]!;
+      nodes[stage]!.push({ line: "fate", critical: false });
+      continue;
+    }
     const ev = eventById(h.eventId);
     if (!ev) continue;
     nodes[ev.stage]!.push({ line: ev.line, critical: ev.type === "critical" });

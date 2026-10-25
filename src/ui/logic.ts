@@ -37,10 +37,10 @@ export function stageEntries(history: readonly HistoryEntry[], stage: Stage): Hi
   return history.filter((h) => stageOf(h.eventId) === stage);
 }
 
-/** stage 开始时的四维 = 早于该阶段的最近一次 dimsAfter；没有任何更早事件则取出生初始值。 */
+/** stage 开始时的四维 = 早于该阶段的最近一次 dimsAfter；没有任何更早事件则取出生初始值（v4 八因素合成）。 */
 export function dimsAtStageStart(state: RunState, stage: Stage): Dims {
   const ordinal = STAGES.indexOf(stage);
-  let dims = initialDimsOf(state.env);
+  let dims = initialDimsOf(state);
   for (const h of state.history) {
     const s = stageOf(h.eventId);
     if (s !== undefined && STAGES.indexOf(s) < ordinal) dims = h.dimsAfter;
@@ -58,9 +58,9 @@ export function stageDeltas(state: RunState, stage: Stage): Dims {
   return out;
 }
 
-/** 终局字母口径：优先结局自带 typeText；兜底结局无 typeText，按四维实算（plan/02 §一）。 */
+/** 终局字母口径：优先结局自带 typeText；兜底结局无 typeText，按四维实算（plan/02 §一；v4 需画像补合成初值）。 */
 export function endingLetters(ending: Ending, state: RunState): string {
-  return ending.typeText ?? mbtiLetters(state.dims, state.env);
+  return ending.typeText ?? mbtiLetters(state.dims, state.env, state.profile);
 }
 
 export interface ChoiceReview {

@@ -624,6 +624,228 @@ if (iconMap && events && Array.isArray(events)) {
   iconStats = { covered: eventIds.length - missingIds.length, total: eventIds.length, disk: diskIcons.size };
 }
 
+// ── R、v4 历法/年代库/画像/家庭（plan/v4/02 §一/二/三 ▸ M1''' 增补；区字母 E 已被 v1 事件库占用）──
+const eraEvents = readJson("era-events.json");
+const namesPool = readJson("names.json");
+const V4_ENUMS = {
+  region: ["南方", "北方"],
+  structure: ["独生", "双孩", "多孩", "单亲", "隔代"],
+  parentsJob: ["工人", "农民", "个体", "教师医生", "公职", "待岗"],
+  wealth: ["拮据", "一般", "宽裕"],
+};
+/** v4 八因素组合空间：6era×4place×4mood×3style × 2region×5structure×6job×3wealth（域检查用超集，含不可达组合） */
+const V4_BIRTH_COMBOS = 6 * 4 * 4 * 3 * 2 * 5 * 6 * 3;
+const ERA_YEAR_MIN = 1955;
+const ERA_YEAR_MAX = 2030;
+const ERA_ANCHOR_COUNT = 76;
+/** 国际锚上限 = floor(76 × 15%) = 11（02 §二） */
+const ERA_INTL_MAX = Math.floor(ERA_ANCHOR_COUNT * 0.15);
+const ERA_ID_RE = /^era-(\d{4})-[a-z0-9-]+$/;
+const ERA_CHECK_STATUS = ["✅已核对", "典型值", "待核"];
+let eraStats = null;
+if (Array.isArray(eraEvents)) {
+  const seenIds = new Set();
+  const yearCount = new Map();
+  let intl = 0;
+  let verified = 0;
+  let typical = 0;
+  for (let i = 0; i < eraEvents.length; i++) {
+    const ev = eraEvents[i];
+    const at = `era-events.json#${i}`;
+    if (!ev || typeof ev !== "object" || Array.isArray(ev)) {
+      fail("R.SCHEMA", `${at} 不是对象`);
+      continue;
+    }
+    const idm = typeof ev.id === "string" ? ERA_ID_RE.exec(ev.id) : null;
+    if (!idm) fail("R.SCHEMA", `${at} id 非法：${JSON.stringify(ev.id)}（应 era-YYYY-kebab）`);
+    else if (seenIds.has(ev.id)) fail("R.SCHEMA", `id 重复：${ev.id}`);
+    else seenIds.add(ev.id);
+    if (!Number.isInteger(ev.year) || ev.year < ERA_YEAR_MIN || ev.year > ERA_YEAR_MAX) {
+      fail("R.SCHEMA", `${at} year 非法：${JSON.stringify(ev.year)}（应 ${ERA_YEAR_MIN}–${ERA_YEAR_MAX} 整数）`);
+    } else {
+      if (idm && Number(idm[1]) !== ev.year) fail("R.SCHEMA", `${ev.id} id 年段 ${idm[1]} ≠ year ${ev.year}`);
+      yearCount.set(ev.year, (yearCount.get(ev.year) ?? 0) + 1);
+    }
+    if (ev.scope !== "national" && ev.scope !== "international") {
+      fail("R.SCHEMA", `${at} scope 非法：${JSON.stringify(ev.scope)}`);
+    } else if (ev.scope === "international") intl += 1;
+    if (typeof ev.titleHint !== "string" || !ev.titleHint.trim()) fail("R.SCHEMA", `${at} 缺非空 titleHint`);
+    if (typeof ev.text !== "string" || !ev.text.trim()) fail("R.SCHEMA", `${at} 缺非空 text`);
+    // 增量口径：|Δ3| ≤2 / |res| ≤8；两项至少一项非空（时代卡必有固定增量）
+    const d3 = ev.deltas3;
+    const rd = ev.resourceDeltas;
+    const d3Ok = d3 && typeof d3 === "object" && !Array.isArray(d3);
+    const rdOk = rd && typeof rd === "object" && !Array.isArray(rd);
+    if (!d3Ok) fail("R.DELTA", `${at} deltas3 不是对象`);
+    if (!rdOk) fail("R.DELTA", `${at} resourceDeltas 不是对象`);
+    if (d3Ok && rdOk && Object.keys(d3).length === 0 && Object.keys(rd).length === 0) {
+      fail("R.DELTA", `${at} 时代卡无任何增量（deltas3/resourceDeltas 至少一项非空，02 §二）`);
+    }
+    if (d3Ok) {
+      for (const [k, v] of Object.entries(d3)) {
+        if (!VALUES_AXES.includes(k)) fail("R.DELTA", `${at} deltas3 轴非法：${k}`);
+        else if (!Number.isInteger(v) || v === 0) fail("R.DELTA", `${at} deltas3 ${k} 应为非零整数：${JSON.stringify(v)}`);
+        else if (Math.abs(v) > 2) fail("R.DELTA", `${at} deltas3 ${k}=${v} 超口径（|Δ| ≤2，02 §二）`);
+      }
+    }
+    if (rdOk) {
+      for (const [k, v] of Object.entries(rd)) {
+        if (!RES_KEYS.includes(k)) fail("R.DELTA", `${at} 资源键非法：${k}`);
+        else if (!Number.isInteger(v) || v === 0) fail("R.DELTA", `${at} 资源 ${k} 应为非零整数：${JSON.stringify(v)}`);
+        else if (Math.abs(v) > 8) fail("R.DELTA", `${at} 资源 ${k}=${v} 超口径（|Δ| ≤8，02 §二）`);
+      }
+    }
+    if (!Array.isArray(ev.stageFit) || ev.stageFit.length === 0) {
+      fail("R.SCHEMA", `${at} stageFit 应为非空数组`);
+    } else if (ev.stageFit.some((s) => !STAGES.includes(s))) {
+      fail("R.SCHEMA", `${at} stageFit 含未知阶段：${JSON.stringify(ev.stageFit)}`);
+    }
+    if (!ERA_CHECK_STATUS.includes(ev.checkStatus)) {
+      fail("R.FACT", `${at} checkStatus 非法：${JSON.stringify(ev.checkStatus)}（枚举 ${ERA_CHECK_STATUS.join("/")}）`);
+    } else if (ev.checkStatus === "待核") {
+      fail("R.FACT", `${at} checkStatus=待核（M1''' 出口门禁：76 锚不得留待核）`);
+    } else if (ev.checkStatus === "✅已核对") verified += 1;
+    else typical += 1;
+  }
+  // 主锚数量与年份连续（每年恰 1 条，1955–2030 无缺无重）
+  if (yearCount.size !== ERA_YEAR_MAX - ERA_YEAR_MIN + 1 || eraEvents.length !== ERA_ANCHOR_COUNT) {
+    const missing = [];
+    for (let y = ERA_YEAR_MIN; y <= ERA_YEAR_MAX; y++) {
+      if ((yearCount.get(y) ?? 0) !== 1) missing.push(y);
+    }
+    fail("R.MAIN", `主锚 ${eraEvents.length} 条 / 覆盖年份 ${yearCount.size} 个 ≠ 口径 76 锚逐年 1 条；异常年份：${missing.slice(0, 10).join(",")}${missing.length > 10 ? "…" : ""}`);
+  }
+  if (intl > ERA_INTL_MAX) fail("R.MAIN", `国际锚 ${intl} 条 > 上限 ${ERA_INTL_MAX}（占比 ≤15%，02 §二）`);
+  // 查证三态表对账（docs/v4-era-facts.md）：行数 = 主锚数且逐锚在表
+  const factsPath = join(ROOT, "docs", "v4-era-facts.md");
+  if (!existsSync(factsPath)) {
+    fail("R.FACT", "缺 docs/v4-era-facts.md（查证三态表，02 §二）");
+  } else {
+    const facts = readFileSync(factsPath, "utf8");
+    const rows = (facts.match(/^\| era-\d{4}-[a-z0-9-]+ \|.+\|$/gm) ?? []);
+    if (rows.length !== ERA_ANCHOR_COUNT) fail("R.FACT", `查证表数据行 ${rows.length} ≠ 主锚 ${ERA_ANCHOR_COUNT}`);
+    for (const id of seenIds) {
+      if (!facts.includes(`| ${id} |`)) fail("R.FACT", `查证表缺锚行：${id}`);
+    }
+    for (const row of rows) {
+      if (!/\|\s*(✅已核对|典型值)\s*\|?\s*$/.test(row) && !row.includes("✅已核对") && !row.includes("典型值")) {
+        fail("R.FACT", `查证表行状态列非法：${row.slice(0, 50)}`);
+      }
+    }
+  }
+  eraStats = { count: eraEvents.length, intl, verified, typical };
+} else {
+  fail("R.SCHEMA", "era-events.json 应为 76 条主锚数组（02 §二）");
+}
+
+// names.json 姓名池（02 §三 ▸ M1'''：姓池 + 南北男女分池，同局无重复由 family.ts 保证）
+let namesStats = null;
+if (namesPool && typeof namesPool === "object" && !Array.isArray(namesPool)) {
+  const surnames = namesPool["姓"];
+  if (!Array.isArray(surnames) || surnames.length < 10 || surnames.some((s) => typeof s !== "string" || !s.trim())) {
+    fail("R.NAMES", "names.json 姓池应为 ≥10 个非空串数组");
+  } else if (new Set(surnames).size !== surnames.length) {
+    fail("R.NAMES", "names.json 姓池有重复");
+  }
+  let given = 0;
+  for (const region of ["南方", "北方"]) {
+    const pool = namesPool[region];
+    if (!pool || typeof pool !== "object" || Array.isArray(pool)) {
+      fail("R.NAMES", `names.json 缺 ${region} 池`);
+      continue;
+    }
+    for (const gender of ["男", "女"]) {
+      const list = pool[gender];
+      if (!Array.isArray(list) || list.length < 16 || list.some((n) => typeof n !== "string" || !n.trim())) {
+        fail("R.NAMES", `names.json ${region}.${gender} 应为 ≥16 个非空串数组`);
+      } else if (new Set(list).size !== list.length) {
+        fail("R.NAMES", `names.json ${region}.${gender} 有重复名`);
+      } else {
+        given += list.length;
+      }
+    }
+  }
+  namesStats = { surnames: Array.isArray(surnames) ? surnames.length : 0, given };
+} else {
+  fail("R.NAMES", "names.json 应为对象（姓 + 南北分池，02 §三）");
+}
+
+// npcs.json 家庭注册槽（02 §三 ▸ M1'''：grandma/grandpa/sibling-1..3，line 全 fate）
+for (const slot of ["grandma", "grandpa", "sibling-1", "sibling-2", "sibling-3"]) {
+  const row = npcRegistry?.[slot];
+  if (!row || row.line !== "fate") fail("R.SLOT", `npcs.json 缺家庭注册槽「${slot}」（line=fate，v4/02 §三）`);
+}
+
+// birth-map v4 四组：枚举齐 + 八因素全组合初始四维落域 [0,100]（超集检查，含手选派生不可达组合）
+let v4Combos = 0;
+if (birthMap && typeof birthMap === "object" && !Array.isArray(birthMap)) {
+  let v4SchemaOk = true;
+  for (const [el, values] of Object.entries(V4_ENUMS)) {
+    const group = birthMap[el];
+    if (!group || typeof group !== "object" || Array.isArray(group)) {
+      fail("R.BIRTH", `birth-map 缺 v4 组「${el}」`);
+      v4SchemaOk = false;
+      continue;
+    }
+    for (const key of Object.keys(group)) {
+      if (!values.includes(key)) fail("R.BIRTH", `birth-map ${el} 含未枚举值「${key}」`);
+    }
+    for (const key of values) {
+      const row = group[key];
+      if (!row || typeof row !== "object" || Array.isArray(row)) {
+        fail("R.BIRTH", `birth-map ${el}.${key} 缺修正量行`);
+        v4SchemaOk = false;
+        continue;
+      }
+      for (const k of Object.keys(row)) {
+        if (!DIMS.includes(k)) fail("R.BIRTH", `birth-map ${el}.${key} 维度非法：${k}`);
+      }
+      for (const d of DIMS) {
+        if (!Number.isInteger(row[d])) fail("R.BIRTH", `birth-map ${el}.${key}.${d} 非整数：${JSON.stringify(row[d])}`);
+      }
+    }
+  }
+  if (v4SchemaOk) {
+    let bad = 0;
+    for (const era of BIRTH_ENUMS.era) {
+      for (const place of BIRTH_ENUMS.place) {
+        for (const mood of BIRTH_ENUMS.mood) {
+          for (const style of BIRTH_ENUMS.style) {
+            for (const region of V4_ENUMS.region) {
+              for (const structure of V4_ENUMS.structure) {
+                for (const job of V4_ENUMS.parentsJob) {
+                  for (const wealth of V4_ENUMS.wealth) {
+                    v4Combos++;
+                    const rows = [
+                      birthMap.era[era],
+                      birthMap.place[place],
+                      birthMap.mood[mood],
+                      birthMap.style[style],
+                      birthMap.region[region],
+                      birthMap.structure[structure],
+                      birthMap.parentsJob[job],
+                      birthMap.wealth[wealth],
+                    ];
+                    for (const d of DIMS) {
+                      const init = BIRTH_BASE + rows.reduce((acc, r) => acc + (typeof r[d] === "number" ? r[d] : 0), 0);
+                      if (init < 0 || init > 100) {
+                        bad++;
+                        if (bad <= 5) fail("R.BIRTH", `八因素组合 ${era}/${place}/${mood}/${style}/${region}/${structure}/${job}/${wealth} 的 ${d} 初始值 ${init} 出域`);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    if (bad > 5) fail("R.BIRTH", `……另有 ${bad - 5} 处出域未逐条列出`);
+    if (v4Combos !== V4_BIRTH_COMBOS) fail("R.BIRTH", `八因素组合数 ${v4Combos} ≠ ${V4_BIRTH_COMBOS}`);
+  }
+}
+
 // ── 输出 ──
 const out = (s) => process.stdout.write(s + "\n");
 out("数据校验门 · 依据 plan/02（单一定义源）+ plan/v3/02 ▸ M1'' 增补");
@@ -641,6 +863,7 @@ const lines = [
   ["M", `fish-mood-map ${moodStats ? `覆盖 ${moodStats.covered}/${moodStats.total} 帧 + 终局锁 ${moodStats.locked} 张` : "—"}：19/19 全覆盖 / 类别枚举 / 终局不重复（v2/02 §二）`],
   ["V", `三观层：stage-drift ${driftOk}/24 格（8 阶段×3 轴，|值|≤2）+ monologues ${monoOk}/9 条（3 轴×3 区间）`],
   ["I", `图标对照（v3/02 §九）：${iconStats ? `覆盖 ${iconStats.covered}/${iconStats.total} 条事件 + SVG 实物 ${iconStats.disk} 枚（Game-Icons CC-BY）` : "未完成校验"}`],
+  ["R", `v4 历法/画像/家庭（v4/02 ▸ M1'''）：era ${eraStats ? `${eraStats.count}/76 主锚逐年无缺（国际 ${eraStats.intl}/≤${ERA_INTL_MAX}；✅${eraStats.verified}/典型 ${eraStats.typical}）+ 查证表对账` : "—"}；names 池 ${namesStats ? `姓 ${namesStats.surnames} + 名 ${namesStats.given}` : "—"}；家庭注册槽 5；birth-map 八因素 ${v4Combos}/${V4_BIRTH_COMBOS} 组合落域`],
 ];
 for (const [p, label] of lines) out(`${areaOk(p) ? "PASS" : "FAIL"}  ${label}`);
 for (const f of fails) out(`FAIL  ${f}`);
@@ -656,6 +879,12 @@ if (WANT_COUNT) {
   }
   out(`结局: 条件结局 ${endingSummary?.conditioned ?? "—"} + 兜底 ${endingSummary?.fallbackCount ?? "—"}（口径 ≥${ENDING_MIN_CONDITIONED} + 1）`);
   out(`画像: ${portraitFilled}/${PORTRAIT_TYPES.length} 型在位`);
+  if (eraStats) {
+    out(`era 主锚: ${eraStats.count}（✅已核对 ${eraStats.verified} / 典型值 ${eraStats.typical} / 国际 ${eraStats.intl}）`);
+  }
+  if (namesStats) {
+    out(`names 池: 姓 ${namesStats.surnames} + 南北名 ${namesStats.given}（02 §三 ▸ M1'''）`);
+  }
   if (birthStats) {
     const ranges = DIMS.map((d) => `${d} ${birthStats.stats[d].min}–${birthStats.stats[d].max}`).join(" / ");
     out(`birth-map: ${birthStats.combos}/${BIRTH_COMBOS} 组合全覆盖，出域 ${birthStats.bad} 处；初始值范围 ${ranges}`);

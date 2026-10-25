@@ -68,6 +68,8 @@ export interface NpcState {
   id: string;
   bond: number;
   tag: NpcTag;
+  /** 出生家庭 NPC 的本局姓名（names.json 池抽取；渲染时覆盖注册表名，plan/v4/02 §三 ▸ M1''' 增补）。 */
+  name?: string;
 }
 
 /** 出生环境四要素；取值为 birth-map.json 的枚举键，代码不内联枚举清单。 */
@@ -78,19 +80,56 @@ export interface BirthEnv {
   style: string;
 }
 
+// ── v4 出生画像六因素（plan/v4/02 §三；birthYear 顶层入 RunState，place 沿 env.place）──
+
+export const PROFILE_REGIONS = ["南方", "北方"] as const;
+export const PROFILE_STRUCTURES = ["独生", "双孩", "多孩", "单亲", "隔代"] as const;
+export const PROFILE_JOBS = ["工人", "农民", "个体", "教师医生", "公职", "待岗"] as const;
+export const PROFILE_WEALTHS = ["拮据", "一般", "宽裕"] as const;
+
+export interface BirthProfile {
+  region: (typeof PROFILE_REGIONS)[number];
+  structure: (typeof PROFILE_STRUCTURES)[number];
+  parentsJob: (typeof PROFILE_JOBS)[number];
+  wealth: (typeof PROFILE_WEALTHS)[number];
+}
+
 export interface HistoryEntry {
   eventId: string;
   option: number;
   dimsAfter: Dims;
+  /** v4 时代卡条目（plan/v4/02 §二 ▸ M1''' 增补）：option = -1 哨兵（无选项）。 */
+  kind?: "era";
+}
+
+// ── v4 年代事件库（plan/v4/02 §二；数据文件 src/data/era-events.json）──
+
+export type EraScope = "national" | "international";
+/** 事实三态：✅已核对 = 公共事实可核；典型值 = 氛围级典型生活（不声称具体事实）；待核仅过程态。 */
+export type EraCheckStatus = "✅已核对" | "典型值" | "待核";
+
+export interface EraEvent {
+  id: string;
+  year: number;
+  scope: EraScope;
+  titleHint: string;
+  text: string;
+  deltas3: Deltas3;
+  resourceDeltas: ResourceDeltas;
+  stageFit: Stage[];
+  checkStatus: EraCheckStatus;
 }
 
 /**
- * 运行态。v1 五字段 + v3 状态层扩展（plan/v3/02 §八）：
- * 存档信封 xinlu.save.v2 与此同构；v1 档经迁移函数补齐扩展字段，绝不静默清档。
+ * 运行态。v1 五字段 + v3 状态层扩展（plan/v3/02 §八）+ v4 历法/画像扩展
+ * （plan/v4/02 §一/§三/§九 ▸ M1''' 增补）：birthYear/profile 与存档信封 xinlu.save.v3 同构；
+ * 旧档经迁移函数补齐扩展字段，绝不静默清档。
  */
 export interface RunState {
   seed: number;
   env: BirthEnv;
+  birthYear: number;
+  profile: BirthProfile;
   stageIndex: number;
   dims: Dims;
   history: HistoryEntry[];
@@ -99,6 +138,8 @@ export interface RunState {
   resources: Resources;
   lines: LineProgress;
   npcs: NpcState[];
+  /** 历法迁移标记（v2→v3 迁移局 true；终局提示一句，plan/v4/02 §九 ▸ M1''' 增补）。 */
+  migrated?: boolean;
 }
 
 export type EventType = "main" | "context" | "critical" | "rescue";

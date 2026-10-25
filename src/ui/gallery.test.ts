@@ -1,7 +1,7 @@
 // 16 型图鉴单测（v2/03 §4 验收：读写 / 损坏重建 / 16 型封闭 / endings 键 ⊆ 枚举）。
 // localStorage 用内存 stub（套路同 src/storage/storage.test.ts）；一律黑盒走 loadGallery/recordRun。
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { mbtiLetters } from "../engine/engine";
+import { createRun, mbtiLetters } from "../engine/engine";
 import portraitsRaw from "../data/portraits.json" with { type: "json" };
 import {
   ENDING_META,
@@ -181,7 +181,8 @@ describe("封闭集派生与展示代表四维", () => {
     ];
     for (const t of GALLERY_TYPES) {
       for (const env of envs) {
-        expect(mbtiLetters(representativeDims(t), env)).toBe(t);
+        // v4：mbtiLetters 需画像第三参（代表值远离 50，任取合法画像不改变字母）
+        expect(mbtiLetters(representativeDims(t), env, createRun(env, 1).profile)).toBe(t);
       }
     }
   });

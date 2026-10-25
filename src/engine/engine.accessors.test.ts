@@ -32,9 +32,8 @@ describe("M3 只读访问器（plan/03 §2 附件导出，不动冻结五签名�
         for (const mood of opts.mood) {
           for (const style of opts.style) {
             const env: BirthEnv = { era, place, mood, style };
-            expect(initialDimsOf(env), `${era}/${place}/${mood}/${style}`).toEqual(
-              createRun(env, 1).dims,
-            );
+            const state = createRun(env, 1);
+            expect(initialDimsOf(state), `${era}/${place}/${mood}/${style}`).toEqual(state.dims);
             combos += 1;
           }
         }

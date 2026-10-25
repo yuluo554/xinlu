@@ -62,9 +62,11 @@ export function relationsVM(npcs: readonly NpcState[]): RelationsVM {
   const inner: RelationNode[] = [];
   for (const npc of npcs) {
     const profile = NPC_PROFILES[npc.id] ?? { ...FALLBACK, name: npc.id };
+    // 出生家庭 NPC 的本局姓名覆盖注册名（plan/v4/02 §三 ▸ M1''' 增补）
+    const name = npc.name ?? profile.name;
     const node: RelationNode = {
       id: npc.id,
-      name: profile.name,
+      name,
       role: profile.role,
       line: profile.line,
       bond: npc.bond,
@@ -76,10 +78,12 @@ export function relationsVM(npcs: readonly NpcState[]): RelationsVM {
     if (profile.line === "fate") inner.push(node);
     else outer.push(node);
   }
-  // 内环：父母按注册序均分圆周（上半弧），固定起点朝上。
+  // 内环：≤4 节点走上半弧（父母口径）；>4（出生家庭含祖辈/同辈）改整圆均分，防拥挤重叠。
   inner.forEach((node, i) => {
-    const t = inner.length === 1 ? 0.5 : i / (inner.length - 1);
-    const angle = -Math.PI / 2 + Math.PI * t;
+    const angle =
+      inner.length <= 4
+        ? -Math.PI / 2 + Math.PI * (inner.length === 1 ? 0.5 : i / (inner.length - 1))
+        : ((i + 0.5) / inner.length) * Math.PI * 2 - Math.PI / 2;
     node.ring = 0;
     node.x = Math.round(CENTER.x + INNER_R * Math.cos(angle));
     node.y = Math.round(CENTER.y + INNER_R * Math.sin(angle));

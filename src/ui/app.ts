@@ -6,15 +6,20 @@ import {
   advanceStage,
   applyChoice,
   applyCustomChoice,
+  applyEraCard,
   birthEnvOptions,
   createRun,
+  envFromBirth,
+  eraEventFor,
   initialDimsOf,
   optionDimsDelta,
   optionLocks,
   pickEvent,
-  randomBirthEnv,
+  profileOptions,
+  randomBirth,
   resolveEnding,
 } from "../engine/engine";
+import { runYearOf } from "../engine/year";
 import { SEED_MAX, seedCodeOf, seedFromCode } from "../engine/seedcode";
 import {
   DEFAULT_LLM_SETTINGS,
@@ -31,7 +36,7 @@ import {
   rewriteVariant,
 } from "../llm/bypass";
 import type { LlmSettings } from "../llm/config";
-import { STAGES, type BirthEnv, type Dims, type Ending, type LineKey, type ResKey, type RunState, type Stage } from "../engine/model";
+import { STAGES, type BirthEnv, type BirthProfile, type Dims, type Ending, type LineKey, type ResKey, type RunState, type Stage } from "../engine/model";
 import { deriveEndingV3 } from "../engine/values";
 import { clear, hasSaveKey, load, save } from "../storage/storage";
 import { createFishParams, endingFrame, pickChoiceFrame, renderFish, stageFrame, type DeltaDir } from "../viz/fish";
@@ -73,7 +78,7 @@ let relationsReturn: View = "summary";
 let customSlotError: string | null = null;
 // context 变体改写缓存（eventId → 改写文本；表现态，重开即弃）。
 const variantCache = new Map<string, string>();
-let pendingAftermath: { stage: Stage; ageHint: string; text: string } | null = null;
+let pendingAftermath: { stage: Stage; ageHint: string; ageMonths: number; text: string } | null = null;
 // choice 类表情反馈帧(02 §二):表现态,不进存档(schema v1 冻结,刷新续局回待机态)。
 let choiceFeedback: string | null = null;
 // 后果微反馈(一次性):onChoose 时装配,下一次 card/aftermath 渲染消费并清空。
@@ -165,16 +170,18 @@ function render(): void {
 }
 
 function renderStart(error?: string): void {
-  root.innerHTML = S.startScreen(birthEnvOptions(), error);
-  const form = root.querySelector<HTMLFormElement>("[data-env-form]");
-  if (!form) return;
-  const begin = (env: BirthEnv, seed: number): void => {
-    state = createRun(env, seed);
+  const years: number[] = [];
+  for (let y = 1955; y <= 2015; y++) years.push(y);
+  root.innerHTML = S.startScreen({ env: birthEnvOptions(), profile: profileOptions(), years, error });
+  const begin = (env: BirthEnv, seed: number, birth?: { birthYear: number; profile: BirthProfile }): void => {
+    state = createRun(env, seed, birth);
     persist();
     view = "card";
     render();
   };
-  form.addEventListener("submit", (e) => {
+  // 手选出生（v3/02 §六：手选路径不改；v4 其余因素按年代概率派生并随种子可复现）
+  const form = root.querySelector<HTMLFormElement>("[data-env-form]");
+  form?.addEventListener("submit", (e) => {
     e.preventDefault();
     const data = new FormData(form);
     const env: BirthEnv = {
@@ -184,17 +191,38 @@ function renderStart(error?: string): void {
       style: String(data.get("style") ?? ""),
     };
     try {
-      // 手选出生：种子仍生成并随终局展示（v3/02 §六：手选路径不改，码可复现）
       begin(env, randomSeed());
     } catch {
       renderStart("出生环境无效，请重新选择后再开始。");
     }
   });
-  // 随机出生（v3/02 §六 ▸ M3'' 增补）：seed 派生四要素，同码必同人生
-  root.querySelector<HTMLButtonElement>("[data-random-birth]")?.addEventListener("click", () => {
-    begin(randomBirthEnv(randomSeed()), randomSeed());
+  // 自定义六因素（v4/02 §三 ▸ M1''' 增补）：六因素全选 → env 由派生表定（mood/style 不再直接选）
+  const customForm = root.querySelector<HTMLFormElement>("[data-custom-form]");
+  customForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = new FormData(customForm);
+    const birthYear = Number(data.get("birthYear"));
+    // 枚举合法性由引擎兜底校验（birth-map 查表越界即抛错 → catch 走错误提示），此处只做类型归位。
+    const profile = {
+      region: String(data.get("region") ?? ""),
+      structure: String(data.get("structure") ?? ""),
+      parentsJob: String(data.get("parentsJob") ?? ""),
+      wealth: String(data.get("wealth") ?? ""),
+    } as BirthProfile;
+    const place = String(data.get("place") ?? "");
+    try {
+      begin(envFromBirth(birthYear, profile, place), randomSeed(), { birthYear, profile });
+    } catch {
+      renderStart("出生六因素无效，请重新选择后再开始。");
+    }
   });
-  // 种子码开局：输入码 → 还原 seed → 派生同一出生环境
+  // 随机出生（v4/02 §一 ▸ M1''' 增补）：seed 派生全部六因素 + 四要素，同码必同人生
+  root.querySelector<HTMLButtonElement>("[data-random-birth]")?.addEventListener("click", () => {
+    const seed = randomSeed();
+    const born = randomBirth(seed);
+    begin(born.env, seed, { birthYear: born.birthYear, profile: born.profile });
+  });
+  // 种子码开局：输入码 → 还原 seed → 派生同一出生（v4 起含出生年/画像/家庭）
   const seedForm = root.querySelector<HTMLFormElement>("[data-seed-form]");
   seedForm?.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -204,7 +232,8 @@ function renderStart(error?: string): void {
       renderStart("种子码没认出来——格式应为 XL-XXXX-XXXX（不含 0、1、O、I）。");
       return;
     }
-    begin(randomBirthEnv(seed), seed);
+    const born = randomBirth(seed);
+    begin(born.env, seed, { birthYear: born.birthYear, profile: born.profile });
   });
   root.querySelector<HTMLButtonElement>("[data-gallery-open]")?.addEventListener("click", () => {
     view = "gallery";
@@ -216,8 +245,50 @@ function renderStart(error?: string): void {
   });
 }
 
+/** 时代卡渲染与「我的家庭」入口绑定（card/era/aftermath 三屏共用）。 */
+function bindFamilyOpen(): void {
+  root.querySelector<HTMLButtonElement>("[data-family-open]")?.addEventListener("click", () => {
+    relationsReturn = "card";
+    view = "relations";
+    render();
+  });
+}
+
+function renderEraCard(): void {
+  if (!state) return;
+  const event = eraEventFor(state);
+  if (!event) {
+    renderCard(null);
+    return;
+  }
+  root.innerHTML = S.eraCardScreen({
+    stageIndex: state.stageIndex,
+    stage: STAGES[state.stageIndex]!,
+    yearBadge: `${event.year} 年 · ${event.year - state.birthYear} 岁`,
+    titleHint: event.titleHint,
+    text: event.text,
+    backdrop: sceneBackdrop(state.env),
+    timeline: timelineVM(state),
+    resources: state.resources,
+  });
+  bindFamilyOpen();
+  root.querySelector<HTMLButtonElement>("[data-continue]")?.addEventListener("click", () => {
+    if (!state) return;
+    state = applyEraCard(state);
+    persist();
+    view = "card";
+    render();
+  });
+  bindRestart();
+}
+
 function renderCard(feedback: typeof pendingFeedback): void {
   if (!state) return;
+  // 时代卡优先于事件卡（plan/v4/02 §二 ▸ M1''' 增补：注入在 pickEvent 之外，判定核零改动）
+  if (eraEventFor(state)) {
+    renderEraCard();
+    return;
+  }
   const event = pickEvent(state);
   if (!event) {
     toNext();
@@ -232,6 +303,7 @@ function renderCard(feedback: typeof pendingFeedback): void {
     stage,
     ageHint: event.ageHint,
     ageMonths: event.ageMonths,
+    yearBadge: `${runYearOf(state.birthYear, event.ageMonths)} 年 · ${event.ageHint}`,
     text: event.text,
     options: event.options.map((o) => o.text),
     locks: optionLocks(state, event),
@@ -249,6 +321,7 @@ function renderCard(feedback: typeof pendingFeedback): void {
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-option]")) {
     btn.addEventListener("click", () => onChoose(Number(btn.dataset.option)));
   }
+  bindFamilyOpen();
   root.querySelector<HTMLButtonElement>("[data-custom-submit]")?.addEventListener("click", () => {
     const input = root.querySelector<HTMLInputElement>("[data-custom-slot] .custom-input");
     void onCustom(input?.value ?? "");
@@ -341,7 +414,7 @@ function onChoose(index: number): void {
   state = applyChoice(state, index);
   persist();
   if (aftermath) {
-    pendingAftermath = { stage: STAGES[state.stageIndex]!, ageHint: event.ageHint, text: aftermath };
+    pendingAftermath = { stage: STAGES[state.stageIndex]!, ageHint: event.ageHint, ageMonths: event.ageMonths, text: aftermath };
     view = "aftermath";
     render();
   } else {
@@ -358,6 +431,7 @@ function renderAftermath(feedback: typeof pendingFeedback): void {
     stageIndex: state.stageIndex,
     stage: pendingAftermath.stage,
     ageHint: pendingAftermath.ageHint,
+    yearBadge: `${runYearOf(state.birthYear, pendingAftermath.ageMonths)} 年 · ${pendingAftermath.ageHint}`,
     aftermath: pendingAftermath.text,
     backdrop: sceneBackdrop(state.env),
     timeline: timelineVM(state),
@@ -366,6 +440,7 @@ function renderAftermath(feedback: typeof pendingFeedback): void {
     floaters: feedback?.floaters ?? [],
   });
   hydrateFish(choiceFeedback ?? undefined);
+  bindFamilyOpen();
   bindContinue();
   bindRestart();
 }
@@ -456,6 +531,7 @@ function renderEnding(): void {
     resources: state.resources,
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
+    migrated: state.migrated === true,
     gallery: {
       unlocked: Object.keys(gallery.types).length,
       total: GALLERY_TYPES.length,
@@ -468,7 +544,7 @@ function renderEnding(): void {
   hydrateFish(endingFrame(ending.id));
   hydrateRadar(STAGES.map((s) => dimsAtStageStart(state!, s)));
   const curveSlot = root.querySelector("[data-slot='curve']");
-  if (curveSlot) renderCurve(state.history, curveSlot, initialDimsOf(state.env));
+  if (curveSlot) renderCurve(state.history, curveSlot, initialDimsOf(state));
   hydrateCommentary(ending);
   bindShare(ending);
   bindRestart();
