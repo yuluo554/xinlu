@@ -30,3 +30,6 @@ assets/upstream/deepseek-fat-fish-codex-pet/
 *.log
 npm-debug.log*
 assets/**/*.jpg
+
+# 发布本地工作目录（Release 说明草稿/附件副本，走 Release 页为单源）
+dist-release/

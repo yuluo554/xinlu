@@ -77,7 +77,7 @@
 | 主题四款 | 09 §四.1 | 设置页 | 切换 E2E + 色板单源 | ✅ v4-M2'''（2026-10-26：切换 E2E + theme.test 5 + 夜航 AA theme-contrast.test 5 断言 11 组合 ≥4.5 + xinlu.theme.v1 独立键） |
 | objectKey 图标 | 09 §四.4 | 事件卡图标 | 抽验 100% + 补采清单闭合 | ✅ v4-M3'''（2026-10-26：243 条按新文本全量复核 238 保留/4 换图/1 显式豁免 ≤10%；I 区扩展 I.SCHEMA/I.EXEMPT；objectKeyOf 单源 + timeline.test 豁免断言，[docs/v4-M3-icons.md](../../docs/v4-M3-icons.md)） |
 | 小结贴合配图 | 09 §四.5 | 小结屏 | 逐张对文案留痕 | ✅ v4-M3'''（2026-10-26：8 张自产 CC0 剪影（assets/web-ready/stage-scenes）逐张对文案留痕；CSS 变量四主题联动；E2E 场景图断言；预算增量 +2.42KB gzip） |
-| 历史存档重开声明 | 双层版本规则 | Release 说明 | CHANGELOG 核对 | ⬜ 待 v4-M4''' 实现 |
+| 历史存档重开声明 | 双层版本规则 | Release 说明 | CHANGELOG 核对 | ✅ v4-M4'''（2026-10-26：CHANGELOG v4.0.0 节 + Release 五部分第三栏双落——年代事件改变人生体验与判定输入；旧档自动迁移 `xinlu.save.v3` 不清档但建议重开） |
 
 ## 里程碑总表（DoD 只加不减；要减必须在本档决策记录留行）
 

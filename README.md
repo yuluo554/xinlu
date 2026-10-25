@@ -112,7 +112,7 @@ npm run dev      # 浏览器打开 http://localhost:5173
 | v4-M1''' 内容与历法主工程（出生年历法/年代事件库/故事写实化/六因素出生/家庭生成/存档 v3） | ✅（2026-10-25 收官（A/B 拆棒）：243 条写实化重写 + validate:story 四项机检全绿 + 抽查 94.1%≥90% + dogfooding 3 局（[docs/v4-story-review.md](docs/v4-story-review.md) / [docs/v4-M1-dogfooding.md](docs/v4-M1-dogfooding.md)）；vitest 252 / e2e 双端绿） |
 | v4-M2''' 表现实感包（主题四款/积蓄换元/五档状态词/移动轴改版/小结三观） | ✅（2026-10-26：主题四款+夜航 AA / 积蓄按年代换算元+五档词色阶 / D6=A 顶部阶段条+桌面计数徽标 / 小结五段三观接线；V4-1 预算线重审定案 850KB 实测 717.89KB（[docs/v4-M2-feel.md](docs/v4-M2-feel.md)）；vitest 280 / e2e 双端绿） |
 | v4-M3''' 图标与配图对象级（objectKey 重映射/小结场景配图/开局图谱打磨） | ✅（2026-10-26：objectKey 243 条全量复核（238 保留/4 换图/1 显式豁免 ≤10%，validate I 区扩展）+ 小结场景图 8 张自产 CC0（四主题联动，[docs/v4-M3-icons.md](docs/v4-M3-icons.md)）+ 图谱 SVG 主题适配与家庭入口图标；vitest 282 / e2e 双端绿 / 预算 720.31KB ≤ 850KB） |
-| v4-M4''' 发布 v4.0.0 | ⬜ 待开工（2026-10-25 装订） |
+| v4-M4''' 发布 v4.0.0（年代中国、家庭与实感） | ✅（2026-10-26，[tag v4.0.0](https://github.com/yuluo554/xinlu/releases/tag/v4.0.0)；双端一键通关 + 手动实开复核全绿，留档 plan/05 §九） |
 
 ## 许可
 
