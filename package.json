@@ -16,6 +16,7 @@
     "e2e": "node tests/e2e/smoke.mjs",
     "typecheck": "tsc --noEmit",
     "validate": "node scripts/validate-data.mjs --full",
+    "validate:story": "node scripts/check-story-quality.mjs",
     "gate:layout": "node tools/check-sprint-layout.mjs",
     "gate:desens": "node tools/check-desensitized.mjs",
     "gate:license": "node tools/check-assets-license.mjs",

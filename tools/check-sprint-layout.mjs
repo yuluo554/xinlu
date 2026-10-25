@@ -357,9 +357,8 @@ function checkDocumentedToolsExist(doneMilestones) {
   // v2-M2' 清空 check-assets-license.mjs（许可门随 v2-M2' 提前交付，排序约束见 plan/v2/00 §决策记录）。
   // v2-M3' 清空 check-dist-budget.mjs（预算门随 v2-M3' 3.1 落位，同提交删登记）。
   // v4 套件点名：写实初筛脚本（v4-M1''' 块 1.3 落位 + `npm run validate:story` 同批，落位同提交删本登记）。
-  const PENDING_TOOLS = {
-    "scripts/check-story-quality.mjs": "v4-M1'''",
-  };
+  // v4-M1''' B 段已清空 check-story-quality.mjs（2026-10-25 与 243 条重写同提交落位）。
+  const PENDING_TOOLS = {};
   const docs = ["AGENTS.md", ...(existsSync(join(ROOT, "plan")) ? readdirSyncSafe() : [])];
   const referenced = new Set();
   for (const rel of docs) {
