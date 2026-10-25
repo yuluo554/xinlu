@@ -595,7 +595,8 @@ if (moodMap && typeof moodMap === "object" && !Array.isArray(moodMap)) {
   moodStats = { covered: diskFrames.length - missing.length, total: diskFrames.length, locked: lockedLen };
 }
 
-// ── I、图标对照（plan/v3/02 §九：Game-Icons 每事件 1 枚主题图标，对照表入库）──
+// ── I、图标对照（v3/02 §九 + v4/02 §六 objectKey：每事件 1 枚主题图标；
+//    v4-M3''' 起条目形状为 {objectKey: 图标名|null}，null = 显式豁免（卡片不配图，宁缺毋滥 ≤10%））──
 const iconMap = readJson("icon-map.json");
 let iconStats = null;
 if (iconMap && events && Array.isArray(events)) {
@@ -604,9 +605,29 @@ if (iconMap && events && Array.isArray(events)) {
   const extraIds = Object.keys(iconMap).filter((id) => !eventIds.includes(id));
   if (missingIds.length) fail("I.COVER", `对照表缺 ${missingIds.length} 条事件：${missingIds.slice(0, 8).join(",")}${missingIds.length > 8 ? "…" : ""}`);
   if (extraIds.length) fail("I.EXTRA", `对照表含 ${extraIds.length} 条不存在的事件 id：${extraIds.slice(0, 8).join(",")}`);
-  if (typeof iconMap !== "object" || Array.isArray(iconMap)) fail("I.SCHEMA", "icon-map.json 应为 {事件id: 图标名} 平面对象");
-  const badNames = Object.entries(iconMap).filter(([, v]) => typeof v !== "string" || !/^[a-z0-9-]+$/.test(v));
-  if (badNames.length) fail("I.NAME", `图标名非法（应小写 kebab-case）：${badNames.slice(0, 5).map(([k, v]) => `${k}→${JSON.stringify(v)}`).join("、")}`);
+  if (typeof iconMap !== "object" || Array.isArray(iconMap)) fail("I.SCHEMA", "icon-map.json 应为 {事件id: {objectKey}} 对象");
+  // objectKey 形状：小写 kebab-case 图标名（字符串）或显式 null（豁免）
+  const badShape = Object.entries(iconMap)
+    .filter(
+      ([, v]) =>
+        typeof v !== "object" ||
+        v === null ||
+        Array.isArray(v) ||
+        Object.keys(v).length !== 1 ||
+        !("objectKey" in v) ||
+        (typeof v.objectKey !== "string" && v.objectKey !== null),
+    )
+    .slice(0, 5);
+  if (badShape.length)
+    fail("I.SCHEMA", `条目形状非法（应为 {objectKey:图标名|null}）：${badShape.map(([k, v]) => `${k}→${JSON.stringify(v)}`).join("、")}`);
+  const named = Object.entries(iconMap).filter(
+    ([, v]) => typeof v === "object" && v !== null && !Array.isArray(v) && typeof v.objectKey === "string",
+  );
+  const exempt = Object.entries(iconMap).filter(
+    ([, v]) => typeof v === "object" && v !== null && !Array.isArray(v) && v.objectKey === null,
+  );
+  const badNames = named.filter(([, v]) => !/^[a-z0-9-]+$/.test(v.objectKey));
+  if (badNames.length) fail("I.NAME", `objectKey 非法（应小写 kebab-case）：${badNames.slice(0, 5).map(([k, v]) => `${k}→${JSON.stringify(v.objectKey)}`).join("、")}`);
   // 图标 SVG 实物存在性（assets/game-icons/icons/<作者>/<名>.svg 按 basename 对账）
   const iconDir = join(ROOT, "assets", "game-icons", "icons");
   const diskIcons = new Set();
@@ -619,9 +640,14 @@ if (iconMap && events && Array.isArray(events)) {
     }
   };
   walkIcons(iconDir);
-  const noFile = [...new Set(Object.values(iconMap))].filter((n) => typeof n === "string" && !diskIcons.has(n));
-  if (noFile.length) fail("I.FILE", `对照表引用的图标无 SVG 实物：${noFile.slice(0, 8).join(",")}${noFile.length > 8 ? "…" : ""}`);
-  iconStats = { covered: eventIds.length - missingIds.length, total: eventIds.length, disk: diskIcons.size };
+  const noFile = [...new Set(named.map(([, v]) => v.objectKey))].filter((n) => !diskIcons.has(n));
+  if (noFile.length) fail("I.FILE", `objectKey 引用的图标无 SVG 实物：${noFile.slice(0, 8).join(",")}${noFile.length > 8 ? "…" : ""}`);
+  // 豁免单独计数（02 §六：宁缺毋滥，目标 ≤10%）
+  const exemptMax = Math.floor(eventIds.length * 0.1);
+  const exemptIds = exempt.map(([id]) => id);
+  if (exempt.length > exemptMax)
+    fail("I.EXEMPT", `objectKey 豁免（null）${exempt.length} 条 > 上限 ${exemptMax}（≤10%，v4/02 §六）：${exemptIds.slice(0, 8).join(",")}${exemptIds.length > 8 ? "…" : ""}`);
+  iconStats = { covered: eventIds.length - missingIds.length, total: eventIds.length, disk: diskIcons.size, exempt: exempt.length, exemptMax };
 }
 
 // ── R、v4 历法/年代库/画像/家庭（plan/v4/02 §一/二/三 ▸ M1''' 增补；区字母 E 已被 v1 事件库占用）──
@@ -862,7 +888,7 @@ const lines = [
   ["P", `portraits ${portraitFilled}/${PORTRAIT_TYPES.length} 型封闭枚举${WANT_FULL ? " + 80–150 字" : ""}`],
   ["M", `fish-mood-map ${moodStats ? `覆盖 ${moodStats.covered}/${moodStats.total} 帧 + 终局锁 ${moodStats.locked} 张` : "—"}：19/19 全覆盖 / 类别枚举 / 终局不重复（v2/02 §二）`],
   ["V", `三观层：stage-drift ${driftOk}/24 格（8 阶段×3 轴，|值|≤2）+ monologues ${monoOk}/9 条（3 轴×3 区间）`],
-  ["I", `图标对照（v3/02 §九）：${iconStats ? `覆盖 ${iconStats.covered}/${iconStats.total} 条事件 + SVG 实物 ${iconStats.disk} 枚（Game-Icons CC-BY）` : "未完成校验"}`],
+  ["I", `图标对照（v3/02 §九 + v4/02 §六 objectKey）：${iconStats ? `覆盖 ${iconStats.covered}/${iconStats.total} 条事件 + SVG 实物 ${iconStats.disk} 枚（Game-Icons CC-BY）+ 豁免 ${iconStats.exempt} 条（≤${iconStats.exemptMax}）` : "未完成校验"}`],
   ["R", `v4 历法/画像/家庭（v4/02 ▸ M1'''）：era ${eraStats ? `${eraStats.count}/76 主锚逐年无缺（国际 ${eraStats.intl}/≤${ERA_INTL_MAX}；✅${eraStats.verified}/典型 ${eraStats.typical}）+ 查证表对账` : "—"}；names 池 ${namesStats ? `姓 ${namesStats.surnames} + 名 ${namesStats.given}` : "—"}；家庭注册槽 5；birth-map 八因素 ${v4Combos}/${V4_BIRTH_COMBOS} 组合落域`],
 ];
 for (const [p, label] of lines) out(`${areaOk(p) ? "PASS" : "FAIL"}  ${label}`);

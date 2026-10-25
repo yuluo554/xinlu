@@ -14,8 +14,13 @@ for (const [path, url] of Object.entries(urls)) {
   byName[file.replace(/\.svg$/, "")] = url;
 }
 
-/** 事件 id → 图标名（对照表数据件，M2'' 2.1 入库）。 */
-export const EVENT_ICONS = iconMapJson as Record<string, string>;
+/** 事件 id → objectKey 条目（对照表数据件；v4/02 §六：{objectKey: 图标名|null}，null = 显式豁免）。 */
+export const EVENT_ICONS = iconMapJson as Record<string, { objectKey: string | null }>;
+
+/** 事件 id → objectKey（豁免条目回空串，卡片自然不渲染图标）。 */
+export function objectKeyOf(id: string): string {
+  return EVENT_ICONS[id]?.objectKey ?? "";
+}
 
 export function iconUrl(name: string): string {
   return byName[name] ?? "";

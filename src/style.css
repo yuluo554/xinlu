@@ -1309,12 +1309,26 @@ body {
   opacity: 0.3;
 }
 
-/* 阶段小结图标(Simple Worlds 提取件,装饰性) */
-.stage-icon {
-  width: 34px;
-  height: 34px;
-  vertical-align: -6px;
-  margin-left: 12px;
+/* 阶段小结场景带(v4-M3''' 3.2:自产 CC0 剪影,CSS 变量随四主题联动) */
+.stage-scene {
+  margin: 10px 0 14px;
+  border: 1px solid var(--ink-3);
+  border-radius: 10px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.stage-scene svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 「我的家庭」入口（v4-M3''' 3.3 打磨：family-tree 图标前置，三屏 topbar 一致） */
+.btn-family {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* about 链接(素材与许可说明) */

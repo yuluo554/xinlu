@@ -26,7 +26,27 @@ import type { RunState } from "../engine/model";
 // 场景氛围素材 URL(vite 静态 import → dist hash 文件名;水面/云层 = CC-BY Open Ocean 组,图标 = Simple Worlds 提取件)
 import waterUrl from "../../assets/web-ready/open-ocean/Other/WikndWakerWater_Background.webp";
 import cloudsUrl from "../../assets/web-ready/open-ocean/Other/Clouds_Background.webp";
-import jellyfishSvg from "../../assets/cc-by/simple-worlds-ocean-animals/jellyfish.svg";
+// 小结阶段场景图(v4-M3''' 3.2:自产 CC0 单色剪影,fill 用 CSS 变量随四主题联动;逐张对文案 docs/v4-M3-icons.md)
+import infantScene from "../../assets/web-ready/stage-scenes/infant.svg?raw";
+import toddlerScene from "../../assets/web-ready/stage-scenes/toddler.svg?raw";
+import childhoodScene from "../../assets/web-ready/stage-scenes/childhood.svg?raw";
+import teenScene from "../../assets/web-ready/stage-scenes/teen.svg?raw";
+import youthScene from "../../assets/web-ready/stage-scenes/youth.svg?raw";
+import adultScene from "../../assets/web-ready/stage-scenes/adult.svg?raw";
+import midlifeScene from "../../assets/web-ready/stage-scenes/midlife.svg?raw";
+import elderScene from "../../assets/web-ready/stage-scenes/elder.svg?raw";
+
+/** 阶段 → 场景插画单源（v4/02 §七.1：小结主题头场景图）。 */
+const STAGE_SCENES: Record<Stage, string> = {
+  infant: infantScene,
+  toddler: toddlerScene,
+  childhood: childhoodScene,
+  teen: teenScene,
+  youth: youthScene,
+  adult: adultScene,
+  midlife: midlifeScene,
+  elder: elderScene,
+};
 
 /** 场景氛围层(v2-M3' 3.3):水面纹理 + 云层,出生环境经 sceneBackdrop 驱动;装饰性,aria-hidden。 */
 function sceneLayer(backdrop: SceneBackdrop): string {
@@ -101,7 +121,7 @@ function topbar(
       <span class="wordmark">心路</span>
       <div class="dots" aria-label="人生进度">${dots}</div>
       ${statebar(resources, bump, band)}
-      ${family ? '<button type="button" class="btn-ghost btn-family" data-family-open>我的家庭</button>' : ""}
+      ${family ? `<button type="button" class="btn-ghost btn-family" data-family-open aria-label="查看我的家庭图谱"><span class="res-icon" style="${esc(iconStyle("family-tree"))}" aria-hidden="true"></span>我的家庭</button>` : ""}
       <button type="button" class="btn-ghost" data-restart>重开</button>
     </header>`;
 }
@@ -403,8 +423,9 @@ export function summaryScreen(vm: {
     <section class="screen screen-summary">
       ${sceneLayer(vm.backdrop)}
       ${topbar(vm.stageIndex, vm.resources, [], false, vm.band)}
-      <h2>${STAGE_LABEL[vm.stage]} · 小结<img class="stage-icon" src="${jellyfishSvg}" alt="" aria-hidden="true"></h2>
+      <h2>${STAGE_LABEL[vm.stage]} · 小结</h2>
       <p class="sum-theme muted" data-stage-span>${vm.yearRange ? `${esc(vm.yearRange)} · ${esc(vm.ageRange)}` : STAGE_LABEL[vm.stage]}</p>
+      <div class="stage-scene" data-stage-scene role="img" aria-label="${STAGE_LABEL[vm.stage]}阶段场景插画">${STAGE_SCENES[vm.stage]}</div>
       <div class="fish-slot fish-slot-stage" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
       <h3 class="sum-h">三观刻度</h3>
       <div class="values-notes">${notes}</div>

@@ -9,7 +9,8 @@ import { tagOfBond } from "../engine/values";
 /** NPC 注册表（名字/职责/线别唯一事实源 = npcs.json，validate N.REG 守门）。 */
 export const NPC_PROFILES = npcsRaw as unknown as Record<string, { name: string; role: string; line: LineKey }>;
 
-/** tag 配色（inline 属性进 SVG，随快照自包含）。 */
+/** tag 配色（inline 属性进 SVG，随快照自包含）。节点底/文字用 CSS 变量 + 米纸 fallback：
+ * 主题页内随 data-theme 联动（v4-M3''' 3.3 四主题复验），快照独立查看时回退米纸值。 */
 export const TAG_COLORS: Record<NpcTag, string> = {
   亲密: "#b0873a",
   疏离: "#7c8aa0",
@@ -137,9 +138,9 @@ export function renderRelations(npcs: readonly NpcState[]): string {
       const label = isCenter ? "你" : n.name;
       const sub = isCenter ? "" : n.role;
       return `<g transform="translate(${n.x} ${n.y})">
-        <circle r="${r}" fill="#f7f1e3" stroke="${isCenter ? "#5d4f3a" : TAG_COLORS[n.tag]}" stroke-width="${isCenter ? 2 : 1.5}"/>
-        <text y="4" text-anchor="middle" font-size="11" fill="#3d3428">${label}</text>
-        ${sub ? `<text y="15" text-anchor="middle" font-size="8" fill="#8a7a62">${sub}</text>` : ""}
+        <circle r="${r}" fill="var(--surface,#f7f1e3)" stroke="${isCenter ? "var(--ink,#5d4f3a)" : TAG_COLORS[n.tag]}" stroke-width="${isCenter ? 2 : 1.5}"/>
+        <text y="4" text-anchor="middle" font-size="11" fill="var(--ink,#3d3428)">${label}</text>
+        ${sub ? `<text y="15" text-anchor="middle" font-size="8" fill="var(--ink-2,#8a7a62)">${sub}</text>` : ""}
       </g>`;
     })
     .join("");

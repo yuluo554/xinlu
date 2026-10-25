@@ -58,7 +58,7 @@ import {
 import { timelineVM, choiceFloats, RES_KEYS, LINE_META } from "./timeline";
 import { moneyBandOf, type MoneyBand } from "./resources";
 import { applyTheme, loadTheme, saveTheme, type ThemeId } from "./theme";
-import { EVENT_ICONS } from "./icons";
+import { objectKeyOf } from "./icons";
 import { renderRelations } from "./relations";
 import { exportShareCard } from "./share-card";
 import { GALLERY_TYPES, loadGallery, recordRun, representativeDims } from "./gallery";
@@ -335,7 +335,7 @@ function renderCard(feedback: typeof pendingFeedback): void {
     locks: optionLocks(state, event),
     line: event.line,
     critical: event.type === "critical",
-    iconName: EVENT_ICONS[event.id] ?? "",
+    iconName: objectKeyOf(event.id),
     backdrop: sceneBackdrop(state.env),
     timeline: timelineVM(state),
     resources: state.resources,

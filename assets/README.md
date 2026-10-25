@@ -110,3 +110,24 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 | 许可证 | CC-BY 3.0（不变）；`game-icons/LICENSE-game-icons.txt` 已随附；public/credits.md 署名行不变（覆盖全部作者） |
 | 选取 | **增补 68 枚**（love/-4xx、friend/-5xx、health/-6xx 三线新事件每事件 1 枚；全库零重复 243/243）；逐张对文案增行 `docs/v3-M2-icons.md` §v3-M3'' 增补 |
 | 处理 | 原样入库（同 M2''：官方包即最小化产物）；路径 `game-icons/icons/<作者>/<名>.svg`；validate I 区随库扩至 243/243，许可门白名单不变 |
+
+## v4 增量节（v4-M3''' 3.1 objectKey 重映射补采 + 3.2 小结场景图，2026-10-26）
+
+> 依据 plan/v4/02 §六（objectKey 选图纪律）与 §七（小结场景配图）。许可门白名单**无需扩展**：补采图标落 `game-icons/`、场景图落 `web-ready/stage-scenes/`，两者前缀均已在 D1=B 白名单内。
+
+### objectKey 补采（`game-icons/`，4 枚）
+
+| 项 | 内容 |
+|---|---|
+| 来源 | Game-Icons 官方全量包再下载（同地址，4,168,300 字节与 M2''/M3'' 两次采集一致；直连一次成功） |
+| 许可证 | CC-BY 3.0（不变）；credits 署名行不变（lorc/delapouite 均已在覆盖行内） |
+| 选取 | snowflake-1（lorc）/ broom、tv、gym-bag（delapouite）——v4 文本写实化后 243 条全量复核中 4 条换图；1 条显式豁免（objectKey: null，卡片不配图）；复核清单 `docs/v4-M3-icons.md` |
+| 处理 | 原样入库（官方包即最小化产物）；icon-map.json 条目形状升级为 `{objectKey: 图标名\|null}`（validate I 区同笔扩展：I.SCHEMA 形状 / I.EXEMPT 豁免 ≤10%） |
+
+### 小结场景配图（`web-ready/stage-scenes/`，8 枚 SVG）
+
+| 项 | 内容 |
+|---|---|
+| 来源 | **项目自产**（AI 生成，2026-10-26）：8 阶段小结场景插画（infant/toddler/childhood/teen/youth/adult/midlife/elder 各 1 张），单色剪影风与 Game-Icons 事件图标层同语言 |
+| 许可证 | 自产物以 **CC0** 释放（本项目为作者，无第三方权利）；credits 无新增署名行（自产无署名义务） |
+| 处理 | 手写紧凑 SVG（每张 <4KB），fill 用 CSS 变量（`--ink-3`/`--accent` 等 + fallback），四主题（米纸/月白/夜航/青瓷）随主题联动；`screens.ts` summaryScreen 主题头内联渲染；逐张对文案留痕 `docs/v4-M3-icons.md` §二 |

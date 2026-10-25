@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 96" aria-hidden="true">
+  <path d="M12 84h296" stroke="var(--ink-3,#a39d8d)" stroke-width="2" opacity=".45" fill="none"/>
+  <path d="M64 24q6-6 12 0q6-6 12 0" stroke="var(--ink-2,#6e6a5f)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="230" cy="70" r="17" fill="var(--accent,#2f7d6d)" opacity=".9"/>
+  <circle cx="230" cy="70" r="26" stroke="var(--accent,#2f7d6d)" stroke-width="1.6" fill="none" opacity=".35"/>
+  <path d="M12 84h296" stroke="var(--surface,#fdfaf2)" stroke-width="3" opacity=".55" fill="none"/>
+  <g stroke="var(--ink-2,#6e6a5f)" stroke-width="3" fill="none" stroke-linecap="round">
+    <path d="M118 56q3-19 17-19h9"/>
+    <path d="M104 67h42l-5 7h-32z" fill="var(--ink-2,#6e6a5f)" stroke="none"/>
+    <path d="M103 74q22 11 44 0"/>
+  </g>
+  <rect x="158" y="76" width="13" height="8" fill="var(--ink-3,#a39d8d)"/>
+  <path d="M171 78q7 2 0 7" stroke="var(--ink-3,#a39d8d)" stroke-width="1.6" fill="none"/>
+  <path d="M163 72q1-4 3 0" stroke="var(--ink-3,#a39d8d)" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</svg>

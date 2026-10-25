@@ -3,7 +3,7 @@ import eventsRaw from "../data/events.json";
 import { createRun, pickEvent, applyChoice, advanceStage, eventById } from "../engine/engine";
 import { STAGES, type HistoryEntry, type RunState } from "../engine/model";
 import { timelineVM, resourceFloats, valueFloats, choiceFloats, RES_META } from "./timeline";
-import { EVENT_ICONS, iconUrl } from "./icons";
+import { EVENT_ICONS, iconUrl, objectKeyOf } from "./icons";
 
 const events = eventsRaw as unknown as Array<{ id: string }>;
 
@@ -122,14 +122,31 @@ describe("choiceFloats（一次选择的合并浮动，资源在前三观在后�
   });
 });
 
-describe("图标注册表（icons.ts，对照表单源 icon-map.json）", () => {
-  it("每个事件的图标名都能解析到真实 SVG URL（vite glob 全量入库）", () => {
+describe("图标注册表（icons.ts，对照表单源 icon-map.json；v4/02 §六 objectKey 形状）", () => {
+  it("objectKey 全覆盖：条目形如 {objectKey}，非空值 kebab-case 且解析到真实 SVG URL", () => {
     const ids = Object.keys(EVENT_ICONS);
     expect(ids.length).toBe(events.length); // 全库覆盖（随事件库增长同步，不做硬编码）
     for (const id of ids) {
-      const name = EVENT_ICONS[id]!;
+      const entry = EVENT_ICONS[id]!;
+      expect(Object.keys(entry), id).toEqual(["objectKey"]);
+      const name = entry.objectKey;
+      if (name === null) continue; // 显式豁免（卡片不配图），豁免上限单列一条断言
       expect(name, id).toMatch(/^[a-z0-9-]+$/);
       expect(iconUrl(name), `${id} → ${name}`).not.toBe("");
+    }
+  });
+
+  it("objectKey 豁免（null）≤10%（宁缺毋滥，v4/02 §六；豁免清单 docs/v4-M3-icons.md）", () => {
+    const entries = Object.values(EVENT_ICONS);
+    const exempt = entries.filter((e) => e.objectKey === null);
+    expect(exempt.length).toBeLessThanOrEqual(Math.floor(entries.length * 0.1));
+  });
+
+  it("objectKeyOf：豁免条目回空串（卡片不渲染图标），在册条目回图标名", () => {
+    for (const id of Object.keys(EVENT_ICONS)) {
+      const name = EVENT_ICONS[id]!.objectKey;
+      if (name === null) expect(objectKeyOf(id), id).toBe("");
+      else expect(objectKeyOf(id), id).toBe(name);
     }
   });
 

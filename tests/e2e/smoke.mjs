@@ -10,7 +10,7 @@
 // 纪律：本脚本不加任何 devDependencies（K2 零运行时依赖的测试侧延伸）。
 
 import { spawn, execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -373,6 +373,12 @@ async function main() {
       let cardActions = 0;
       let criticalSeen = 0;
       let floatSeen = false;
+      // v4-M3''' 3.1：无图标卡 = objectKey 显式豁免（icon-map objectKey:null，v4/02 §六宁缺毋滥 ≤10%）；
+      // 豁免总数 node 侧从对照表算（页面 DOM 无事件 id，精确对账归 validate I 区 + vitest）
+      const exemptTotal = Object.values(JSON.parse(readFileSync(join(ROOT, "src", "data", "icon-map.json"), "utf8"))).filter(
+        (v) => v && typeof v === "object" && v.objectKey === null,
+      ).length;
+      let noIconCards = 0;
       let countGrew = false;
       let railFixed = true;
       let relationsChecked = false;
@@ -391,6 +397,7 @@ async function main() {
                 shift: n.querySelector(".vn-shift")?.textContent ?? "",
                 mono: n.querySelector(".vn-monologue")?.textContent ?? "",
               })),
+              scene: !!document.querySelector(".screen-summary [data-stage-scene] svg"),
               span: document.querySelector("[data-stage-span]")?.textContent ?? "",
               resRow: [...document.querySelectorAll(".sum-res b")].map((e) => e.textContent ?? ""),
               criticals: !!document.querySelector(".sum-criticals"),
@@ -463,7 +470,7 @@ async function main() {
           if (!yearMatch) throw new Error(`${vp.width} 档：年份徽章格式非法「${sample.badge}」（v4/02 §一）`);
           yearSeq.push(Number(sample.badge.slice(0, 4)));
           minOptions = Math.min(minOptions, sample.opts);
-          if (!sample.card.icon) throw new Error(`${vp.width} 档：第 ${cardActions} 张卡无图标位`);
+          if (!sample.card.icon) noIconCards++; // 豁免卡无图标位是预期（v4/02 §六）；超豁免总数即接线回归，verdict 区拦
           if (sample.card.critical) criticalSeen++;
           if (sample.floats) floatSeen = true;
           // v4-M2'''：状态条三词格式（五档词 ×2 + 换算元 ×1）
@@ -486,6 +493,9 @@ async function main() {
       if (!endingSeen) throw new Error(`${vp.width} 档：${MAX_STEPS} 步内未到终局`);
       if (minOptions < 3) throw new Error(`${vp.width} 档：出现选项数 ${minOptions} < 3 的卡片（v3 口径 ≥3）`);
       if (!floatSeen) throw new Error(`${vp.width} 档：全程未观察到后果浮动层（微反馈缺失）`);
+      if (noIconCards > exemptTotal) {
+        throw new Error(`${vp.width} 档：无图标卡 ${noIconCards} 张 > 豁免总数 ${exemptTotal}（图标接线回归）`);
+      }
       if (vp.width >= 768 && !countGrew) throw new Error(`${vp.width} 档：桌面阶段计数徽标未随抉择增长`);
       if (vp.width < 768 && !railFixed) throw new Error(`${vp.width} 档：移动阶段条高度发生变化（D6=A 固定口径）`);
       if (criticalSeen < 1) throw new Error(`${vp.width} 档：全程未出现 critical 分级卡`);
@@ -498,6 +508,7 @@ async function main() {
         if ((n.mono ?? "").length < 8) throw new Error(`${vp.width} 档：独白未接线（「${n.mono}」）`);
       }
       if (!/[0-9]{4}/.test(summarySeen.span)) throw new Error(`${vp.width} 档：小结主题头缺年代区间（「${summarySeen.span}」）`);
+      if (!summarySeen.scene) throw new Error(`${vp.width} 档：小结场景配图缺失（v4-M3''' 3.2）`);
       if (summarySeen.resRow.length !== 3) throw new Error(`${vp.width} 档：身家状态非 3 项（实得 ${summarySeen.resRow.length}）`);
       if (!summarySeen.criticals) throw new Error(`${vp.width} 档：小结关键抉择回顾段缺失`);
       for (let i = 1; i < yearSeq.length; i++) {
@@ -655,12 +666,19 @@ async function main() {
         if (settingsSeen.providers < 4) throw new Error(`${vp.width} 档：服务商预设 < 4`);
         if (settingsSeen.themeChips !== 4) throw new Error(`${vp.width} 档：主题 chips 非 4 款（实得 ${settingsSeen.themeChips}）`);
         // v4-M2''' 主题四款（02 §五）：切夜航即时生效（data-theme + 深底）+ 独立键落盘；切回米纸复原
+        // v4-M3''' 3.3 追加：夜航下内联 SVG 的 var(--surface/--ink) 解析为夜航值（图谱/场景图同机制，防米纸 fallback 死色）
         const themeSwitch = await cdp.evaluate(`(() => {
           const night = document.querySelector('[data-theme-choice][value="night"]');
           if (!night) return { ok: false };
           night.click();
           const nightAttr = document.documentElement.dataset.theme;
           const nightBg = getComputedStyle(document.body).backgroundColor;
+          const probe = document.createElement("div");
+          probe.innerHTML = '<svg viewBox="0 0 10 10"><circle r="5" fill="var(--surface,#f7f1e3)"></circle><text fill="var(--ink,#3d3428)">测</text></svg>';
+          document.body.appendChild(probe);
+          const svgNode = getComputedStyle(probe.querySelector("circle")).fill;
+          const svgText = getComputedStyle(probe.querySelector("text")).fill;
+          probe.remove();
           const saved = localStorage.getItem("xinlu.theme.v1");
           const paper = document.querySelector('[data-theme-choice][value="paper"]');
           if (paper) paper.click();
@@ -668,6 +686,8 @@ async function main() {
             ok: true,
             nightAttr,
             nightBg,
+            svgNode,
+            svgText,
             saved,
             backAttr: document.documentElement.dataset.theme,
             backBg: getComputedStyle(document.body).backgroundColor,
@@ -675,6 +695,9 @@ async function main() {
         })()`);
         if (!themeSwitch.ok) throw new Error(`${vp.width} 档：主题选项缺失`);
         if (themeSwitch.nightAttr !== "night") throw new Error(`${vp.width} 档：夜航未即时生效（${themeSwitch.nightAttr}）`);
+        if (themeSwitch.svgNode === "rgb(247, 241, 227)" || themeSwitch.svgText === "rgb(61, 52, 40)") {
+          throw new Error(`${vp.width} 档：夜航下内联 SVG 仍解析米纸 fallback（node ${themeSwitch.svgNode} / text ${themeSwitch.svgText}）`);
+        }
         if (themeSwitch.saved !== "night") throw new Error(`${vp.width} 档：主题键未落盘（${themeSwitch.saved}）`);
         if (themeSwitch.nightBg === themeSwitch.backBg) {
           throw new Error(`${vp.width} 档：主题切换背景色未变（${themeSwitch.nightBg}）`);
@@ -807,7 +830,7 @@ async function main() {
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项≥3 图标全覆盖 critical分级/五档词状态条/阶段条聚合(D6=A)/浮动层/小结三观三轴/图谱页/种子码/自定义槽离线隐藏/主题四款切换已断言`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项≥3 图标(无图标卡≤豁免) critical分级/五档词状态条/阶段条聚合(D6=A)/浮动层/小结三观三轴/小结场景图/图谱页/种子码/自定义槽离线隐藏/主题四款切换+夜航SVG联动已断言`);
     }
     out("PASS  v4 自定义出生全流程：三页签/六因素表单/1956 时代卡首屏/年份徽章/我的家庭图谱(本局姓名)/存档 v3 形状");
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
