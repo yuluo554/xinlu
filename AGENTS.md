@@ -22,7 +22,7 @@ node tools/check-sprint-layout.mjs    # 布局门；必须绿，红了先修布�
 | v2 计划套件 | `plan/v2/00–06` + `plan/v2/backlog.md` | 存在且各含必需小节；v2 里程碑机读状态行以 `v2-M<k>'` 标号写入两处状态副本；交接单落 `plan/v2/HANDOFF-v2-M<k>.md` |
 | v4 计划套件 | `plan/v4/00–06` + `plan/v4/backlog.md` | 存在且各含必需小节；v4 里程碑机读状态行以 `v4-M<k>'''` 标号写入两处状态副本；交接单落 `plan/v4/HANDOFF-v4-M<k>.md`（v3 腿未接门，行纪律双维护，见 `plan/v3/backlog.md` 观察区） |
 | 数据台账 | `data/README.md` | 口径来源 + 依据查证三态表在位 |
-| 交接单 | `plan/HANDOFF-M<k>.md`（v2 腿：`plan/v2/HANDOFF-v2-M<k>.md`；v4 腿：`plan/v4/HANDOFF-v4-M<k>.md`） | 每个 ✅ 里程碑一份，七节齐（含"当前事实"）；**M0 豁免**（M0 之前没有上一棒可写 HANDOFF-M0，M0 的收尾动作是写 HANDOFF-M1） |
+| 交接单 | `plan/HANDOFF-M<k>.md`（v2 腿：`plan/v2/HANDOFF-v2-M<k>.md`；v4 腿：`plan/v4/HANDOFF-v4-M<k>.md`） | 每个 ✅ 里程碑一份，七节齐（含"当前事实"）；**M0 豁免**（M0 之前没有上一棒可写 HANDOFF-M0，M0 的收尾动作是写 HANDOFF-M1）。**编号随棒顺延**（skill 纪律①：每棒收尾写下一棒的 `HANDOFF-M<next>`；一里程碑拆多棒时每棒各占一号——布局门只对 ✅ 里程碑做最低校验，别拿门当编号纪律） |
 | 里程碑状态副本 | `plan/00` 里程碑总表状态列 + `README.md` 状态表 | **逐处一致**，逐副本独立采集（状态行必须写成表格行才可机读；散文状态不参与判定，两处副本的行数门会打进结论） |
 | 承诺-证据台账 | `plan/00` + `plan/v2/00` + `plan/v4/00` | 已 ✅ 里程碑不得仍挂"⬜ 待 M<k>"（台账三份都扫；v3/00 台账纪律双维护） |
 | 缺口队列 | `plan/backlog.md`、`plan/v2/backlog.md` 与 `plan/v4/backlog.md` 队列表 | "待 M<k>"/"待 v2-M<k>'"/"待 v4-M<k>'''"的行在其里程碑 ✅ 后必须清理或关闭（v3/backlog 纪律双维护） |
