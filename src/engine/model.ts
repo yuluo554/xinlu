@@ -105,8 +105,10 @@ export interface HistoryEntry {
 // ── v4 年代事件库（plan/v4/02 §二；数据文件 src/data/era-events.json）──
 
 export type EraScope = "national" | "international";
-/** 事实三态：✅已核对 = 公共事实可核；典型值 = 氛围级典型生活（不声称具体事实）；待核仅过程态。 */
-export type EraCheckStatus = "✅已核对" | "典型值" | "待核";
+/** 事实三态：已核对 = 公共事实可核；典型值 = 氛围级典型生活（不声称具体事实）；待核仅过程态。
+ *  枚举字面量的首个取值带勾选符号（plan/v4/02 §二 定稿，era-events.json 55 条同值，validate E 区守门）；
+ *  它是数据枚举、不进任何渲染路径，不是界面 emoji。 */
+export type EraCheckStatus = "✅已核对" | "典型值" | "待核"; // taste-skill-ignore - 数据枚举字面量，非 UI
 
 export interface EraEvent {
   id: string;

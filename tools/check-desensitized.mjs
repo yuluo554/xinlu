@@ -23,7 +23,7 @@ const SELF = new Set(["tools/check-desensitized.mjs"]);
 // 纪律：凡 .gitignore 声明的"本地产物/环境"目录，必须在这里有对应项
 const SKIP_DIRS = new Set([
   ".git", ".tmp", "dist", "dist-release", "node_modules", ".cache", ".venv", "build",
-  ".mimosa", ".pytest_cache", "coverage",
+  ".mimosa", ".pytest_cache", "coverage", ".taste-skill",
 ]);
 const SKIP_SUFFIXES = [".egg-info", ".dist-info"];
 const SKIP_EXTS = new Set([".png", ".jpg", ".jpeg", ".gif", ".ico", ".zip", ".gz", ".exe", ".dll", ".pdf", ".woff", ".woff2"]);

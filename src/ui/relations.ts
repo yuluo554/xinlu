@@ -121,28 +121,33 @@ export function relationsVM(npcs: readonly NpcState[]): RelationsVM {
   return { nodes: [center, ...nodes], edges };
 }
 
-/** 图谱 SVG 字符串（快照与图谱页共用；纯静态，无脚本无外链）。 */
+/** 图谱 SVG 字符串（快照与图谱页共用；纯静态，无脚本无外链）。
+ *  v5：字号与墨色走 CSS 变量（四主题联动）；节点名 12px、身份 9px；线只一条，节点只一圈。 */
 export function renderRelations(npcs: readonly NpcState[]): string {
   const vm = relationsVM(npcs);
   const edges = vm.edges
     .map((e) => {
       const to = vm.nodes.find((n) => n.id === e.toId);
       if (!to) return "";
-      return `<line x1="${CENTER.x}" y1="${CENTER.y}" x2="${to.x}" y2="${to.y}" stroke="${TAG_COLORS[e.tag]}" stroke-width="${e.width}" stroke-linecap="round" opacity="0.85"/>`;
+      return `<line x1="${CENTER.x}" y1="${CENTER.y}" x2="${to.x}" y2="${to.y}" stroke="${TAG_COLORS[e.tag]}" stroke-width="${e.width}" stroke-linecap="round" opacity="0.9"/>`;
     })
     .join("");
   const nodes = vm.nodes
     .map((n) => {
       const isCenter = n.ring === -1;
-      const r = isCenter ? 19 : n.ring === 0 ? 17 : 15;
+      const r = isCenter ? 22 : n.ring === 0 ? 20 : 18;
       const label = isCenter ? "你" : n.name;
       const sub = isCenter ? "" : n.role;
+      // 名字在圆里放得下：三个汉字 ≈ 33px 宽，圆内可用弦长 ≥ 名字宽（半径 18–22 时 11px 字够）
+      const body = isCenter
+        ? `<text y="4" text-anchor="middle" font-size="13" font-weight="600" fill="var(--ink,#26241f)">${label}</text>`
+        : `<text y="0" text-anchor="middle" font-size="11" fill="var(--ink,#26241f)">${label}</text>
+           <text y="12" text-anchor="middle" font-size="9" fill="var(--ink-3,#6f6a5e)">${sub}</text>`;
       return `<g transform="translate(${n.x} ${n.y})">
-        <circle r="${r}" fill="var(--surface,#f7f1e3)" stroke="${isCenter ? "var(--ink,#5d4f3a)" : TAG_COLORS[n.tag]}" stroke-width="${isCenter ? 2 : 1.5}"/>
-        <text y="4" text-anchor="middle" font-size="11" fill="var(--ink,#3d3428)">${label}</text>
-        ${sub ? `<text y="15" text-anchor="middle" font-size="8" fill="var(--ink-2,#8a7a62)">${sub}</text>` : ""}
+        <circle r="${r}" fill="var(--surface,#ffffff)" stroke="${isCenter ? "var(--ink,#26241f)" : TAG_COLORS[n.tag]}" stroke-width="${isCenter ? 2 : 1.5}"/>
+        ${body}
       </g>`;
     })
     .join("");
-  return `<svg viewBox="0 0 360 330" role="img" aria-label="关系图谱" xmlns="http://www.w3.org/2000/svg">${edges}${nodes}</svg>`;
+  return `<svg viewBox="0 0 360 330" role="img" aria-label="关系图谱" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,-apple-system,'PingFang SC','Microsoft YaHei',sans-serif">${edges}${nodes}</svg>`;
 }

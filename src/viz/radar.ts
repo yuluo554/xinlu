@@ -39,24 +39,19 @@ export function renderRadar(dims: Dims, el: Element, past: readonly Dims[] = [])
     "aria-label": `四维雷达图：E-I ${sanitize(dims.ei)}、S-N ${sanitize(dims.sn)}、T-F ${sanitize(dims.tf)}、J-P ${sanitize(dims.jp)}`,
   });
 
-  // 参考环：外沿与中立环（50，虚线）
-  svg.appendChild(svgEl("polygon", { points: rimPolygon(), class: "radar-ring" }));
+  // 参考环：只留 50 中立环一条（v5 去装饰：不叠第二层外框、不画辐条——单系列图不摆网格）
   svg.appendChild(svgEl("polygon", { points: rimPolygon(50), class: "radar-ring neutral" }));
-  for (const dim of DIM_KEYS) {
-    const [x, y] = point(dim, 100);
-    svg.appendChild(svgEl("line", { x1: CENTER, y1: CENTER, x2: x, y2: y, class: "radar-spoke" }));
-  }
 
   // 历史淡影（虚线空心）
   for (const ghost of past) {
     svg.appendChild(svgEl("polygon", { points: polygonPoints(ghost), class: "radar-ghost" }));
   }
 
-  // 当前四维实线多边形 + 顶点
+  // 当前四维实线多边形 + 四个顶点（顶点是读多边形的锚，不是装饰点阵）
   svg.appendChild(svgEl("polygon", { points: polygonPoints(dims), class: "radar-now" }));
   for (const dim of DIM_KEYS) {
     const [x, y] = point(dim, dims[dim]);
-    svg.appendChild(svgEl("circle", { cx: x, cy: y, r: 3, class: "radar-dot" }));
+    svg.appendChild(svgEl("circle", { cx: x, cy: y, r: 2.5, class: "radar-dot" }));
   }
 
   // 轴端标签

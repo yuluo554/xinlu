@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Dims, HistoryEntry } from "../engine/model";
-import { renderCurve } from "./curve";
+import { renderCurve, thin } from "./curve";
 import { renderRadar } from "./radar";
 
 // 最小 SVG DOM 桩：viz 只依赖 createElementNS / setAttribute / appendChild / textContent 四个面，
@@ -126,5 +126,35 @@ describe("renderCurve", () => {
     expect(points("curve-ei")).toBe("175.00,14.00"); // 999 → 100 → 顶边
     expect(points("curve-sn")).toBe("175.00,174.00"); // -999 → 0 → 底边
     expect(points("curve-tf")).toBe("175.00,94.00"); // NaN → 50 → 中位
+  });
+});
+
+describe("thin（曲线抽稀：保形，不抹平拐点）", () => {
+  const seq = (n: number): Dims[] =>
+    Array.from({ length: n }, (_, i) => ({ ei: 50 + i, sn: 50, tf: 50, jp: 50 }));
+
+  it("短序列原样返回（不抽样、不复制错位）", () => {
+    const s = seq(10);
+    expect(thin(s)).toEqual(s);
+  });
+
+  it("长序列抽到上限附近，首末点必留", () => {
+    const s = seq(400);
+    const t = thin(s, 40);
+    expect(t.length).toBeLessThanOrEqual(40);
+    expect(t[0]).toEqual(s[0]);
+    expect(t[t.length - 1]).toEqual(s[399]);
+  });
+
+  it("孤立的极值点不被抹平（拐点优先于平滑）", () => {
+    const s = seq(300);
+    s[150] = { ei: 2, sn: 2, tf: 2, jp: 2 }; // 一处深谷
+    const t = thin(s, 30);
+    expect(t.some((d) => d.ei === 2)).toBe(true);
+  });
+
+  it("空序列与单点不崩", () => {
+    expect(thin([])).toEqual([]);
+    expect(thin(seq(1))).toEqual(seq(1));
   });
 });

@@ -13,6 +13,9 @@ dist.zip
 # 本机工具目录（不入库）
 .mimosa/
 
+# 界面审查工作目录（design-taste-frontend skill 的截图 / 方向定案 / 临时驱动脚本；本地产物不入库）
+.taste-skill/
+
 # v2 素材库护栏（台账单源 assets/README.md；v2-M1' 1.2 跟踪策略落地——plan/v2/02 §八）：
 # git 只跟踪 assets/web-ready/（压缩 WebP ≤50KB/张）+ 许可/溯源文本 + SVG 矢量源；
 # 原始位图件与 zip 一律留本地不入 git。

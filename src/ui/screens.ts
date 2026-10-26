@@ -1,6 +1,7 @@
-// 屏幕装配（字符串模板，v3-M2'' D4=B 时间轴画卷重设计）。
-// 布局口径：桌面双栏（左八段轨道含线别色点 + 右事件卡），移动单列竖向时间轴（08 §四）；
-// mascot 沿 08 §四降级为三类出场（抉择反馈表情=aftermath / 阶段转场彩蛋=summary / 终局庆祝=ending），事件卡以图标承担叙事。
+// 屏幕装配（字符串模板）。v5 界面改造：档案页式排版（framed-sheet）。
+// 骨架三段：① 顶栏（字标 + 八段进度点 + 一两个动作）；② 本局实况带（年份戳 / 阶段 / 六线档位 / 三项状态）；
+// ③ 白页正文（事件卡 / 小结 / 终局 / 图鉴 / 设置）。
+// 排版纪律：年份与结局字母走 40px 大字；正文 17px；关键信息靠字号与留白分层，不靠加框与描边胶囊。
 // 动态文本一律经 esc() 转义；出生四要素枚举由 engine.birthEnvOptions() 传入渲染，UI 不内联枚举清单（plan/03 §4）。
 import {
   DIM_KEYS,
@@ -9,24 +10,29 @@ import {
   type DimKey,
   type Dims,
   type LineKey,
+  type LineProgress,
   type ResKey,
   type Resources,
   type Stage,
 } from "../engine/model";
 import type { SceneBackdrop } from "../viz/scene";
-import { DIM_SHORT, STAGE_LABEL, type ChoiceReview, type ValuesNote } from "./logic";
+import { DIM_SHORT, STAGE_LABEL, VALUES_AXIS_LABEL, type ChoiceReview, type ValuesNote } from "./logic";
 import { ENDING_META, GALLERY_TYPES, type GalleryData } from "./gallery";
 import { LINE_META, RES_META, RES_KEYS, type Floater, type TimelineSegment } from "./timeline";
 import { moneyDisplay, resTier, type MoneyBand } from "./resources";
+import { LINE_BAR_CELLS, lineBars } from "./lines";
+import { decadeBands, yearTicks } from "./years";
 import { THEMES, type ThemeId } from "./theme";
 import { iconStyle } from "./icons";
-import { NPC_PROFILES, TAG_COLORS, renderRelations } from "./relations";
+import { NPC_PROFILES, TAG_COLORS, relationsVM, renderRelations } from "./relations";
 import { PROVIDERS, type LlmSettings } from "../llm/config";
 import type { RunState } from "../engine/model";
-// 场景氛围素材 URL(vite 静态 import → dist hash 文件名;水面/云层 = CC-BY Open Ocean 组,图标 = Simple Worlds 提取件)
+// 16 型画像一句话（图鉴解锁格用；未解锁不渲染，不留假内容）
+import portraits from "../data/portraits.json" with { type: "json" };
+// 场景氛围素材 URL(vite 静态 import → dist hash 文件名;水面/云层 = CC-BY Open Ocean 组)
 import waterUrl from "../../assets/web-ready/open-ocean/Other/WikndWakerWater_Background.webp";
 import cloudsUrl from "../../assets/web-ready/open-ocean/Other/Clouds_Background.webp";
-// 小结阶段场景图(v4-M3''' 3.2:自产 CC0 单色剪影,fill 用 CSS 变量随四主题联动;逐张对文案 docs/v4-M3-icons.md)
+// 小结阶段场景图(v4-M3''':自产 CC0 单色剪影,fill 用 CSS 变量随四主题联动;逐张对文案 docs/v4-M3-icons.md)
 import infantScene from "../../assets/web-ready/stage-scenes/infant.svg?raw";
 import toddlerScene from "../../assets/web-ready/stage-scenes/toddler.svg?raw";
 import childhoodScene from "../../assets/web-ready/stage-scenes/childhood.svg?raw";
@@ -83,14 +89,43 @@ const PROFILE_META: Array<{ key: "region" | "structure" | "parentsJob" | "wealth
   { key: "wealth", label: "家境" },
 ];
 
-/** 常驻状态条（v4/02 §四 ▸ M2''' 增补）：mood/health 五档词 + 细色条（数值只在浮动层出现），
- *  money 换算「元」口语；bump = 本步有增损的资源键，渲染即触发词弹跳。 */
+/** 「YYYY 年 · N 岁」拆成大字年份 + 小字岁数（年份戳是每页的锚）。
+ *  纯字符串切分（不用正则捕获），格式不符时整串当年份、岁数留空。 */
+function splitYearBadge(badge: string): { year: string; age: string } {
+  const cut = badge.indexOf("·");
+  if (cut === -1) return { year: badge.replace("年", "").trim(), age: "" };
+  const yearPart = badge.slice(0, cut).replace("年", "").trim();
+  const agePart = badge.slice(cut + 1).trim();
+  const isYear = yearPart.length === 4 && Number(yearPart) > 0;
+  return isYear ? { year: yearPart, age: agePart } : { year: badge, age: "" };
+}
+
+/** 五格档位条片段（on = 已点亮格数）。 */
+function barCells(level: number): string {
+  return Array.from({ length: LINE_BAR_CELLS }, (_, i) => `<i${i < level ? ' class="on"' : ""}></i>`).join("");
+}
+
+/** 六线档位条（fate 作主干一行；支线五格，按档位着色）。 */
+function lineBarRows(lines: LineProgress): string {
+  return lineBars(lines)
+    .map(
+      (b) => `<div class="line-row ${b.cls}" data-line="${b.line}" data-level="${b.level}" title="${esc(b.label)}">
+        <span class="line-name">${esc(b.label)}</span>
+        <span class="line-bar" aria-hidden="true">${barCells(b.level)}</span>
+      </div>`,
+    )
+    .join("");
+}
+
+/** 三项状态（心境 / 积蓄 / 健康）：五档词 + 细色条；积蓄换算「元」（数字只在浮动层）。
+ *  E2E 契约：.statebar .res[data-res] / .res-word / .res-tier-bar i 宽度 / data-tier。 */
 function statebar(resources: Resources | null, bump: readonly ResKey[], band: MoneyBand): string {
   if (!resources) return "";
   const items = RES_KEYS.map((key) => {
     const meta = RES_META[key];
     const bumpCls = bump.includes(key) ? " bump" : "";
     if (key === "money") {
+      // 积蓄只给换算后的金额：它是绝对量（元），不是五档里的位置，因此不带档色条（E2E 口径）
       return `<span class="res res-money${bumpCls}" data-res="money" title="${meta.label}">
         <span class="res-icon" data-res-icon="${meta.icon}" style="${esc(iconStyle(meta.icon))}" aria-hidden="true"></span>
         <span class="res-word" data-res-word>${esc(moneyDisplay(resources.money, band))}</span>
@@ -106,13 +141,7 @@ function statebar(resources: Resources | null, bump: readonly ResKey[], band: Mo
   return `<div class="statebar" role="status" aria-label="状态">${items}</div>`;
 }
 
-function topbar(
-  stageIndex: number,
-  resources: Resources | null = null,
-  bump: readonly ResKey[] = [],
-  family = false,
-  band: MoneyBand = "90s",
-): string {
+function topbar(stageIndex: number, family = false): string {
   const dots = STAGES.map((_, i) =>
     `<span class="dot${i < stageIndex ? " done" : i === stageIndex ? " now" : ""}"></span>`,
   ).join("");
@@ -120,10 +149,37 @@ function topbar(
     <header class="topbar">
       <span class="wordmark">心路</span>
       <div class="dots" aria-label="人生进度">${dots}</div>
-      ${statebar(resources, bump, band)}
       ${family ? `<button type="button" class="btn-ghost btn-family" data-family-open aria-label="查看我的家庭图谱"><span class="res-icon" style="${esc(iconStyle("family-tree"))}" aria-hidden="true"></span>我的家庭</button>` : ""}
-      <button type="button" class="btn-ghost" data-restart>重开</button>
+      <div class="topbar-actions">
+        <button type="button" class="btn-ghost" data-restart>重开</button>
+      </div>
     </header>`;
+}
+
+/** 年份戳（页眉）：大字年份 + 岁数。data-year-badge 挂在这里——E2E 从事件卡内读「YYYY 年 · N 岁」。 */
+function yearStamp(yearBadge: string): string {
+  const { year, age } = splitYearBadge(yearBadge);
+  return `<p class="year-stamp"><span data-year-badge><b class="year-figure">${esc(year)}</b><span class="year-unit"> 年${age ? ` · ${esc(age)}` : ""}</span></span></p>`;
+}
+
+/** 本局实况带：阶段 + 六线 + 三项状态（年份由正文页眉承担，此处不重复）。
+ *  桌面在左栏（竖）；移动折叠成正文顶部一段（横排）——同一段 DOM，CSS 换排法。 */
+function liveBand(opts: {
+  yearBadge: string;
+  stageLabel: string;
+  stageSub?: string;
+  lines: LineProgress;
+  resources: Resources;
+  band: MoneyBand;
+  bump?: readonly ResKey[];
+}): string {
+  return `
+    <aside class="live-band" aria-label="本局实况">
+      <p class="live-caption">六条线</p>
+      <div class="lines" aria-label="六条人生线">${lineBarRows(opts.lines)}</div>
+      <p class="live-caption">三项状态</p>
+      ${statebar(opts.resources, opts.bump ?? [], opts.band)}
+    </aside>`;
 }
 
 /** 人生轨道（D6=A 阶段级聚合）：移动端 = 顶部固定八段阶段条（小点 ≤5 封顶）；
@@ -170,17 +226,63 @@ export interface StartScreenVM {
   error?: string;
 }
 
-/** 开局屏（v4 三页签：随机 / 手选 / 自定义六因素；plan/v4/02 §三 ▸ M1''' 增补）。 */
+/** 年份尺（开局屏正文最重的一块内容）：76 年逐年一格，每格挂该年的时代锚名。
+ *  可选出生年（1955–2015）是可点的格；2016 之后只有锚名——那是「你会走到的年份」，不是起点。 */
+function yearRuler(years: readonly number[]): string {
+  if (!years.length) return "";
+  const ticks = yearTicks(years);
+  const rows = ticks
+    .map((t) => {
+      const cls = ["year-tick", t.selectable ? "selectable" : "beyond", t.anchor ? "has-anchor" : ""]
+        .filter(Boolean)
+        .join(" ");
+      const body = t.anchor
+        ? `<b>${t.year}</b><span>${esc(t.anchor)}</span>`
+        : `<b>${t.year}</b><span aria-hidden="true"></span>`;
+      return t.selectable
+        ? `<button type="button" class="${cls}" data-birth-year="${t.year}" aria-label="出生于 ${t.year} 年${t.anchor ? `（${esc(t.anchor)}）` : ""}">${body}</button>`
+        : `<span class="${cls}" aria-hidden="true">${body}</span>`;
+    })
+    .join("");
+  // 出生域终点：2015 是最后一个可出生的年份，之后只能走到、不能生在那里
+  const boundary = years[years.length - 1];
+  const boundaryNote = boundary
+    ? `<p class="year-boundary">${boundary} 是最后一个可以出生的年份。再往后，是你会走到的日子。</p>`
+    : "";
+  const bands = decadeBands(ticks)
+    .map(
+      (b) =>
+        `<span class="year-decade"><b>${b.label}</b><i>${b.anchors} 个年代锚</i></span>`,
+    )
+    .join("");
+  return `
+    <div class="year-ruler-wrap">
+      <div class="year-ruler-head">
+        <h2>七十六个年份，七十六件旧事</h2>
+        <p>每一格是一个年份，格子里写的是那一年的事。带下划线的年份可以出生；点一格，就从那一年开始。</p>
+      </div>
+      <div class="year-ruler" aria-label="年份与年代锚">${rows}</div>
+      ${boundaryNote}
+      <div class="year-decades" aria-hidden="true">${bands}</div>
+    </div>`;
+}
+
+/** 开局屏（档案封面：三页签 + 八段一览 + 年份跨度写进正文）。 */
 export function startScreen(vm: StartScreenVM): string {
   const manualGroups = ELEMENT_META.map(({ key, label }) => chipGroup(key, vm.env[key], label)).join("");
   const customGroups = PROFILE_META.map(({ key, label }) => chipGroup(key, vm.profile[key], label)).join("");
   const yearOptions = vm.years
     .map((y, i) => `<option value="${y}"${i === Math.floor(vm.years.length / 2) ? " selected" : ""}>${y} 年</option>`)
     .join("");
+  const stageStrip = STAGES.map((s) => `<span>${STAGE_LABEL[s]}</span>`).join("");
+  const first = vm.years[0] ?? 1955;
+  const last = vm.years[vm.years.length - 1] ?? 2015;
   return `
-    <section class="screen screen-start">
-      <h1>心路</h1>
-      <p class="lede">从一段出生出发，做出一路选择，看着 E-I / S-N / T-F / J-P 四维倾向值慢慢长成人格。</p>
+    <section class="screen screen-start screen-narrow">
+      <div class="screen-head">
+        <h1>心路</h1>
+        <p class="lede">从 ${first} 到 ${last} 之间挑一个出生年，走完八个阶段。四维倾向值随着每一次抉择慢慢长成人格；同一种子码，重走同一段人生。</p>
+      </div>
       <div class="start-tabs">
         <input type="radio" name="birthTab" id="birth-tab-random" class="birth-tab-input" checked>
         <input type="radio" name="birthTab" id="birth-tab-manual" class="birth-tab-input">
@@ -191,7 +293,7 @@ export function startScreen(vm: StartScreenVM): string {
           <label for="birth-tab-custom">自定义六因素</label>
         </div>
         <section class="start-panel" data-panel="random">
-          <p class="muted">出生年、家境、家庭结构……全部交给种子：同一种子码，重走同一段人生。</p>
+          <p class="muted">出生年、家庭结构、父母职业、家境，全部交给种子决定。</p>
           <div class="seed-tools">
             <button type="button" class="btn btn-primary" data-random-birth>随机出生</button>
             <form class="seed-form" data-seed-form>
@@ -203,7 +305,7 @@ export function startScreen(vm: StartScreenVM): string {
         <section class="start-panel" data-panel="manual">
           <form class="env-form" data-env-form>
             ${manualGroups}
-            <p class="fine-print">其余因素（出生年/南北/家庭结构/父母职业/家境）按年代概率自动派生。</p>
+            <p class="fine-print">出生年与其余四项（南北 / 家庭结构 / 父母职业 / 家境）按年代概率派生。</p>
             <button type="submit" class="btn btn-primary btn-start">开始这一生</button>
           </form>
         </section>
@@ -218,9 +320,11 @@ export function startScreen(vm: StartScreenVM): string {
           </form>
         </section>
       </div>
+      ${yearRuler(vm.years)}
+      <div class="stage-strip" aria-label="人生八阶段">${stageStrip}</div>
       ${vm.error ? `<p class="form-error">${esc(vm.error)}</p>` : ""}
-      <p class="fine-print">单机运行，进度保存在本机浏览器，无需网络与账号。</p>
-      <p class="fine-print about-links">
+      <p class="fine-print">单机运行，进度存在本机浏览器，不需要网络与账号。</p>
+      <p class="about-links">
         <button type="button" class="btn-ghost" data-gallery-open>人格图鉴</button>
         <button type="button" class="btn-ghost" data-settings-open>设置</button>
         <a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a>
@@ -233,7 +337,7 @@ export function cardAskScreen(vm: {
   stage: Stage;
   ageHint: string;
   ageMonths: number;
-  /** v4 年份徽章「YYYY 年 · N 岁」（runYearOf 派生，02 §一 ▸ M1''' 增补）。 */
+  /** v4 年份徽章「YYYY 年 · N 岁」（runYearOf 派生）。 */
   yearBadge: string;
   text: string;
   options: string[];
@@ -244,6 +348,7 @@ export function cardAskScreen(vm: {
   backdrop: SceneBackdrop;
   timeline: readonly TimelineSegment[];
   resources: Resources;
+  lines: LineProgress;
   bump: readonly ResKey[];
   floaters: readonly Floater[];
   /** AI 自定义第 4 槽（v3/02 §七）：仅旁路可用时渲染（离线隐藏口径）。 */
@@ -253,24 +358,35 @@ export function cardAskScreen(vm: {
   band: MoneyBand;
 }): string {
   const line = LINE_META[vm.line];
+  // 卡片头只说「这是哪条线的什么事」；年份与岁数归实况带（一处事实只出现一次）
   const head = `
     <header class="card-head">
       ${vm.iconName ? `<span class="ev-icon ${line.cls}" data-icon="${esc(vm.iconName)}" style="${esc(iconStyle(vm.iconName))}" aria-hidden="true"></span>` : ""}
       <div class="card-meta">
         <span class="chip chip-line ${line.cls}">${line.label}</span>
-        <span class="chip chip-age" data-year-badge>${esc(vm.yearBadge)}</span>
         ${vm.critical ? '<span class="critical-badge">重大抉择</span>' : ""}
       </div>
     </header>`;
   return `
-    <section class="screen screen-card layout-timeline">
+    <section class="screen screen-card">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, vm.bump, true, vm.band)}
+      ${topbar(vm.stageIndex, true)}
       ${floatLayer(vm.floaters)}
-      <div class="timeline-body">
+      <div class="sheet-body">
         ${timelineRail(vm.timeline)}
+        <div class="rail">
+          ${liveBand({
+            yearBadge: vm.yearBadge,
+            stageLabel: STAGE_LABEL[vm.stage],
+            lines: vm.lines,
+            resources: vm.resources,
+            band: vm.band,
+            bump: vm.bump,
+          })}
+        </div>
         <div class="stage-main">
           <article class="card event-card${vm.critical ? " critical" : ""}" data-age-months="${vm.ageMonths}">
+            ${yearStamp(vm.yearBadge)}
             ${head}
             <p class="event-text">${esc(vm.text)}</p>
             <div class="options">
@@ -298,7 +414,7 @@ export function cardAskScreen(vm: {
     </section>`;
 }
 
-/** 时代卡屏（plan/v4/02 §二 ▸ M1''' 增补）：无选项、固定增量；「继续」回事件流。 */
+/** 时代卡屏：无选项、固定增量；「继续」回事件流。样式上与事件卡同页，但顶线标为插页。 */
 export function eraCardScreen(vm: {
   stageIndex: number;
   stage: Stage;
@@ -308,25 +424,36 @@ export function eraCardScreen(vm: {
   backdrop: SceneBackdrop;
   timeline: readonly TimelineSegment[];
   resources: Resources;
+  lines: LineProgress;
   band: MoneyBand;
 }): string {
   return `
-    <section class="screen screen-card layout-timeline" data-era-card="1">
+    <section class="screen screen-card" data-era-card="1">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, [], true, vm.band)}
-      <div class="timeline-body">
+      ${topbar(vm.stageIndex, true)}
+      <div class="sheet-body">
         ${timelineRail(vm.timeline)}
+        <div class="rail">
+          ${liveBand({
+            yearBadge: vm.yearBadge,
+            stageLabel: STAGE_LABEL[vm.stage],
+            stageSub: "时代",
+            lines: vm.lines,
+            resources: vm.resources,
+            band: vm.band,
+          })}
+        </div>
         <div class="stage-main">
           <article class="card event-card era-card">
+            ${yearStamp(vm.yearBadge)}
             <header class="card-head">
               <div class="card-meta">
                 <span class="chip chip-line line-fate">时代</span>
-                <span class="chip chip-age" data-year-badge>${esc(vm.yearBadge)}</span>
               </div>
             </header>
             <h3 class="era-title">${esc(vm.titleHint)}</h3>
             <p class="event-text">${esc(vm.text)}</p>
-            <div class="options">
+            <div class="options-row">
               <button type="button" class="btn btn-primary" data-continue>继续</button>
             </div>
           </article>
@@ -344,23 +471,34 @@ export function cardAftermathScreen(vm: {
   backdrop: SceneBackdrop;
   timeline: readonly TimelineSegment[];
   resources: Resources;
+  lines: LineProgress;
   bump: readonly ResKey[];
   floaters: readonly Floater[];
   band: MoneyBand;
 }): string {
   return `
-    <section class="screen screen-card layout-timeline">
+    <section class="screen screen-card">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, vm.bump, true, vm.band)}
+      ${topbar(vm.stageIndex, true)}
       ${floatLayer(vm.floaters)}
-      <div class="timeline-body">
+      <div class="sheet-body">
         ${timelineRail(vm.timeline)}
+        <div class="rail">
+          ${liveBand({
+            yearBadge: vm.yearBadge,
+            stageLabel: STAGE_LABEL[vm.stage],
+            lines: vm.lines,
+            resources: vm.resources,
+            band: vm.band,
+            bump: vm.bump,
+          })}
+        </div>
         <div class="stage-main">
           <article class="card event-card">
-            <p class="stage-tag">${STAGE_LABEL[vm.stage]} · <span data-year-badge>${esc(vm.yearBadge)}</span></p>
+            ${yearStamp(vm.yearBadge)}
             <div class="fish-slot" data-slot="fish"></div>
             <p class="aftermath">${esc(vm.aftermath)}</p>
-            <div class="options">
+            <div class="options-row">
               <button type="button" class="btn btn-primary" data-continue>继续</button>
             </div>
           </article>
@@ -369,14 +507,15 @@ export function cardAftermathScreen(vm: {
     </section>`;
 }
 
-/** 阶段小结（v4/02 §七五段结构 + ▸ M2''' 增补）：主题头（年代区间+年龄段）/ 三观三轴说明（区间词+位移箭头+独白）/
- *  四维雷达淡影对比（沿 v3，四维增量并排小字）/ 资源五档状态 / 关键抉择回顾。配图位留 v4-M3''' 3.2。 */
+/** 阶段小结：① 跨度大字头 ② 阶段场景图 ③ 六线走到哪 ④ 三观标尺（区间词 + 位移 + 独白）
+ *  ⑤ 四维雷达淡影对比 ⑥ 身家状态 ⑦ 关键抉择回顾。 */
 export function summaryScreen(vm: {
   stageIndex: number;
   stage: Stage;
   count: number;
   deltas: Dims;
   resources: Resources;
+  lines: LineProgress;
   fishRadius: number;
   backdrop: SceneBackdrop;
   band: MoneyBand;
@@ -395,8 +534,10 @@ export function summaryScreen(vm: {
     .map((n) => {
       const shiftText = n.shift === 0 ? "→0" : `${n.arrow}${Math.abs(n.shift)}`;
       const shiftCls = n.shift > 0 ? "up" : n.shift < 0 ? "down" : "flat";
+      // 「世界观 · 理感相济」：轴名小字，区间词大字——一行读完一条轴，下面接内心独白。
+      // 分隔符「 · 」两侧留实空格并留在文本里（E2E 断言的区间词行格式），不交给 CSS 生成。
       return `<div class="values-note" data-values-note data-axis="${n.axis}">
-        <span class="vn-band">${esc(n.label)} · ${esc(n.bandWord)}</span>
+        <span class="vn-band"><em>${esc(VALUES_AXIS_LABEL[n.axis])}</em> · ${esc(n.bandWord)}</span>
         <b class="vn-shift ${shiftCls}">${shiftText}</b>
         <span class="vn-monologue">${esc(n.monologue)}</span>
       </div>`;
@@ -422,11 +563,15 @@ export function summaryScreen(vm: {
   return `
     <section class="screen screen-summary">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(vm.stageIndex, vm.resources, [], false, vm.band)}
-      <h2>${STAGE_LABEL[vm.stage]} · 小结</h2>
-      <p class="sum-theme muted" data-stage-span>${vm.yearRange ? `${esc(vm.yearRange)} · ${esc(vm.ageRange)}` : STAGE_LABEL[vm.stage]}</p>
+      ${topbar(vm.stageIndex)}
+      <div class="screen-head">
+        <h2>${STAGE_LABEL[vm.stage]} · 小结</h2>
+        <p class="sum-head"><span class="sum-span" data-stage-span>${vm.yearRange ? esc(vm.yearRange) : esc(STAGE_LABEL[vm.stage])}</span><span class="sum-age">${vm.ageRange ? esc(vm.ageRange) : ""}</span></p>
+      </div>
       <div class="stage-scene" data-stage-scene role="img" aria-label="${STAGE_LABEL[vm.stage]}阶段场景插画">${STAGE_SCENES[vm.stage]}</div>
       <div class="fish-slot fish-slot-stage" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
+      <h3 class="sum-h">六条人生线走到这里</h3>
+      <div class="lines lines-wide" aria-label="六条人生线">${lineBarRows(vm.lines)}</div>
       <h3 class="sum-h">三观刻度</h3>
       <div class="values-notes">${notes}</div>
       <div class="viz-row two">
@@ -438,7 +583,7 @@ export function summaryScreen(vm: {
       <p class="muted sum-count">本阶段经历了 ${vm.count} 次抉择。</p>
       <h3 class="sum-h">关键抉择回顾</h3>
       <div class="criticals sum-criticals">${criticals}</div>
-      <div class="options options-row">
+      <div class="options-row">
         <button type="button" class="btn btn-primary" data-continue>继续人生</button>
         <button type="button" class="btn btn-ghost" data-relations-open>关系图谱</button>
       </div>
@@ -453,11 +598,12 @@ export function endingScreen(vm: {
   criticals: ChoiceReview[];
   seedCode: string;
   resources: Resources;
+  lines: LineProgress;
   fishRadius: number;
   backdrop: SceneBackdrop;
   gallery: GalleryHint | null;
   relations: RunState["npcs"];
-  /** v4 历法迁移局提示（plan/v4/02 §九 ▸ M1''' 增补）：一句，不抢戏。 */
+  /** v4 历法迁移局提示：一句，不抢戏。 */
   migrated: boolean;
   band: MoneyBand;
 }): string {
@@ -470,31 +616,46 @@ export function endingScreen(vm: {
           )
           .join("")
       : `<p class="muted">这一段人生没有触发重大抉择。</p>`;
+  const lineStates = lineBars(vm.lines)
+    .map(
+      (b) => `<div class="line-state ${b.cls}" data-line="${b.line}" data-level="${b.level}">
+        <span class="line-name">${esc(b.label)}</span>
+        <span class="line-bar" aria-hidden="true">${barCells(b.level)}</span>
+        <span class="line-word">${esc(b.word)}</span>
+      </div>`,
+    )
+    .join("");
   return `
     <section class="screen screen-ending">
       ${sceneLayer(vm.backdrop)}
-      ${topbar(STAGES.length, vm.resources, [], false, vm.band)}
-      <h2>${esc(vm.title)}</h2>
-      <p class="ending-type">${esc(vm.letters)}</p>
+      ${topbar(STAGES.length)}
+      <div class="ending-head">
+        <h2>${esc(vm.title)}</h2>
+        <p class="ending-type" aria-label="人格类型">${esc(vm.letters)}</p>
+      </div>
       <div class="fish-slot fish-slot-ending" data-slot="fish" style="border-radius:${vm.fishRadius.toFixed(1)}px"></div>
       <p class="ending-text">${esc(vm.text)}</p>
-      ${vm.migrated ? '<p class="fine-print migrated-note">这段人生由旧版存档迁移而来（历法迁移）：出生年与家庭按现行口径补派生。</p>' : ""}
+      ${vm.migrated ? '<p class="fine-print migrated-note">这段人生由旧版存档迁移而来：出生年与家庭按现行口径补派生。</p>' : ""}
       <div class="ending-commentary" data-llm-commentary aria-live="polite"></div>
       <div class="viz-row two">
         <div class="radar-slot" data-slot="radar"></div>
         <div class="curve-slot" data-slot="curve"></div>
       </div>
+      <h3>六条人生线</h3>
+      <div class="line-states">${lineStates}</div>
       <h3>复盘</h3>
       <ul class="retrospect">${vm.retrospect.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>
       <h3>关键抉择</h3>
       <div class="criticals">${criticals}</div>
       <h3>同行的人</h3>
       <div class="relations-snapshot" data-relations-snapshot>${renderRelations(vm.relations)}</div>
-      <p class="fine-print">本局种子码 <span data-seed-code>${esc(vm.seedCode)}</span>——同码同人生；想重走或分享，开局屏输入这个码即可。</p>
+      <p class="fine-print">本局种子码 <span data-seed-code>${esc(vm.seedCode)}</span>。同码同人生；想重走或分享，开局屏输入这个码即可。</p>
       ${galleryHintLine(vm.gallery)}
-      <p class="fine-print about-links"><a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a></p>
-      <button type="button" class="btn btn-primary" data-share>保存分享卡</button>
-      <button type="button" class="btn btn-ghost" data-restart>重开一局</button>
+      <div class="ending-actions">
+        <button type="button" class="btn btn-primary" data-share>保存分享卡</button>
+        <button type="button" class="btn btn-ghost" data-restart>重开一局</button>
+      </div>
+      <p class="about-links"><a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a></p>
     </section>`;
 }
 
@@ -511,24 +672,28 @@ function galleryHintLine(hint: GalleryHint | null): string {
   if (!hint) return "";
   const unlockedPart =
     hint.unlocked >= hint.total
-      ? `${hint.unlocked}/${hint.total} 型——图鉴集齐！`
+      ? `${hint.unlocked}/${hint.total} 型，图鉴集齐`
       : `已解锁 ${hint.unlocked} / ${hint.total} 型，还有 ${hint.total - hint.unlocked} 型未解锁`;
-  const newPart = hint.isNew ? `——本局新解锁「${hint.letters}」` : "";
-  return `<p class="gallery-hint fine-print">人格图鉴：${unlockedPart}${newPart}；累计通关 ${hint.runs} 局。</p>`;
+  const newPart = hint.isNew ? `；本局新解锁「${hint.letters}」` : "";
+  return `<p class="gallery-hint fine-print">人格图鉴：${unlockedPart}${newPart}。累计通关 ${hint.runs} 局。</p>`;
 }
 
-/** 图鉴屏（v2/03 §4）：16 型格（解锁印 avatar 缩略 / 未上锁印？？？）+ 结局记录（解锁印 ending 锁表帧）。 */
+/** 图鉴屏：全部未解锁 = 先讲清 16 型由什么组成（首屏空态规则，app-screens §11），
+ *  有解锁则回到 16 格网格（avatar 缩略 + 一行画像；未上锁只留位置与「未解锁」）。 */
 export function galleryScreen(gallery: GalleryData): string {
+  const unlockedCount = Object.keys(gallery.types).length;
   const cells = GALLERY_TYPES.map((t) => {
     const entry = gallery.types[t];
     if (!entry) {
-      return `<li class="gallery-cell locked"><span class="gallery-unknown">？？？</span><span class="gallery-letters">未解锁</span></li>`;
+      return `<li class="gallery-cell locked"><span class="gallery-letters">未解锁</span></li>`;
     }
     const day = new Date(entry.firstSeenAt).toISOString().slice(0, 10);
+    const portrait = (portraits as Record<string, string>)[t] ?? "";
     return `<li class="gallery-cell unlocked" data-gallery-type="${t}">
       <div class="gallery-slot" data-slot="gallery-fish"></div>
       <span class="gallery-letters">${t}</span>
       <span class="gallery-meta">×${entry.count} · ${day} 首见</span>
+      ${portrait ? `<p class="gallery-portrait">${esc(portrait)}</p>` : ""}
     </li>`;
   }).join("");
   const records = ENDING_META.map((e) => {
@@ -543,81 +708,144 @@ export function galleryScreen(gallery: GalleryData): string {
     </li>`;
   }).join("");
   return `
-    <section class="screen screen-gallery">
-      <h2>人格图鉴</h2>
-      <p class="muted gallery-progress">累计通关 ${gallery.runs} 局 · 已解锁 ${Object.keys(gallery.types).length} / ${GALLERY_TYPES.length} 型</p>
+    <section class="screen screen-gallery screen-narrow">
+      <div class="screen-head">
+        <h2>人格图鉴</h2>
+        <p class="gallery-progress">累计通关 ${gallery.runs} 局 · 已解锁 ${unlockedCount} / ${GALLERY_TYPES.length} 型</p>
+      </div>
+      ${
+        unlockedCount === 0
+          ? `<div class="gallery-empty">
+        <p>十六型由四对倾向拼成：<b>E</b> 外向 / <b>I</b> 内向，<b>S</b> 实感 / <b>N</b> 直觉，<b>T</b> 思考 / <b>F</b> 情感，<b>J</b> 判断 / <b>P</b> 感知。走完一局，你的四维倾向会定格在其中一型。</p>
+        <ul class="gallery-axes">
+          <li><b>E — I</b><span>力气往外交，还是往内收</span></li>
+          <li><b>S — N</b><span>信眼前的具体，还是信背后的可能</span></li>
+          <li><b>T — F</b><span>先讲道理，还是先顾人情</span></li>
+          <li><b>J — P</b><span>先定下来，还是先留着</span></li>
+        </ul>
+        <p class="gallery-note">第一型会随第一局通关自动上锁在下面这十六格里。</p>
+      </div>`
+          : ""
+      }
       <ul class="gallery-grid">${cells}</ul>
       <h3>结局记录</h3>
+      <p class="gallery-note">九种结局按四维与关键抉择判定；抵达过的会在这里记下次数。</p>
       <ul class="gallery-endings">${records}</ul>
-      <button type="button" class="btn btn-primary" data-gallery-back>返回</button>
+      <div class="options-row">
+        <button type="button" class="btn btn-primary" data-gallery-back>返回</button>
+      </div>
     </section>`;
 }
 
 export function corruptScreen(): string {
   return `
-    <section class="screen screen-corrupt">
-      <h2>存档无法读取</h2>
-      <p class="muted">本机的存档似乎损坏了。我们不会动它的内容——你可以现在重新开始一段新的人生。</p>
+    <section class="screen screen-corrupt screen-narrow">
+      <div class="screen-head">
+        <h2>存档无法读取</h2>
+        <p>本机的存档似乎损坏了。我们不会动它的内容——你可以现在重新开始一段新的人生。</p>
+      </div>
       <button type="button" class="btn btn-primary" data-restart>重新开始</button>
     </section>`;
 }
 
-/** 关系图谱页（v3/03 §4）：环形图谱 + tag 图例；返回目标由 app 层决定（小结或终局）。 */
-export function relationsScreen(): string {
+/** 关系图谱页：左环形图谱 + 右同行的人清单（名 / 身份 / 羁绊长度条）。
+ *  返回目标由 app 层决定（小结或终局）。 */
+export function relationsScreen(npcs: RunState["npcs"]): string {
   const legend = Object.entries(TAG_COLORS)
     .map(([tag, color]) => `<span class="rel-legend-item"><i style="background:${color}"></i>${tag}</span>`)
     .join("");
   const known = Object.values(NPC_PROFILES).filter((p) => p.line !== "fate").length;
+  const vm = relationsVM(npcs);
+  const rows = vm.nodes
+    .filter((n) => n.ring !== -1)
+    .map((n) => {
+      const color = TAG_COLORS[n.tag];
+      return `<div class="rel-row" data-npc="${esc(n.id)}">
+        <span class="rel-name">${esc(n.name)}</span>
+        <span class="rel-role">${esc(n.role)} · ${esc(n.tag)}</span>
+        <span class="rel-bond" title="羁绊 ${n.bond}">
+          <span class="rel-bond-bar" aria-hidden="true"><i style="width:${n.bond}%;background:${color}"></i></span>
+          <span>${n.bond}</span>
+        </span>
+      </div>`;
+    })
+    .join("");
   return `
     <section class="screen screen-relations">
-      <h2>关系图谱</h2>
-      <p class="muted">一圈同行的人。线越粗，羁绊越深；颜色是现在的关系。</p>
-      <div class="relations-slot" data-relations-chart></div>
-      <div class="rel-legend" aria-hidden="true">${legend}</div>
-      <p class="fine-print">图谱会随你的人生长出新名字（本段人生可能遇见 ${known} 位路人与父母同行）。</p>
-      <button type="button" class="btn btn-primary" data-relations-back>返回</button>
+      <div class="screen-head">
+        <h2>关系图谱</h2>
+        <p>一圈同行的人。线越粗，羁绊越深；颜色是现在的关系。</p>
+      </div>
+      <div class="rel-wrap">
+        <div>
+          <div class="relations-slot" data-relations-chart></div>
+          <div class="rel-legend" aria-hidden="true">${legend}</div>
+        </div>
+        <div>
+          <div class="rel-list">${rows || '<p class="muted">还没有人在册。</p>'}</div>
+          <p class="rel-note">横条是羁绊的深浅（0–100），跟在后面的数字就是它的读数。图谱会随你的人生长出新名字（本段人生可能遇见 ${known} 位路人与父母同行）。</p>
+          <div class="options-row">
+            <button type="button" class="btn btn-primary" data-relations-back>返回</button>
+          </div>
+        </div>
+      </div>
     </section>`;
 }
 
-/** 设置页（v3/02 §七 D2=a + v4/02 §五）：界面主题四款（即时切换，独立键 xinlu.theme.v1）；
- *  BYO Key 明文存本机；未启用时全部字段不生效（离线口径）。 */
+/** 设置页：标签列 + 面板两栏（framed-sheet settings-two-column）。
+ *  主题四款即时切换（独立键 xinlu.theme.v1）；BYO Key 明文存本机；未启用时全部字段不生效。 */
 export function settingsScreen(vm: { settings: LlmSettings; theme: ThemeId; error?: string }): string {
   const providerOptions = PROVIDERS.map(
     (p) => `<option value="${esc(p.id)}"${p.id === vm.settings.provider ? " selected" : ""}>${esc(p.label)}</option>`,
   ).join("");
   const themeChips = THEMES.map(
     (t) =>
-      `<label class="chip"><input type="radio" name="theme" value="${t.id}" data-theme-choice${t.id === vm.theme ? " checked" : ""}><span>${esc(t.label)}<i class="theme-note">${esc(t.note)}</i></span></label>`,
+      `<label class="chip"><input type="radio" name="theme" value="${t.id}" data-theme-choice${t.id === vm.theme ? " checked" : ""}><span>${esc(t.label)}<span class="theme-swatch" data-theme="${t.id}" aria-hidden="true"><i class="sw-ground"></i><i class="sw-surface"></i><i class="sw-accent"></i></span><i class="theme-note">${esc(t.note)}</i></span></label>`,
   ).join("");
   return `
     <section class="screen screen-settings">
-      <h2>设置</h2>
-      <fieldset class="env-group theme-group">
-        <legend>界面主题</legend>
-        <div class="chips theme-chips">${themeChips}</div>
-      </fieldset>
-      <form class="settings-form" data-settings-form>
-        <label class="settings-check">
-          <input type="checkbox" name="enabled"${vm.settings.enabled ? " checked" : ""}>
-          启用 AI 旁路（可选；不启用或离线时，游戏行为与 v2 完全一致）
-        </label>
-        <label>服务商
-          <select name="provider">${providerOptions}</select>
-        </label>
-        <label>接口地址（Base URL，OpenAI 兼容）
-          <input name="baseUrl" value="${esc(vm.settings.baseUrl)}" spellcheck="false">
-        </label>
-        <label>API Key
-          <input name="apiKey" type="password" value="${esc(vm.settings.apiKey)}" autocomplete="off" spellcheck="false">
-        </label>
-        <label>模型名
-          <input name="model" value="${esc(vm.settings.model)}" placeholder="例如 deepseek-chat" spellcheck="false">
-        </label>
-        <p class="fine-print">Key 以明文保存在本机浏览器，仅在你启用旁路后，为自定义行动裁决、事件变体与终局点评向所配服务商发起请求。请勿在公共设备填写；判定核心（人生演化本身）永不过网。</p>
-        ${vm.error ? `<p class="form-error">${esc(vm.error)}</p>` : ""}
-        <div class="options-row">
-          <button type="submit" class="btn btn-primary">保存</button>
-          <button type="button" class="btn btn-ghost" data-settings-back>返回</button>
+      <div class="screen-head">
+        <h2>设置</h2>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">
+          <h3>界面主题</h3>
+          <p>即时生效，存在本机，不随存档走。</p>
+        </div>
+        <div class="settings-panel">
+          <div class="chips theme-chips">${themeChips}</div>
+        </div>
+      </div>
+      <form data-settings-form>
+        <div class="settings-section">
+          <div class="settings-label">
+            <h3>AI 旁路</h3>
+            <p>可选。不启用或离线时，游戏行为与纯本地版完全一致。</p>
+          </div>
+          <div class="settings-panel settings-form">
+            <label class="settings-check">
+              <input type="checkbox" name="enabled"${vm.settings.enabled ? " checked" : ""}>
+              启用 AI 旁路
+            </label>
+            <label>服务商
+              <select name="provider">${providerOptions}</select>
+            </label>
+            <label>接口地址（Base URL，OpenAI 兼容）
+              <input name="baseUrl" value="${esc(vm.settings.baseUrl)}" spellcheck="false">
+            </label>
+            <label>API Key
+              <input name="apiKey" type="password" value="${esc(vm.settings.apiKey)}" autocomplete="off" spellcheck="false">
+            </label>
+            <label>模型名
+              <input name="model" value="${esc(vm.settings.model)}" placeholder="例如 deepseek-chat" spellcheck="false">
+            </label>
+            <p class="fine-print">Key 以明文保存在本机浏览器，仅在你启用旁路后，为自定义行动裁决、事件变体与终局点评向所配服务商发起请求。请勿在公共设备填写。判定核心（人生演化本身）永不过网。</p>
+            ${vm.error ? `<p class="form-error">${esc(vm.error)}</p>` : ""}
+            <div class="settings-actions">
+              <button type="submit" class="btn btn-primary">保存</button>
+              <button type="button" class="btn btn-ghost" data-settings-back>返回</button>
+            </div>
+          </div>
         </div>
       </form>
     </section>`;

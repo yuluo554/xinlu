@@ -260,6 +260,21 @@ function renderStart(error?: string): void {
     const born = randomBirth(seed);
     begin(born.env, seed, { birthYear: born.birthYear, profile: born.profile });
   });
+  // 年份尺点选（v5）：种子定画像与城乡，年份用玩家点的那一年——与自定义页签同一派生链
+  // （envFromBirth 单源），不新增口径。同一年 + 同一种子 = 同一副牌。
+  for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-birth-year]")) {
+    btn.addEventListener("click", () => {
+      const birthYear = Number(btn.dataset.birthYear);
+      if (!Number.isInteger(birthYear)) return;
+      const seed = randomSeed();
+      const born = randomBirth(seed);
+      try {
+        begin(envFromBirth(birthYear, born.profile, born.env.place), seed, { birthYear, profile: born.profile });
+      } catch {
+        renderStart("这一年的牌没有派出来，请再点一次。");
+      }
+    });
+  }
   root.querySelector<HTMLButtonElement>("[data-gallery-open]")?.addEventListener("click", () => {
     view = "gallery";
     render();
@@ -295,6 +310,7 @@ function renderEraCard(): void {
     backdrop: sceneBackdrop(state.env),
     timeline: timelineVM(state),
     resources: state.resources,
+    lines: state.lines,
     band: bandForYear(event.year),
   });
   bindFamilyOpen();
@@ -339,6 +355,7 @@ function renderCard(feedback: typeof pendingFeedback): void {
     backdrop: sceneBackdrop(state.env),
     timeline: timelineVM(state),
     resources: state.resources,
+    lines: state.lines,
     bump: feedback?.bump ?? [],
     floaters: feedback?.floaters ?? [],
     custom: llmUsable(llm),
@@ -464,6 +481,7 @@ function renderAftermath(feedback: typeof pendingFeedback): void {
     backdrop: sceneBackdrop(state.env),
     timeline: timelineVM(state),
     resources: state.resources,
+    lines: state.lines,
     bump: feedback?.bump ?? [],
     floaters: feedback?.floaters ?? [],
     band: bandForYear(runYearOf(state.birthYear, pendingAftermath.ageMonths)),
@@ -520,6 +538,7 @@ function renderSummary(): void {
     count: stageEntries(state.history, stage).length,
     deltas: stageDeltas(state, stage),
     resources: state.resources,
+    lines: state.lines,
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
     band: bandOfState(state),
@@ -542,7 +561,7 @@ function renderSummary(): void {
 /** 图谱页：SVG 水合进图表槽（与鱼像/雷达同一水合纪律）；返回到进入时的屏幕。 */
 function renderRelationsView(): void {
   if (!state) return;
-  root.innerHTML = S.relationsScreen();
+  root.innerHTML = S.relationsScreen(state.npcs);
   const slot = root.querySelector("[data-relations-chart]");
   if (slot) slot.innerHTML = renderRelations(state.npcs);
   root.querySelector<HTMLButtonElement>("[data-relations-back]")?.addEventListener("click", () => {
@@ -564,6 +583,7 @@ function renderEnding(): void {
     criticals: criticalChoices(state.history),
     seedCode: seedCodeOf(state.seed),
     resources: state.resources,
+    lines: state.lines,
     fishRadius: createFishParams(state.dims).orderliness.radius,
     backdrop: sceneBackdrop(state.env),
     migrated: state.migrated === true,
@@ -578,7 +598,8 @@ function renderEnding(): void {
     band: bandOfState(state),
   });
   hydrateFish(endingFrame(ending.id));
-  hydrateRadar(STAGES.map((s) => dimsAtStageStart(state!, s)));
+  // 终局雷达只留一条淡影：出生时的四维（「那时 vs 现在」）。八条历史叠影读不出东西。
+  hydrateRadar([initialDimsOf(state)]);
   const curveSlot = root.querySelector("[data-slot='curve']");
   if (curveSlot) renderCurve(state.history, curveSlot, initialDimsOf(state));
   hydrateCommentary(ending);
@@ -678,7 +699,7 @@ function bindShare(ending: Ending): void {
     btn.textContent = "正在生成…";
     exportShareCard(input)
       .then(() => {
-        btn.textContent = "已保存 ✓";
+        btn.textContent = "已保存";
         btn.disabled = false;
       })
       .catch(() => {
