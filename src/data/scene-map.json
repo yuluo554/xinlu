@@ -59,11 +59,8 @@
     ],
     "funeral": [
       "funeral-hall.svg",
-      "funeral-flowers.svg"
-    ],
-    "night": [
-      "night-window.svg",
-      "night-lamp.svg"
+      "funeral-flowers.svg",
+      "funeral-candles.svg"
     ],
     "rain": [
       "rain-street.svg",
@@ -72,10 +69,6 @@
     "outdoors": [
       "outdoors-park.svg",
       "outdoors-road.svg"
-    ],
-    "meal": [
-      "meal-table.svg",
-      "meal-bowl.svg"
     ],
     "study": [
       "study-books.svg",
@@ -86,6 +79,24 @@
       "relic-box.svg",
       "relic-photo.svg",
       "relic-letter.svg"
+    ],
+    "pet": [
+      "pet-cat.svg",
+      "pet-cage.svg"
+    ],
+    "toy": [
+      "toy-jigsaw.svg",
+      "toy-gamepad.svg"
+    ],
+    "media": [
+      "media-tv.svg",
+      "media-radio.svg",
+      "media-phone.svg"
+    ],
+    "music": [
+      "music-guitar.svg",
+      "music-piano.svg",
+      "music-mic.svg"
     ]
   },
   "keyTag": {
@@ -100,6 +111,7 @@
     "night-sleep": "home",
     "windchimes": "home",
     "new-born": "home",
+    "tired-eye": "home",
     "fork-knife-spoon": "kitchen",
     "cooking-glove": "kitchen",
     "teapot": "kitchen",
@@ -209,6 +221,8 @@
     "walking-boot": "outdoors",
     "boots": "outdoors",
     "barefoot": "outdoors",
+    "caterpillar": "outdoors",
+    "star-formation": "outdoors",
     "scales": "market",
     "cash": "market",
     "banknote": "market",
@@ -237,22 +251,8 @@
     "grave-flowers": "funeral",
     "candle-holder": "funeral",
     "candle-light": "funeral",
-    "hourglass": "funeral",
-    "broken-heart": "funeral",
-    "shattered-heart": "funeral",
-    "tear-tracks": "funeral",
-    "despair": "funeral",
-    "two-shadows": "funeral",
-    "sunrise": "night",
-    "sundial": "night",
-    "sparkles": "night",
-    "star-formation": "night",
-    "tired-eye": "night",
     "water-splash": "rain",
     "snowflake-1": "rain",
-    "meeple-group": "meal",
-    "three-friends": "meal",
-    "shaking-hands": "meal",
     "book-pile": "study",
     "bookshelf": "study",
     "bookmark": "study",
@@ -265,31 +265,29 @@
     "love-letter": "study",
     "envelope": "study",
     "mailbox": "study",
-    "photo-camera": "study",
-    "film-spool": "study",
-    "pocket-radio": "study",
-    "boombox": "study",
-    "musical-notes": "study",
-    "guitar": "study",
-    "piano-keys": "study",
-    "microphone": "study",
-    "old-microphone": "study",
-    "drama-masks": "study",
-    "tablet": "study",
-    "smartphone": "study",
-    "vibrating-smartphone": "study",
-    "wifi-router": "study",
-    "phone": "study",
-    "tv": "study",
-    "gamepad": "study",
-    "jigsaw-piece": "study",
-    "jigsaw-box": "study",
-    "puzzle": "study",
-    "caterpillar": "study",
-    "rabbit": "study",
-    "dinosaur-rex": "study",
-    "cat": "study",
-    "paw-print": "study",
+    "rabbit": "pet",
+    "cat": "pet",
+    "paw-print": "pet",
+    "dinosaur-rex": "toy",
+    "jigsaw-piece": "toy",
+    "jigsaw-box": "toy",
+    "puzzle": "toy",
+    "gamepad": "toy",
+    "tv": "media",
+    "pocket-radio": "media",
+    "boombox": "media",
+    "phone": "media",
+    "smartphone": "media",
+    "vibrating-smartphone": "media",
+    "tablet": "media",
+    "wifi-router": "media",
+    "photo-camera": "media",
+    "film-spool": "media",
+    "musical-notes": "music",
+    "guitar": "music",
+    "piano-keys": "music",
+    "microphone": "music",
+    "old-microphone": "music",
     "cardboard-box": "relic",
     "cardboard-box-closed": "relic",
     "calendar": "relic",

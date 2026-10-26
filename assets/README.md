@@ -92,19 +92,24 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 | 检索式 | 无需检索（全量包直接解取）；替代路径实测：gh-proxy/jdelivr raw 均 404（仓库路径不含裸 author/ 顶层），`all.svg.zip` 旧地址 301→404 |
 | 署名 | `Icons made by Lorc, Delapouite and contributors (game-icons.net, CC-BY 3.0)`（public/credits.md 已加，许可门 CREDIT_LINES 同步） |
 
-### CC0 场景底图/纹理（`cc0/parchment/`）
+### CC0 场景底图/纹理（`cc0/parchment/` · **v5-M6 已清出仓库**）
 
-> **v5 状态（2026-10-26，D8 素纸口径）**：这两件纹理**已不被界面引用**——`src/style.css` 删除了 `body::before`
-> 纹理层（`--tex-wash: 0`，素纸无纹理、无背景图）。文件按「留档不删」处理（CC0 台账需可追溯，且是 v3 素材
-> 决策的留痕）；如后续确认永久不用，可单独一笔删除并同步本节。
+> **v5-M6 状态（2026-10-26）：目录与文件已删除**（`assets/cc0/parchment/` 整目录，含两件处理版 webp 与本地留底 jpg）。
+> 沿革：D8 素纸口径下这两件纹理自 v5-M2'''' 起已不被界面引用（`src/style.css` 删除 `body::before` 纹理层，
+> `--tex-wash: 0`）；当时按「留档不删」处理（CC0 台账可追溯 + v3 素材决策留痕）。
+> v5-M6 复评：**连续三轮无复用诉求**（v5-M3'''' / M4'''' / M5''''），且全仓复查后**唯一提及**只剩
+> `src/ui/theme-contrast.test.ts` 的**反向断言**（「样式表不应再引用 parchment」）——
+> 即「留着」已无任何消费者。用户明示清仓 → 单独一笔删除，本节保留**溯源文本**（台账可追溯性靠文本延续，
+> 不靠二进制留存），决策记录见 `plan/v5/00-README总览.md` 决策记录「纹理素材是否删除」行（v5-M6 推翻 v5-M2'''' 的留档不删）。
+> 机检：`npm run gate:license` 跟踪图像 512 → **510 件**仍 ⊆ 白名单（`cc0` 前缀级条目保留，供将来 CC0 底图复用）。
 
-| 素材 | 来源 | 许可证 | 检索式 | 处理 |
+| 素材 | 来源 | 许可证 | 检索式 | 处理（历史留痕） |
 |---|---|---|---|---|
-| `parchment-bg.webp`（1.9KB） | [OpenGameArt · Parchment background](https://opengameart.org/content/parchment-background)（FelisChaus_ParchmentBackground.jpg，380×421） | CC0（页面明示） | OGA 高级搜索 `keys=paper texture` + 类型=Texture + 许可=CC0，结果第 7 位 | ffmpeg libwebp q60 原尺寸直转（v5 起不再引用） |
-| `parchment-fold.webp`（5.7KB） | [OpenGameArt · Old Parchment Paper](https://opengameart.org/content/old-parchment-paper)（parchment.jpg，640×480） | CC0（作者页明示） | 同上，结果第 3 位 | ffmpeg 中心裁剪 520×360 后 q60（去撕边留十字折痕，画卷质感；v5 起不再引用） |
-| 上游 jpg 留底 | 同上两件原始件 | — | — | 留 `cc0/parchment/` 本地（.gitignore `assets/**/*.jpg` 扩展，原始位图不入 git 纪律延续） |
+| ~~`parchment-bg.webp`（1.9KB）~~ **已删除（v5-M6）** | [OpenGameArt · Parchment background](https://opengameart.org/content/parchment-background)（FelisChaus_ParchmentBackground.jpg，380×421） | CC0（页面明示） | OGA 高级搜索 `keys=paper texture` + 类型=Texture + 许可=CC0，结果第 7 位 | ffmpeg libwebp q60 原尺寸直转（v5 起不再引用） |
+| ~~`parchment-fold.webp`（5.7KB）~~ **已删除（v5-M6）** | [OpenGameArt · Old Parchment Paper](https://opengameart.org/content/old-parchment-paper)（parchment.jpg，640×480） | CC0（作者页明示） | 同上，结果第 3 位 | ffmpeg 中心裁剪 520×360 后 q60（去撕边留十字折痕，画卷质感；v5 起不再引用） |
+| ~~上游 jpg 留底~~ **已删除（v5-M6）** | 同上两件原始件 | — | — | 原留 `cc0/parchment/` 本地（`.gitignore` `assets/**/*.jpg`：原始位图不入 git）——随清仓一并删除 |
 
-跟踪策略：`assets/game-icons/`（SVG 原样 + 溯源文本）与 `assets/cc0/**/*.webp`（处理版）入 git；jpg 原始件不入。
+跟踪策略：`assets/game-icons/`（SVG 原样 + 溯源文本）+ `assets/web-ready/**`（处理版 webp/场景 SVG）入 git；jpg 原始件不入。
 
 ### v3-M3'' 增补（2026-10-24，3.4 支线补齐素材）
 

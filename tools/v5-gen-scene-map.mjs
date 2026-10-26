@@ -32,12 +32,17 @@ export const TAGS = {
   field: "田野",
   wedding: "婚宴",
   funeral: "丧事",
-  night: "夜色",
   rain: "雨天",
-  meal: "饭桌",
   study: "书桌",
   relic: "旧物",
+  // v5-M6 SI-001 修复新增四类（原硬塞进 `study` 的宠物/玩物/影音/器乐各归其位）
+  pet: "宠物",
+  toy: "玩物",
+  media: "影音",
+  music: "器乐",
 };
+// 退役（v5-M6）：`night 夜色` 与 `meal 饭桌` —— 摘出情绪/时间/社交图标后这两类事件归零，
+// 少事件必留死图（`scenes.test.ts`「无死图」会判红），故整类连同图稿一起退场。
 
 /** objectKey → 标签。只收「图标本身就是这一类场景/场景里的核心物件」的键；
  *  抽象图标（heart-* / choice / crossroad / despair / infinity…）不硬凑——它们不是场景。 */
@@ -54,6 +59,7 @@ const KEY_TAG = {
   "night-sleep": "home",
   "windchimes": "home",
   "new-born": "home",
+  "tired-eye": "home", // v5-M6：原 night（夜色），困倦/歇息 = 居家场景
 
   // ── kitchen 厨房：灶台、食材、餐具 ──
   "fork-knife-spoon": "kitchen",
@@ -181,6 +187,8 @@ const KEY_TAG = {
   "walking-boot": "outdoors",
   "boots": "outdoors",
   "barefoot": "outdoors",
+  "caterpillar": "outdoors", // v5-M6：原 study（书桌）——蚕/蚯蚓是户外小生物
+  "star-formation": "outdoors", // v5-M6：原 night（夜色）——星群是户外天象
 
   // ── market 市场：买卖与秤 ──
   "scales": "market",
@@ -217,30 +225,20 @@ const KEY_TAG = {
   "grave-flowers": "funeral",
   "candle-holder": "funeral",
   "candle-light": "funeral",
-  "hourglass": "funeral",
-  "broken-heart": "funeral",
-  "shattered-heart": "funeral",
-  "tear-tracks": "funeral",
-  "despair": "funeral",
-  "two-shadows": "funeral",
+  // v5-M6 SI-001 修：情绪/时间类抽象符号（hourglass / broken-heart / shattered-heart /
+  // tear-tracks / despair / two-shadows / sunrise / sundial / sparkles）**摘出**——
+  // 它们不是任何场景的物件（`heart-*` 系的例外见 study 段末注），摘出后转显式豁免。
 
-  // ── night 夜色：夜与睡 ──
-  "sunrise": "night",
-  "sundial": "night",
-  "sparkles": "night",
-  "star-formation": "night",
-  "tired-eye": "night",
+  // ── night 夜色：v5-M6 退役（摘出上列图标后该类只剩 tired-eye 与 star-formation 两条事件，
+  //    少于 2 张图在哈希下必留死图；两条改挂 home / outdoors，图稿同笔删除）──
 
   // ── rain 雨天：雨雪与水（标签含义 = 「雨雪天气」，故 snowflake 归此类而非夜色）──
   "water-splash": "rain",
   "snowflake-1": "rain",
 
-  // ── meal 饭桌：吃饭与聚饮 ──
-  "meeple-group": "meal",
-  "three-friends": "meal",
-  "shaking-hands": "meal",
+  // ── meal 饭桌：v5-M6 退役（社交图标 meeple-group / three-friends / shaking-hands 摘出后事件归零）──
 
-  // ── study 书桌：读写与自学 ──
+  // ── study 书桌：读写与自学（v5-M6 起只留「读写/文书」类物件）──
   "book-pile": "study",
   "bookshelf": "study",
   "bookmark": "study",
@@ -253,31 +251,40 @@ const KEY_TAG = {
   "love-letter": "study",
   "envelope": "study",
   "mailbox": "study",
-  "photo-camera": "study",
-  "film-spool": "study",
-  "pocket-radio": "study",
-  "boombox": "study",
-  "musical-notes": "study",
-  "guitar": "study",
-  "piano-keys": "study",
-  "microphone": "study",
-  "old-microphone": "study",
-  "drama-masks": "study",
-  "tablet": "study",
-  "smartphone": "study",
-  "vibrating-smartphone": "study",
-  "wifi-router": "study",
-  "phone": "study",
-  "tv": "study",
-  "gamepad": "study",
-  "jigsaw-piece": "study",
-  "jigsaw-box": "study",
-  "puzzle": "study",
-  "caterpillar": "study",
-  "rabbit": "study",
-  "dinosaur-rex": "study",
-  "cat": "study",
-  "paw-print": "study",
+
+  // ── v5-M6 SI-001 修复：原硬塞进 study 的四批键改挂各自的语义场景 ──
+  // 判据仍是同一条（「图标本身是这类场景的核心物件」）——兔子是 `pet` 的主体、拼图是 `toy`、
+  // 电视收音机是 `media`、吉他琴键话筒是 `music`；它们不是书桌的物件，落 study 才会「画书堆配兔子」。
+  // ── pet 宠物：家养小动物 ──
+  "rabbit": "pet",
+  "cat": "pet",
+  "paw-print": "pet",
+  // ── toy 玩物：玩具与游戏 ──
+  "dinosaur-rex": "toy",
+  "jigsaw-piece": "toy",
+  "jigsaw-box": "toy",
+  "puzzle": "toy",
+  "gamepad": "toy",
+  // ── media 影音：家电、通信与影像器材 ──
+  "tv": "media",
+  "pocket-radio": "media",
+  "boombox": "media",
+  "phone": "media",
+  "smartphone": "media",
+  "vibrating-smartphone": "media",
+  "tablet": "media",
+  "wifi-router": "media",
+  "photo-camera": "media",
+  "film-spool": "media",
+  // ── music 器乐：乐器与演唱器材 ──
+  "musical-notes": "music",
+  "guitar": "music",
+  "piano-keys": "music",
+  "microphone": "music",
+  "old-microphone": "music",
+  // 仍摘出：drama-masks（戏剧面具 = 舞台行当，本图库无舞台类）→ 显式豁免。
+
+  // 也随 v5-M6 改挂：tired-eye → home（困倦/歇息 = 居家），caterpillar / star-formation → outdoors（户外）。
 
   // ── relic 旧物：旧盒子、老照片、旧信 ──
   "cardboard-box": "relic",
@@ -300,13 +307,17 @@ const VARIANTS = {
   market: ["stall", "scales"],
   field: ["rows", "harvest"],
   wedding: ["table", "hall"],
-  funeral: ["hall", "flowers"],
-  night: ["window", "lamp"],
+  // funeral 第 3 张（v5-M6 补）：摘出情绪图标后该类只剩 3 条事件，2 张图在哈希下必死 1 张
+  funeral: ["hall", "flowers", "candles"],
   rain: ["street", "umbrella"],
   outdoors: ["park", "road"],
-  meal: ["table", "bowl"],
   study: ["books", "lamp", "writing"],
   relic: ["box", "photo", "letter"],
+  // v5-M6 SI-001 修复新增四类（图稿见 tools/v5-gen-scenes.mjs 对应段）
+  pet: ["cat", "cage"],
+  toy: ["jigsaw", "gamepad"],
+  media: ["tv", "radio", "phone"],
+  music: ["guitar", "piano", "mic"],
 };
 
 const REPORT = process.argv.includes("--report");

@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { OFF_SCENE, OFF_SCENE_KEYS, OFF_SCENE_TIER } from "./v5-scene-misfits.mjs";
+import { OFF_SCENE, OFF_SCENE_KEYS, OFF_SCENE_FIXED } from "./v5-scene-misfits.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const map = JSON.parse(readFileSync(resolve(ROOT, "src/data/scene-map.json"), "utf8"));
@@ -25,7 +25,8 @@ const pick = (id, n) => (hashOf(id) >>> 16) % n;
 const TAG_CN = {
   home: "家", kitchen: "厨房", school: "校园", classroom: "教室", street: "街巷", station: "车站",
   factory: "厂区", office: "办公", hospital: "医院", market: "市场", field: "田野", wedding: "婚宴",
-  funeral: "丧事", night: "夜色", rain: "雨雪", outdoors: "户外", meal: "饭桌", study: "书桌", relic: "旧物",
+  funeral: "丧事", rain: "雨雪", outdoors: "户外", study: "书桌", relic: "旧物",
+  pet: "宠物", toy: "玩物", media: "影音", music: "器乐",
 };
 const cell = (s) => s.replace(/\|/g, "丨");
 
@@ -66,11 +67,7 @@ const restKeys = exemptKeys.filter((x) => x.key && !x.key.includes("heart"));
 const abstractMapped = Object.keys(map.keyTag).filter((k) => OFF_SCENE_KEYS.includes(k));
 const abstractMappedEvents = ev.filter((e) => abstractMapped.includes(im[e.id]?.objectKey)).length;
 const heartMapped = Object.keys(map.keyTag).filter((k) => k.includes("heart") && !OFF_SCENE_KEYS.includes(k));
-/** 一级（funeral/night/meal 三组）摘出后的覆盖率——分级口径见 v5-scene-misfits.mjs 的 OFF_SCENE_TIER。 */
-const tier1Keys = OFF_SCENE_TIER.tier1.flatMap((label) => OFF_SCENE[label] ?? []);
-const tier1Events = ev.filter((e) => tier1Keys.includes(im[e.id]?.objectKey)).length;
-const coverageTier1 = (((covered - tier1Events) / ev.length) * 100).toFixed(1);
-const coverageAll = (((covered - abstractMappedEvents) / ev.length) * 100).toFixed(1);
+const tagCount = Object.keys(map.tags).length;
 /** 其余类按 objectKey 去重（多条事件共用一个 key 时不重复列，改为 `key ×n`）。 */
 const restByKey = new Map();
 for (const x of restKeys) restByKey.set(x.key, (restByKey.get(x.key) ?? 0) + 1);
@@ -91,16 +88,16 @@ const head = `# v5-M3'''' · 语义配图层（D9）逐张对文案留痕
 
 | 项 | plan 原口径 | 本轮落地 | 依据 |
 |---|---|---|---|
-| 素材来源 | CC0/公版照片（WebP ≤40KB/张，40–60 张） | **自产 CC0 单色线稿 SVG（${fileCount} 张 / 19 类，原始合计 34KB）** | 本机实测：Wikimedia/Openverse 不通，Pexels/Pixabay 只有 CDN 直连、无法核验画面与许可 → 照片路线的 provenance 无法逐张证真；且照片 WebP 实测 4.3KB/张 × 48 ≈ 207KB，超当时的预算余量（104KB）。自产沿 v4 \`stage-scenes\` 先例（自产 CC0 剪影）：许可零风险、可逐张留痕、≈0.7KB/张 |
+| 素材来源 | CC0/公版照片（WebP ≤40KB/张，40–60 张） | **自产 CC0 单色线稿 SVG（${fileCount} 张 / ${tagCount} 类）** | 本机实测：Wikimedia/Openverse 不通，Pexels/Pixabay 只有 CDN 直连、无法核验画面与许可 → 照片路线的 provenance 无法逐张证真；且照片 WebP 实测 4.3KB/张 × 48 ≈ 207KB，超当时的预算余量（104KB）。自产沿 v4 \`stage-scenes\` 先例（自产 CC0 剪影）：许可零风险、可逐张留痕、≈0.7KB/张 |
 | 覆盖算法 | 事件 \`sceneTag\` 字段 | **objectKey → 语义标签** | v4-M3''' 已按「文本核心物件 ⊆ objectKey」逐条核过全部事件的图标（\`docs/v4-M3-icons.md\`），从 objectKey 派生是可核查的事实。直接跑文本关键词会得出「99.3% 覆盖」，但每条都是最近似猜测——本轮先试过那种做法，弃用。实测 ${ratio}% |
-| 取图 | 未定 | 同标签多张变体按事件 id 的**哈希高位**轮换（同 id 恒同图） | 低比特取模与事件 id 尾部强相关：实测 rain 的 3 条事件全落同一张、meal 的 4 条撞 3 张（\`scenes.test.ts\` 的死图门即为此而立） |
-| 分类粒度 | 首批 16 类 | **19 类**（多出 \`outdoors 户外\` / \`meal 饭桌\` / \`relic 旧物\`） | 目检抓到真错配：办健身卡配「病房」、公园打拳配「病房」、徒弟开厂配「家门」——场景类目不够细就会硬塞。拆出 \`outdoors\` 承接晨练/远行/街边摊后，「这张卡在说什么」才对得上 |
+| 取图 | 未定 | 同标签多张变体按事件 id 的**哈希高位**轮换（同 id 恒同图） | 低比特取模与事件 id 尾部强相关：实测 rain 的 3 条事件全落同一张、meal 的 4 条撞 3 张（\`scenes.test.ts\` 的死图门即为此而立）。v5-M6 修配图时又踩到同理的坑：funeral 只剩 3 条事件、2 张图在哈希下必死 1 张 → 补第 3 张 |
+| 分类粒度 | 首批 16 类 | **${tagCount} 类**（v5-M3''''：多出 \`outdoors 户外\` / \`meal 饭桌\` / \`relic 旧物\`；**v5-M6：新增 \`pet 宠物\` / \`toy 玩物\` / \`media 影音\` / \`music 器乐\`，退役 \`night 夜色\` / \`meal 饭桌\`**） | 目检抓到真错配：办健身卡配「病房」、公园打拳配「病房」、徒弟开厂配「家门」——场景类目不够细就会硬塞。v5-M6 SI-001 同理：宠物/玩物/影音/器乐图标没有可归的类时被硬塞进 \`study\`（书桌），补齐四类后「这张卡在说什么」才对得上 |
 | 未覆盖 | 显式豁免 | 同：不渲染配图、不留空框 | 豁免 ${exemptIds.length} 条，见 §三 |
 
-## §二、图库与逐张对文案（${fileCount} 张 / 19 类）
+## §二、图库与逐张对文案（${fileCount} 张 / ${tagCount} 类）
 
 图库总览（同一套画法：400×140、单主体居中、描边与填充走 CSS 变量随四主题联动）：
-[docs/assets/v5-scenes-sheet.png](assets/v5-scenes-sheet.png)（缩略图，2026-10-26 生成）。
+[docs/assets/v5-scenes-sheet.png](assets/v5-scenes-sheet.png)（重跑命令：\`node tools/v5-scenes-sheet.mjs\`）。
 
 **构图纪律（第一版踩过）**：第一版每张右侧堆了三个无意义方框当「背景建筑」，${fileCount} 张看起来几乎一样（总览目检一眼看出）。现在**一张只有一个主体**、居中放大——「这张卡在说什么」要一眼看得出来。
 `;
@@ -122,12 +119,13 @@ ${exemptIds.join("、")}
 
 这些事件继续靠事件图标（Game-Icons，295/295 全覆盖）表达量感，不渲染场景图也**不留空框**。
 
-> **⚠ 已知错配（v5-M5 运维首查实测，未修）**：上面这条「抽象符号本就不是场景」的纪律在 \`keyTag\` 里被自家破了
-> ${abstractMapped.length} 处键 / ${abstractMappedEvents} 条事件（${((abstractMappedEvents / ev.length) * 100).toFixed(1)}%）——情绪与时间图标落进丧事/夜色、
-> 社交图标落进饭桌、宠物与乐器与电子图标落进书桌，画出来是花圈/台灯/碗/书堆，配的却是情绪低落、公园晨练、庙会走丢、兔子与电子琴。
-> 逐条清单与样本见 \`node tools/v5-scene-audit.mjs\`（只读报告，退出码恒 0）。
-> 处置是产品决策：只摘丧事/夜色/饭桌三级组 → 覆盖 ${coverageTier1}%（豁免 ${exemptIds.length + tier1Events} 条）；全部摘出 → 覆盖 ${coverageAll}%（豁免 ${exemptIds.length + abstractMappedEvents} 条），两者都过 60% 门。
-> 决策登记在 [plan/v5/backlog.md](../plan/v5/backlog.md) SI-001。已映射的 \`heart-*\` 有 ${heartMapped.length} 个（${heartMapped.map((k) => `\`${k}\``).join(" / ")}），它们画的是器官/心电，不属本条错配。
+> **✅ 已修复（v5-M6 · 2026-10-26）**：v5-M5 首查查出的错配（38 键 / 52 条事件 = 17.6%）已按两种处置修完——
+> **一级摘出**：情绪/时间/氛围/社交/舞台类抽象符号（${OFF_SCENE_FIXED.tier1Removed.length} 键：${OFF_SCENE_FIXED.tier1Removed.map((k) => `\`${k}\``).join(" / ")}）从 \`keyTag\` 删除，事件转显式豁免；
+> **二级改挂**：宠物/玩物/影音/器乐等具体物件改挂新建的 \`pet\` / \`toy\` / \`media\` / \`music\` 四类（\`tired-eye\`→\`home\`、\`caterpillar\`/\`star-formation\`→\`outdoors\`），
+> 原 \`night\`（夜色）/ \`meal\`（饭桌）两类在摘出后事件归零 → 整类连同图稿退役。
+> 复算：\`keyTag\` 里的错配键 **38 → ${abstractMapped.length}**（命中事件 **${abstractMappedEvents}** 条）；覆盖 ${covered}/${ev.length} = **${ratio}%**；豁免 **${exemptIds.length}** 条。
+> 三级机检：\`node tools/v5-scene-audit.mjs\`（只读报告，已印「✅ 非场景图标已清零」）+ \`tests/scene-misfits.test.ts\`（棘轮：这批键再回流 \`keyTag\` 即判红，快照已收紧到 0）。
+> 处置留痕在 [plan/v5/backlog.md](../plan/v5/backlog.md) SI-001（✅）与 [tools/v5-scene-misfits.mjs](../tools/v5-scene-misfits.mjs) 段首注。已映射的 \`heart-*\` 有 ${heartMapped.length} 个（${heartMapped.map((k) => `\`${k}\``).join(" / ")}），它们画的是器官/心电，不属本条错配。
 
 ## §四、与其他门的边界
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// 语义配图 46 张自产 CC0 线稿（plan/v5/02 §九 D9 ▸ v5-M3'''' 落地形态）。
+// 语义配图 55 张自产 CC0 线稿（plan/v5/02 §九 D9 ▸ v5-M3'''' 落地形态；v5-M6 因 SI-001 修配图：
+// 退役 4 张（night×2 / meal×2，摘出情绪·时间·社交图标后事件归零）+ 新增 11 张（pet/toy/media/music 4 类 10 张 + funeral 补 1 张））。
 //
 // 为什么自产而不是采集：本机实测到不了可检索的 CC0 图源（Wikimedia/Openverse 不通，Pexels/Pixabay
 // 只有 CDN 直连、无法核验画面与许可），照片路线的 provenance 无法逐张证真；且照片 WebP 实测
@@ -240,18 +241,18 @@ const SCENES = {
      <circle cx="200" cy="88" r="10"/><path d="M182 122h36"/><path d="M200 104v18"/>`,
     `<circle cx="200" cy="56" r="18"/><circle cx="182" cy="74" r="12"/><circle cx="218" cy="74" r="12"/><circle cx="200" cy="88" r="10"/>`,
   ),
+  // 第 3 张：v5-M6 补——摘出情绪图标后 funeral 只剩 3 条事件，2 张图在哈希下必死 1 张
+  //（`h >>> 16 % 2` 对那 3 条事件同命中 1 号位），补第 3 张让 3 条事件各得一张。
+  "funeral-candles": scene(
+    `<path d="M132 122V78M268 122V78"/><path d="M110 122h44M246 122h44"/>
+     <path d="M132 78v-22M268 78v-26"/><path d="M124 56h16l-4-16h-8z"/><path d="M260 52h16l-4-16h-8z"/>`,
+    `<path d="M124 56h16l-4-16h-8z"/><path d="M260 52h16l-4-16h-8z"/>`,
+  ),
 
-  // ── night 夜色：窗 / 灯 ──
-  "night-window": scene(
-    `<rect x="116" y="20" width="168" height="94" rx="2"/><path d="M200 20v94M116 68h168"/>
-     <circle cx="164" cy="44" r="9"/><circle cx="240" cy="90" r="6"/><circle cx="176" cy="98" r="3"/>`,
-    `<rect x="116" y="20" width="168" height="94" rx="2"/><circle cx="164" cy="44" r="9"/>`,
-  ),
-  "night-lamp": scene(
-    `<path d="M200 122V56"/><path d="M166 56h68"/><path d="M166 56l-18 28h104l-18-28"/>
-     <path d="M182 122h36"/><path d="M258 78l10 8M142 78l-10 8"/>`,
-    `<path d="M166 56l-18 28h104l-18-28z"/>`,
-  ),
+  // ── night / meal 两类已退役（v5-M6）──
+  // 摘出情绪·时间·社交图标后，这两类的合法用户归零：夜色只剩 1 条、饭桌 0 条。
+  // 少事件在哈希下必然留死图（2 条事件无论取 2/3/4 张都同命中一张），留死图会被
+  // `scenes.test.ts`「无死图」判红 —— 故整类退役、图稿同笔删除，事件转显式豁免。
 
   // ── rain 雨天：街 / 伞 ──
   "rain-street": scene(
@@ -279,18 +280,7 @@ const SCENES = {
     `<path d="M240 122l18-52 18 52z"/>`,
   ),
 
-  // ── meal 饭桌：桌 / 碗 ──
-  "meal-table": scene(
-    `<path d="M72 92h256v12H72z"/><path d="M96 104v18M304 104v18"/>
-     <circle cx="132" cy="74" r="11"/><circle cx="186" cy="74" r="11"/><circle cx="240" cy="74" r="11"/><circle cx="292" cy="74" r="11"/>
-     <path d="M200 92V62"/><path d="M186 62h28"/>`,
-    `<path d="M72 92h256v12H72z"/><circle cx="132" cy="74" r="11"/><circle cx="186" cy="74" r="11"/><circle cx="240" cy="74" r="11"/><circle cx="292" cy="74" r="11"/>`,
-  ),
-  "meal-bowl": scene(
-    `<path d="M124 74h152l-20 40H144z"/><path d="M136 74c0-16 14-24 30-24"/>
-     <path d="M212 74c0-20 14-30 34-30"/><path d="M110 114h180"/><path d="M200 96v18"/>`,
-    `<path d="M124 74h152l-20 40H144z"/>`,
-  ),
+  // ── meal 饭桌已退役（见上：社交图标摘出后该类事件归零）──
 
   // ── study 书桌：书 / 台灯 / 写字 ──
   "study-books": scene(
@@ -327,6 +317,78 @@ const SCENES = {
     `<path d="M112 46h176v72H112z"/><path d="M112 46l88 44 88-44"/>
      <path d="M132 102h48M132 92h72"/>`,
     `<path d="M112 46h176v72H112z"/>`,
+  ),
+
+  // ── v5-M6 新增 4 类（SI-001 修复第二半）：宠物 / 玩物 / 影音 / 器乐 ──
+  // 这四类是「图标本身是这类场景的核心物件」的键（兔/猫/拼图/手柄/电视/收音机/吉他/琴/话筒）——
+  // 原先被硬塞进 `study`（书桌）导致「画书堆配兔子」。改挂本四类后覆盖率只掉一点、图形对事。
+  // 画法沿既定纪律：一张只有一个主体、居中放大；描边/填充走 CSS 变量，随四主题联动。
+  "pet-cat": scene(
+    `<circle cx="200" cy="66" r="18"/>
+     <path d="M186 54l-5-18 16 8M214 54l5-18-16 8"/>
+     <circle cx="193" cy="66" r="2"/><circle cx="207" cy="66" r="2"/>
+     <path d="M182 72h-14M182 77h-14M218 72h14M218 77h14"/>
+     <path d="M176 122c0-22 10-36 24-36s24 14 24 36"/>
+     <path d="M188 122v-14M212 122v-14"/><path d="M248 118c14-2 18-12 12-20"/>`,
+    `<circle cx="200" cy="66" r="18"/><path d="M176 122c0-22 10-36 24-36s24 14 24 36z"/>`,
+  ),
+  "pet-cage": scene(
+    `<rect x="140" y="40" width="120" height="82" rx="4"/>
+     <path d="M164 44v74M196 44v74M228 44v74"/>
+     <path d="M132 122h136"/><path d="M180 40c6-16 30-16 36 0"/>
+     <circle cx="204" cy="74" r="10"/><path d="M198 66l-4-16M210 66l4-16"/>
+     <path d="M188 104c0-13 7-20 16-20s16 7 16 20"/>`,
+    `<circle cx="204" cy="74" r="10"/><path d="M188 104c0-13 7-20 16-20s16 7 16 20z"/>`,
+  ),
+  "toy-jigsaw": scene(
+    `<path d="M158 34h60v22a11 11 0 1 1 0 22v22h-60v-22a11 11 0 1 0 0-22z"/>
+     <path d="M120 120h160"/>`,
+    `<path d="M158 34h60v22a11 11 0 1 1 0 22v22h-60v-22a11 11 0 1 0 0-22z"/>`,
+  ),
+  "toy-gamepad": scene(
+    `<rect x="142" y="58" width="116" height="50" rx="20"/>
+     <path d="M172 74v18M163 83h18"/>
+     <circle cx="222" cy="78" r="5"/><circle cx="238" cy="90" r="5"/>
+     <path d="M258 70c12-6 16-16 10-26"/>`,
+    `<rect x="142" y="58" width="116" height="50" rx="20"/>`,
+  ),
+  "media-tv": scene(
+    `<rect x="128" y="40" width="144" height="80" rx="4"/>
+     <rect x="140" y="52" width="120" height="56" rx="2"/>
+     <path d="M172 40l-14-18M228 40l14-18"/>
+     <path d="M168 120v6M232 120v6M150 126h100"/>`,
+    `<rect x="140" y="52" width="120" height="56" rx="2"/>`,
+  ),
+  "media-radio": scene(
+    `<rect x="126" y="52" width="148" height="66" rx="6"/>
+     <circle cx="168" cy="86" r="17"/><circle cx="168" cy="86" r="6"/>
+     <circle cx="234" cy="72" r="9"/><circle cx="252" cy="98" r="6"/>
+     <path d="M240 52l18-26"/>`,
+    `<circle cx="168" cy="86" r="17"/>`,
+  ),
+  "media-phone": scene(
+    `<rect x="164" y="24" width="72" height="98" rx="9"/>
+     <rect x="174" y="38" width="52" height="62" rx="2"/>
+     <circle cx="200" cy="110" r="5"/><path d="M196 32h8"/>`,
+    `<rect x="174" y="38" width="52" height="62" rx="2"/>`,
+  ),
+  "music-guitar": scene(
+    `<circle cx="176" cy="94" r="26"/><circle cx="176" cy="66" r="20"/><circle cx="176" cy="86" r="7"/>
+     <path d="M194 54l46-34"/><path d="M238 20l14-10 8 8-14 10z"/><path d="M186 62l52-38"/>`,
+    `<circle cx="176" cy="94" r="26"/><circle cx="176" cy="66" r="20"/>`,
+  ),
+  "music-piano": scene(
+    `<rect x="112" y="56" width="176" height="54" rx="2"/>
+     <path d="M134 56v54M156 56v54M178 56v54M200 56v54M222 56v54M244 56v54M266 56v54"/>
+     <path d="M124 56v30h11v-30M146 56v30h11v-30M190 56v30h11v-30M212 56v30h11v-30M234 56v30h11v-30"/>
+     <path d="M132 110v10M268 110v10M112 120h176"/>`,
+    `<rect x="112" y="56" width="176" height="54" rx="2"/>`,
+  ),
+  "music-mic": scene(
+    `<rect x="186" y="26" width="28" height="46" rx="14"/>
+     <path d="M192 36h16M192 48h16M192 60h16"/>
+     <path d="M200 72v34"/><path d="M176 112h48"/><path d="M200 112c14 8 26 6 32-4"/>`,
+    `<rect x="186" y="26" width="28" height="46" rx="14"/>`,
   ),
 };
 

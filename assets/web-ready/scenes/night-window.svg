@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 140" aria-hidden="true" focusable="false">
-  <rect width="400" height="140" fill="var(--scene-bg,#f2eee3)"/>
-  <g fill="var(--scene-fill,#cfc9b8)" stroke="none"><rect x="116" y="20" width="168" height="94" rx="2"/><circle cx="164" cy="44" r="9"/></g>
-  <g fill="none" stroke="var(--scene-line,#3a3730)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="116" y="20" width="168" height="94" rx="2"/><path d="M200 20v94M116 68h168"/>
-     <circle cx="164" cy="44" r="9"/><circle cx="240" cy="90" r="6"/><circle cx="176" cy="98" r="3"/></g>
-  <path d="M46 122h308" stroke="var(--scene-line,#3a3730)" stroke-width="1.5" opacity=".45" fill="none" stroke-linecap="round"/>
-</svg>

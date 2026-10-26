@@ -4,22 +4,23 @@
 // 为什么需要它：`tools/v5-gen-scene-map.mjs` 的段首注释自己写着纪律——
 //   「objectKey → 标签。只收『图标本身就是这一类场景/场景里的核心物件』的键；
 //     抽象图标（heart-* / choice / crossroad / despair / infinity…）**不硬凑**——它们不是场景。」
-// 但实测该纪律被自家破了几处：情绪图标（tear-tracks / despair …）落进了 `funeral` 丧事标签、
-// 时间图标（sunrise / sundial）落进了 `night` 夜色标签、社交图标（three-friends …）落进了 `meal` 饭桌标签、
-// 宠物/乐器/电子/娱乐图标落进了 `study` 书桌标签。结果就是「图上说的是别的事」——卡片画着花圈/台灯/碗，
-// 配的却是月考压力、公园晨练、庙会走丢。
+// v5-M5 运维首查实测该纪律被自家破了 38 键 / 52 条事件（17.6%）：卡片画着花圈/台灯/碗/书堆，
+// 配的却是情绪低落、公园晨练、庙会走丢、兔子。→ 入队 SI-001。
+//
+// **v5-M6 已修复**：一级（情绪/时间/氛围/社交/舞台抽象符号）从 keyTag 摘出转显式豁免；
+// 二级（宠物/玩物/影音/器乐等具体物件）改挂新建的 `pet`/`toy`/`media`/`music` 四类；
+// 原 `night`/`meal` 两类事件归零 → 退役。错配键 38 → **0**，覆盖 85.8% → **81.0%**，豁免 42 → **56**。
+// 本工具自此的角色：**回归哨兵**——清单里的键只要再出现在 keyTag 就立刻报出来（棘轮同判据）。
 //
 // 判据（本文件的单源）：`tools/v5-scene-misfits.mjs` 的 OFF_SCENE 清单里的 objectKey **本身不是场景**，
-// 不应出现在 scene-map 的 keyTag 里。清单与分级处置口径都在那个文件（两个消费者共用，不许各写一遍）。
-// 处置路线（摘出 vs 保留）是产品决策，见 plan/v5/backlog.md SI-001：全摘会让覆盖率 85.8% → 68.1%、
-// 豁免 42 → 94 条（一级三组摘出则为 81.0% / 56 条），须同步 README / plan/05 发布说明 / docs/v5-scenes.md，
+// 不应出现在 scene-map 的 keyTag 里。清单与修复留痕都在那个文件（消费者共用，不许各写一遍）。
 // 故本工具**只报告不判红**（退出码恒 0）。
 //
 // 用法：
 //   node tools/v5-scene-audit.mjs           # 人读报告
 //   node tools/v5-scene-audit.mjs --json    # 机读（CI/对账用）
 import { readFileSync } from "node:fs";
-import { OFF_SCENE, OFF_SCENE_KEYS, OFF_SCENE_TIER } from "./v5-scene-misfits.mjs";
+import { OFF_SCENE, OFF_SCENE_KEYS, OFF_SCENE_FIXED } from "./v5-scene-misfits.mjs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -85,8 +86,9 @@ for (const [label, keys] of Object.entries(OFF_SCENE)) {
   });
 }
 
-// 清单里写了、但当前 keyTag 里没有的键（清单与数据脱节时提醒）
-const staleKeys = [...offKeys].filter((k) => !sceneMap.keyTag[k]);
+// 清单里写了、但当前 keyTag 里没有的键 = v5-M6 已摘出（期望态；只有「回流」才是异常）
+const removedKeys = [...offKeys].filter((k) => !sceneMap.keyTag[k]);
+const returnedKeys = [...offKeys].filter((k) => sceneMap.keyTag[k]);
 
 const allImages = Object.values(sceneMap.tags).flat();
 const deadImages = allImages.filter((x) => !usage[x]);
@@ -109,7 +111,9 @@ const report = {
   coverageIfFixedPct: +(((events.length - exempt.length - offEvents) / events.length) * 100).toFixed(1),
   exemptIfFixed: exempt.length + offEvents,
   groups,
-  staleKeys,
+  removedKeys,
+  returnedKeys,
+  fixedRecord: OFF_SCENE_FIXED.after,
   topReuse,
 };
 
@@ -127,10 +131,20 @@ if (process.argv.includes("--json")) {
   );
   out(`复用 top5：${report.topReuse.map((r) => `${r.img}×${r.n}`).join("  ")}`);
   out("");
-  out(
-    `非场景图标混入 keyTag：涉及 ${report.offSceneEvents} 条事件 = ${report.offScenePct}%（若全部摘出：覆盖 ${report.coverageIfFixedPct}% / 豁免 ${report.exemptIfFixed} 条）`
-  );
+  if (report.offSceneEvents === 0) {
+    out(
+      `✅ 非场景图标已清零（黑名单 ${OFF_SCENE_KEYS.length} 键全部摘出/改挂，v5-M6 SI-001）：keyTag 里错配键 ${report.returnedKeys.length} 键 / 命中事件 0 条`
+    );
+    out(`   修复留痕：一级摘出 ${OFF_SCENE_FIXED.tier1Removed.length} 键；二级改挂 pet/toy/media/music + home/outdoors；退役标签 ${OFF_SCENE_FIXED.retiredTags.join("/")}`);
+    out(`   修复时实测：错配键 0 / 覆盖 ${OFF_SCENE_FIXED.after.coverage} / 豁免 ${OFF_SCENE_FIXED.after.exempt} / 图库 ${OFF_SCENE_FIXED.after.images}`);
+  } else {
+    out(
+      `⚠ 非场景图标混入 keyTag：涉及 ${report.offSceneEvents} 条事件 = ${report.offScenePct}%（若全部摘出：覆盖 ${report.coverageIfFixedPct}% / 豁免 ${report.exemptIfFixed} 条）`
+    );
+    out(`   回流键（${report.returnedKeys.length}）：${report.returnedKeys.join(", ")}`);
+  }
   for (const g of groups) {
+    if (g.events === 0) continue;
     out("");
     out(`[${g.label}] 清单 ${g.keys} 键 / 命中 ${g.events} 条`);
     for (const s of g.samples) {
@@ -138,12 +152,9 @@ if (process.argv.includes("--json")) {
     }
     if (g.events > g.samples.length) out(`  …另有 ${g.events - g.samples.length} 条`);
   }
-  if (staleKeys.length) {
-    out("");
-    out(`⚠ 清单内已不在 keyTag 的键（清单与数据脱节，请同步）：${staleKeys.join(", ")}`);
-  }
   out("");
-  out("处置是产品决策，见 plan/v5/backlog.md SI-001（摘出会掉覆盖率，须同步发布说明）。");
+  out(`黑名单已摘出 ${report.removedKeys.length} 键（期望态；本清单的作用 = 谁把它加回 keyTag 就报谁，棘轮 tests/scene-misfits.test.ts 同判据）。`);
+  out("处置留痕见 plan/v5/backlog.md SI-001（✅ 2026-10-26 修复）与 tools/v5-scene-misfits.mjs 段首注。");
 }
 
 process.exitCode = 0;

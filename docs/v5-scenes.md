@@ -10,24 +10,24 @@
 
 | 项 | plan 原口径 | 本轮落地 | 依据 |
 |---|---|---|---|
-| 素材来源 | CC0/公版照片（WebP ≤40KB/张，40–60 张） | **自产 CC0 单色线稿 SVG（48 张 / 19 类，原始合计 34KB）** | 本机实测：Wikimedia/Openverse 不通，Pexels/Pixabay 只有 CDN 直连、无法核验画面与许可 → 照片路线的 provenance 无法逐张证真；且照片 WebP 实测 4.3KB/张 × 48 ≈ 207KB，超当时的预算余量（104KB）。自产沿 v4 `stage-scenes` 先例（自产 CC0 剪影）：许可零风险、可逐张留痕、≈0.7KB/张 |
-| 覆盖算法 | 事件 `sceneTag` 字段 | **objectKey → 语义标签** | v4-M3''' 已按「文本核心物件 ⊆ objectKey」逐条核过全部事件的图标（`docs/v4-M3-icons.md`），从 objectKey 派生是可核查的事实。直接跑文本关键词会得出「99.3% 覆盖」，但每条都是最近似猜测——本轮先试过那种做法，弃用。实测 85.8% |
-| 取图 | 未定 | 同标签多张变体按事件 id 的**哈希高位**轮换（同 id 恒同图） | 低比特取模与事件 id 尾部强相关：实测 rain 的 3 条事件全落同一张、meal 的 4 条撞 3 张（`scenes.test.ts` 的死图门即为此而立） |
-| 分类粒度 | 首批 16 类 | **19 类**（多出 `outdoors 户外` / `meal 饭桌` / `relic 旧物`） | 目检抓到真错配：办健身卡配「病房」、公园打拳配「病房」、徒弟开厂配「家门」——场景类目不够细就会硬塞。拆出 `outdoors` 承接晨练/远行/街边摊后，「这张卡在说什么」才对得上 |
-| 未覆盖 | 显式豁免 | 同：不渲染配图、不留空框 | 豁免 42 条，见 §三 |
+| 素材来源 | CC0/公版照片（WebP ≤40KB/张，40–60 张） | **自产 CC0 单色线稿 SVG（55 张 / 21 类）** | 本机实测：Wikimedia/Openverse 不通，Pexels/Pixabay 只有 CDN 直连、无法核验画面与许可 → 照片路线的 provenance 无法逐张证真；且照片 WebP 实测 4.3KB/张 × 48 ≈ 207KB，超当时的预算余量（104KB）。自产沿 v4 `stage-scenes` 先例（自产 CC0 剪影）：许可零风险、可逐张留痕、≈0.7KB/张 |
+| 覆盖算法 | 事件 `sceneTag` 字段 | **objectKey → 语义标签** | v4-M3''' 已按「文本核心物件 ⊆ objectKey」逐条核过全部事件的图标（`docs/v4-M3-icons.md`），从 objectKey 派生是可核查的事实。直接跑文本关键词会得出「99.3% 覆盖」，但每条都是最近似猜测——本轮先试过那种做法，弃用。实测 81.0% |
+| 取图 | 未定 | 同标签多张变体按事件 id 的**哈希高位**轮换（同 id 恒同图） | 低比特取模与事件 id 尾部强相关：实测 rain 的 3 条事件全落同一张、meal 的 4 条撞 3 张（`scenes.test.ts` 的死图门即为此而立）。v5-M6 修配图时又踩到同理的坑：funeral 只剩 3 条事件、2 张图在哈希下必死 1 张 → 补第 3 张 |
+| 分类粒度 | 首批 16 类 | **21 类**（v5-M3''''：多出 `outdoors 户外` / `meal 饭桌` / `relic 旧物`；**v5-M6：新增 `pet 宠物` / `toy 玩物` / `media 影音` / `music 器乐`，退役 `night 夜色` / `meal 饭桌`**） | 目检抓到真错配：办健身卡配「病房」、公园打拳配「病房」、徒弟开厂配「家门」——场景类目不够细就会硬塞。v5-M6 SI-001 同理：宠物/玩物/影音/器乐图标没有可归的类时被硬塞进 `study`（书桌），补齐四类后「这张卡在说什么」才对得上 |
+| 未覆盖 | 显式豁免 | 同：不渲染配图、不留空框 | 豁免 56 条，见 §三 |
 
-## §二、图库与逐张对文案（48 张 / 19 类）
+## §二、图库与逐张对文案（55 张 / 21 类）
 
 图库总览（同一套画法：400×140、单主体居中、描边与填充走 CSS 变量随四主题联动）：
-[docs/assets/v5-scenes-sheet.png](assets/v5-scenes-sheet.png)（缩略图，2026-10-26 生成）。
+[docs/assets/v5-scenes-sheet.png](assets/v5-scenes-sheet.png)（重跑命令：`node tools/v5-scenes-sheet.mjs`）。
 
-**构图纪律（第一版踩过）**：第一版每张右侧堆了三个无意义方框当「背景建筑」，48 张看起来几乎一样（总览目检一眼看出）。现在**一张只有一个主体**、居中放大——「这张卡在说什么」要一眼看得出来。
+**构图纪律（第一版踩过）**：第一版每张右侧堆了三个无意义方框当「背景建筑」，55 张看起来几乎一样（总览目检一眼看出）。现在**一张只有一个主体**、居中放大——「这张卡在说什么」要一眼看得出来。
 
 ### home · 家
 
 | 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
 |---|---|---|
-| `home-threshold.svg` | 8 | youth-017「表哥家孩子上学差一笔钱。家庭会议开到一半，长辈们说着说着，所有人都在看你。饭桌上…」<br>youth-501「毕业合租，你挑了阿澈。两周后发现：那位的袜子会飞过客厅，你的锅从来不洗。合租房是…」 |
+| `home-threshold.svg` | 9 | youth-017「表哥家孩子上学差一笔钱。家庭会议开到一半，长辈们说着说着，所有人都在看你。饭桌上…」<br>youth-501「毕业合租，你挑了阿澈。两周后发现：那位的袜子会飞过客厅，你的锅从来不洗。合租房是…」 |
 | `home-courtyard.svg` | 3 | infant-011「摇篮上方的彩色转铃慢悠悠地转。你盯着它看，目光跟着那圈颜色走，伸手去够，够不着。…」<br>elder-002「一场小病之后，儿女认真和你谈了一次：要不要卖掉老房子，搬去和他们同住？这个决定，…」 |
 | `home-bedroom.svg` | 5 | toddler-012「全幼儿园都在午睡。你睁着眼睛数天花板，一点睡意都没有。南方的午后蝉声又密又长，北…」<br>youth-005「家里把攒了半辈子的首付拍在你面前，条件只有一个：买在离家近的地方。而你心仪的小区…」 |
 | `home-window.svg` | 2 | infant-001「你睁开眼，世界是一片模糊的暖色。摇篮上方挂着一只会转的布偶铃，拧紧发条就叮叮咚咚…」<br>infant-005「大人们商量了几晚，决定让你自己睡了。小床摆在原来那张大床旁边，蚊帐的钩子白天挂起…」 |
@@ -119,15 +119,9 @@
 
 | 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
 |---|---|---|
-| `funeral-hall.svg` | 3 | adult-301「连续三周，你对什么都提不起劲：饭没味，觉不够，笑出来都像完成任务。工位的灯还是那…」<br>teen-301「月考、竞赛、家里的期待，三头一起压过来。这两个星期你谁都不想理，饭也吃不下。饭桌…」 |
-| `funeral-flowers.svg` | 6 | teen-006「学校后街的旧书摊上，你淘到一本三十年前的旅行笔记，扉页写着一行字：致三十年后的你…」<br>teen-013「晚自习停电，整栋楼欢呼了一声——黑暗里那声欢呼格外齐。有人点起了蜡烛，有人已经冲…」 |
-
-### night · 夜色
-
-| 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
-|---|---|---|
-| `night-window.svg` | 2 | childhood-502「班里的「核心小组」向你招手，条件是别再跟「那个成绩差的」玩。核心小组的据点在操场…」<br>youth-601「工作日的你白天靠咖啡续命，夜里刷手机到两点。周末一觉睡到午饭，起来头疼。出租屋的…」 |
-| `night-lamp.svg` | 3 | midlife-401「结婚二十周年。你翻出当年的红本本，那边凑过来看：那时候你头发真多。红本本上的照片…」<br>elder-403「清晨你俩在公园分头锻炼：老伴打拳，你遛弯。回来在长椅会合，一人一半豆浆。公园的清…」 |
+| `funeral-hall.svg` | 1 | midlife-004「老同学的葬礼上，你数了数，自己是到场的人里年纪最小的一批。回去的路上，你把通讯录…」 |
+| `funeral-flowers.svg` | 1 | elder-501「老周走了。追悼会回来，阿澈打来电话，两个人在电话两头沉默了很久。老周是你们俩的下…」 |
+| `funeral-candles.svg` | 1 | teen-013「晚自习停电，整栋楼欢呼了一声——黑暗里那声欢呼格外齐。有人点起了蜡烛，有人已经冲…」 |
 
 ### rain · 雨雪
 
@@ -140,23 +134,16 @@
 
 | 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
 |---|---|---|
-| `outdoors-park.svg` | 7 | toddler-011「游乐场那个最高最长的滑梯，你仰着头看了很久，楼梯口排着队。滑梯的铁皮被太阳晒得烫…」<br>youth-014「你办了张健身卡。头一个月去了八次，第二个月去了两次。健身房在写字楼地下一层，跑步…」 |
-| `outdoors-road.svg` | 9 | infant-003「你被扶着站在堂屋中央，两条腿还在打颤，脚下的水泥地凉得像一块铁。大人松开手退后半…」<br>toddler-001「幼儿园的沙池边，一个高你半头的孩子一把抢走了你挖了很久的塑料铲子。太阳把沙池晒得…」 |
-
-### meal · 饭桌
-
-| 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
-|---|---|---|
-| `meal-table.svg` | 1 | elder-703「社区组织重阳节活动，抽签分组做手工。签是彩色纸片，抽到同色的坐一桌，抽之前有人说…」 |
-| `meal-bowl.svg` | 3 | infant-022「逛庙会的人挤着人，糖画的甜味、炸糕摊的油烟味和人群的汗味混在一起。一转眼，牵着你…」<br>infant-501「邻居家搬来一户带娃的人家，小孩和你差不多大。两个大人把你们并排放在爬行垫上。搬家…」 |
+| `outdoors-park.svg` | 9 | toddler-011「游乐场那个最高最长的滑梯，你仰着头看了很久，楼梯口排着队。滑梯的铁皮被太阳晒得烫…」<br>youth-014「你办了张健身卡。头一个月去了八次，第二个月去了两次。健身房在写字楼地下一层，跑步…」 |
+| `outdoors-road.svg` | 10 | infant-003「你被扶着站在堂屋中央，两条腿还在打颤，脚下的水泥地凉得像一块铁。大人松开手退后半…」<br>toddler-001「幼儿园的沙池边，一个高你半头的孩子一把抢走了你挖了很久的塑料铲子。太阳把沙池晒得…」 |
 
 ### study · 书桌
 
 | 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
 |---|---|---|
-| `study-books.svg` | 17 | childhood-011「科学课发的蚕宝宝装在铅笔盒里，桑叶要自己去小区最东边那棵树上摘。蚕吃叶子的沙沙声…」<br>teen-005「街舞社在体育馆招新，音响一响你脚底发痒。可下周就是月考，班主任的目光正从教室后窗…」 |
-| `study-lamp.svg` | 26 | toddler-013「邻居送来一只小兔子，笼子就放在阳台上，大人说归你管。兔子爱吃胡萝卜，小卖部五分钱…」<br>toddler-014「小客人来家里，看上了你最少玩的那只旧恐龙。妈妈说：送给小客人吧。那只恐龙是夜市上…」 |
-| `study-writing.svg` | 15 | infant-017「收音机里在放一支歌。你跟着咿咿呀呀，调子跑了十万八千里。那台收音机是家里最值钱的…」<br>childhood-003「家里搬回一台电子琴，附赠一张周一到周日都排满的练习表。琴是攒了大半年才下决心的家…」 |
+| `study-books.svg` | 5 | teen-012「校服背后不知道被谁用马克笔写了一行字，洗了三次都没洗掉。字不大，可你总觉得全班的…」<br>teen-015「你在杂志角落认识了一个笔友，对方在很北很北的城市，字写得像刻出来的。信纸挑了最素…」 |
+| `study-lamp.svg` | 9 | childhood-017「你在课桌里发现一张字条，是上次帮你捡橡皮的同桌留的：放学一起走吗？字条是从作业本…」<br>teen-001「文理分科的志愿表发下来。家人围在饭桌上反复念叨：学理，好找工作。可你真正舍不得的…」 |
+| `study-writing.svg` | 6 | childhood-016「县图书馆的少儿阅览室有三百本书，你给自己定了个小小的目标。借书证押金两块，妈妈从…」<br>teen-004「你的日记本从书包夹层消失了一天，晚饭时原样放回了原处。你一页页对过——少了一根头…」 |
 
 ### relic · 旧物
 
@@ -166,32 +153,63 @@
 | `relic-photo.svg` | 1 | midlife-014「你开始收拾半辈子的家：三箱奖状、一箱磁带、一箱孩子的小学作业本。奖状的绸面有的已…」 |
 | `relic-letter.svg` | 2 | childhood-013「你把爸爸的旧闹钟拆了，桌面上一排整整齐齐的零件——装不回去了。闹钟是爸爸上夜班全…」<br>adult-002「孩子第一次上台表演和家长会排在同一天，而你负责的系统升级也定在当晚上线。日历上这…」 |
 
+### pet · 宠物
+
+| 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
+|---|---|---|
+| `pet-cat.svg` | 6 | toddler-013「邻居送来一只小兔子，笼子就放在阳台上，大人说归你管。兔子爱吃胡萝卜，小卖部五分钱…」<br>adult-013「陪了孩子十二年的狗在春天走了。它睡过的藤筐还摆在阳台，饭盆里的水早上刚换。孩子第…」 |
+| `pet-cage.svg` | 1 | adult-018「孩子把项圈系在自己手腕上，说这样它就还在家里。你蹲下来，看见那块磨平的名牌上还留…」 |
+
+### toy · 玩物
+
+| 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
+|---|---|---|
+| `toy-jigsaw.svg` | 5 | toddler-014「小客人来家里，看上了你最少玩的那只旧恐龙。妈妈说：送给小客人吧。那只恐龙是夜市上…」<br>childhood-019「兴趣班试听日。家长在围棋班和奥数班之间拿不定主意，蹲下来问你自己想学什么。报名那…」 |
+| `toy-gamepad.svg` | 1 | teen-011「周五晚上，同学组局去新开的电玩城，群里接龙接到了你的名字。电玩城开在商城顶层，一…」 |
+
+### media · 影音
+
+| 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
+|---|---|---|
+| `media-tv.svg` | 6 | teen-005「街舞社在体育馆招新，音响一响你脚底发痒。可下周就是月考，班主任的目光正从教室后窗…」<br>youth-004「猎头的电话打进工位：对面公司薪水涨四成，但要放下你手上带了一半的项目。写字楼的中…」 |
+| `media-radio.svg` | 4 | youth-015「又是一个睡不着的凌晨三点。手机屏幕的蓝光照着天花板，你翻了一遍通讯录，没有可以打…」<br>midlife-101「老年活动中心开了一门智能手机摄影课，教室里坐的比你小二十岁。报名表上你的年纪一栏…」 |
+| `media-phone.svg` | 4 | infant-017「收音机里在放一支歌。你跟着咿咿呀呀，调子跑了十万八千里。那台收音机是家里最值钱的…」<br>elder-101「孙女的旧平板淘汰下来了。你戴着老花镜研究了三天，学会了视频通话。平板是孙女贴着卡…」 |
+
+### music · 器乐
+
+| 场景图 | 用图事件数 | 代表性事件与文案（前 2 条） |
+|---|---|---|
+| `music-guitar.svg` | 3 | elder-005「社区的口述历史活动来招募讲述人，报名表上写着：每人四十分钟。你盯着那行字看了很久…」<br>youth-503「阿澈的婚礼定在五一，点名你当伴郎。可你手头项目正卡在节骨眼上。请柬是手递的，红纸…」 |
+| `music-piano.svg` | 4 | midlife-005「整理储藏室，你翻出了年轻时搁下的那把吉他——琴弦锈了，指板上的灰比弦还厚。储藏室…」<br>elder-018「社区记者来采访老人口述栏目，问了一个问题：如果对年轻时的自己说一句话，说什么？记…」 |
+| `music-mic.svg` | 1 | childhood-003「家里搬回一台电子琴，附赠一张周一到周日都排满的练习表。琴是攒了大半年才下决心的家…」 |
+
 ## §三、显式豁免清单（不配图、不留空框）
 
-覆盖 253/295（85.8%），显式豁免 42 条：
+覆盖 239/295（81.0%），显式豁免 56 条：
 
-infant-012（mirror-mirror）、infant-013（cherish）、toddler-021（stork-delivery）、childhood-004（choice）、childhood-005（cross-mark）、teen-002（shouting）、teen-017（backstab）、adult-015（uncertainty）、adult-021（life-in-the-balance）、midlife-001（crown）、midlife-002（chat-bubble）、teen-019（thought-bubble）、adult-019（diploma）、infant-102（circle）、toddler-101（infinity）、toddler-201（broom）、toddler-203（socks）、youth-102（spy）、adult-202（hidden）、adult-302（health-decrease）、infant-402（baby-face）、toddler-401（walking-scout）、childhood-401（heart-necklace）、childhood-402（chewed-heart）、teen-402（love-mystery）、teen-403（tarot-06-the-lovers）、youth-401（heart-wings）、youth-403（opposite-hearts）、adult-403（nested-hearts）、midlife-403（heart-shield）、elder-401（heart-inside）、elder-402（love-song）、infant-502（图标层已豁免）、toddler-501（blackball）、childhood-503（prank-glasses）、midlife-501（team-idea）、elder-502（ballerina-shoes）、teen-601（brain-freeze）、midlife-603（cigarette）、infant-701（chat-bubble）、childhood-701（blackball）、teen-701（choice）
+infant-012（mirror-mirror）、infant-013（cherish）、infant-022（meeple-group）、toddler-021（stork-delivery）、childhood-004（choice）、childhood-005（cross-mark）、teen-006（hourglass）、teen-002（shouting）、teen-017（backstab）、adult-015（uncertainty）、adult-021（life-in-the-balance）、midlife-001（crown）、midlife-002（chat-bubble）、teen-019（thought-bubble）、adult-019（diploma）、infant-102（circle）、toddler-101（infinity）、toddler-201（broom）、toddler-203（socks）、teen-101（drama-masks）、youth-102（spy）、adult-202（hidden）、adult-301（tear-tracks）、adult-302（health-decrease）、teen-301（despair）、infant-402（baby-face）、toddler-401（walking-scout）、toddler-402（broken-heart）、childhood-401（heart-necklace）、childhood-402（chewed-heart）、teen-402（love-mystery）、teen-403（tarot-06-the-lovers）、youth-401（heart-wings）、youth-403（opposite-hearts）、adult-403（nested-hearts）、midlife-401（sparkles）、midlife-403（heart-shield）、elder-401（heart-inside）、elder-402（love-song）、elder-403（sunrise）、infant-501（three-friends）、infant-502（图标层已豁免）、toddler-501（blackball）、toddler-502（shaking-hands）、toddler-503（two-shadows）、childhood-503（prank-glasses）、midlife-501（team-idea）、midlife-502（shattered-heart）、midlife-503（sundial）、elder-502（ballerina-shoes）、teen-601（brain-freeze）、midlife-603（cigarette）、infant-701（chat-bubble）、childhood-701（blackball）、teen-701（choice）、elder-703（three-friends）
 
 **豁免的构成**（从数据实算，见 `node tools/v5-scenes-doc.mjs`；曾手写过一版，与数据漂移过——故改为算出来）：
 
 | 构成 | 条数 | 说明 |
 |---|---|---|
-| `heart-*` 系（情绪符号） | 7 | `heart-necklace` / `chewed-heart` / `heart-wings` / `opposite-hearts` / `nested-hearts` / `heart-shield` / `heart-inside`——画的是一颗心，不是某个场景，硬凑成厨房或街巷只会误导 |
+| `heart-*` 系（情绪符号） | 9 | `broken-heart` / `heart-necklace` / `chewed-heart` / `heart-wings` / `opposite-hearts` / `nested-hearts` / `heart-shield` / `heart-inside` / `shattered-heart`——画的是一颗心，不是某个场景，硬凑成厨房或街巷只会误导 |
 | 图标层已豁免（`objectKey: null`） | 1 | `infant-502` |
-| 其余抽象符号 / 非场景实物 | 34 | `blackball` ×2 / `chat-bubble` ×2 / `choice` ×2 / `baby-face` / `backstab` / `ballerina-shoes` / `brain-freeze` / `broom` / `cherish` / `cigarette` / `circle` / `cross-mark` / `crown` / `diploma` / `health-decrease` / `hidden` / `infinity` / `life-in-the-balance` / `love-mystery` / `love-song` / `mirror-mirror` / `prank-glasses` / `shouting` / `socks` / `spy` / `stork-delivery` / `tarot-06-the-lovers` / `team-idea` / `thought-bubble` / `uncertainty` / `walking-scout` |
+| 其余抽象符号 / 非场景实物 | 46 | `blackball` ×2 / `chat-bubble` ×2 / `choice` ×2 / `three-friends` ×2 / `baby-face` / `backstab` / `ballerina-shoes` / `brain-freeze` / `broom` / `cherish` / `cigarette` / `circle` / `cross-mark` / `crown` / `despair` / `diploma` / `drama-masks` / `health-decrease` / `hidden` / `hourglass` / `infinity` / `life-in-the-balance` / `love-mystery` / `love-song` / `meeple-group` / `mirror-mirror` / `prank-glasses` / `shaking-hands` / `shouting` / `socks` / `sparkles` / `spy` / `stork-delivery` / `sundial` / `sunrise` / `tarot-06-the-lovers` / `team-idea` / `tear-tracks` / `thought-bubble` / `two-shadows` / `uncertainty` / `walking-scout` |
 
 这些事件继续靠事件图标（Game-Icons，295/295 全覆盖）表达量感，不渲染场景图也**不留空框**。
 
-> **⚠ 已知错配（v5-M5 运维首查实测，未修）**：上面这条「抽象符号本就不是场景」的纪律在 `keyTag` 里被自家破了
-> 38 处键 / 52 条事件（17.6%）——情绪与时间图标落进丧事/夜色、
-> 社交图标落进饭桌、宠物与乐器与电子图标落进书桌，画出来是花圈/台灯/碗/书堆，配的却是情绪低落、公园晨练、庙会走丢、兔子与电子琴。
-> 逐条清单与样本见 `node tools/v5-scene-audit.mjs`（只读报告，退出码恒 0）。
-> 处置是产品决策：只摘丧事/夜色/饭桌三级组 → 覆盖 81.0%（豁免 56 条）；全部摘出 → 覆盖 68.1%（豁免 94 条），两者都过 60% 门。
-> 决策登记在 [plan/v5/backlog.md](../plan/v5/backlog.md) SI-001。已映射的 `heart-*` 有 3 个（`heart-organ` / `heart-battery` / `heart-bottle`），它们画的是器官/心电，不属本条错配。
+> **✅ 已修复（v5-M6 · 2026-10-26）**：v5-M5 首查查出的错配（38 键 / 52 条事件 = 17.6%）已按两种处置修完——
+> **一级摘出**：情绪/时间/氛围/社交/舞台类抽象符号（13 键：`tear-tracks` / `despair` / `broken-heart` / `shattered-heart` / `two-shadows` / `hourglass` / `sunrise` / `sundial` / `sparkles` / `meeple-group` / `three-friends` / `shaking-hands` / `drama-masks`）从 `keyTag` 删除，事件转显式豁免；
+> **二级改挂**：宠物/玩物/影音/器乐等具体物件改挂新建的 `pet` / `toy` / `media` / `music` 四类（`tired-eye`→`home`、`caterpillar`/`star-formation`→`outdoors`），
+> 原 `night`（夜色）/ `meal`（饭桌）两类在摘出后事件归零 → 整类连同图稿退役。
+> 复算：`keyTag` 里的错配键 **38 → 0**（命中事件 **0** 条）；覆盖 239/295 = **81.0%**；豁免 **56** 条。
+> 三级机检：`node tools/v5-scene-audit.mjs`（只读报告，已印「✅ 非场景图标已清零」）+ `tests/scene-misfits.test.ts`（棘轮：这批键再回流 `keyTag` 即判红，快照已收紧到 0）。
+> 处置留痕在 [plan/v5/backlog.md](../plan/v5/backlog.md) SI-001（✅）与 [tools/v5-scene-misfits.mjs](../tools/v5-scene-misfits.mjs) 段首注。已映射的 `heart-*` 有 3 个（`heart-organ` / `heart-battery` / `heart-bottle`），它们画的是器官/心电，不属本条错配。
 
 ## §四、与其他门的边界
 
-- **预算门**：48 张 SVG 以 `?raw` 内联进 JS bundle，不单独成文件；dist 实测值见 HANDOFF-v5-M4 的当轮留痕。
+- **预算门**：55 张 SVG 以 `?raw` 内联进 JS bundle，不单独成文件；dist 实测值见 HANDOFF-v5-M4 的当轮留痕。
 - **许可门**：全部自产（无第三方素材）；白名单 `assets/web-ready/` 已覆盖 `scenes/`，credits 无需新增署名行。
 - **E2E 钩子**：配图节点 = `figure.ev-scene[data-ev-scene]`；豁免事件该节点**不存在**（可机检「不留空框」）。
 - **单屏字数**：配图不计入 `validate:story` 的单屏 ≤160 口径（它不占文字量），但**不得顶掉年份戳**——年份戳在配图之上，顺序未变。
