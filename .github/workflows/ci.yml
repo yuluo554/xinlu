@@ -39,5 +39,9 @@ jobs:
         run: npm run typecheck
       - name: "Data validation (plan/02 schema and coverage)"
         run: npm run validate
+      - name: "Story quality (realism + v5 length gates)"
+        run: npm run validate:story
+      - name: "Rhythm gate (variant kinds per stage)"
+        run: npm run validate:rhythm
       - name: "Unit tests"
         run: npm test
