@@ -22,7 +22,7 @@
 | 11 版本与发布（**v5.0.1 补丁**） | 版本号 + CHANGELOG + 留档 + 构建 + 冒烟 + push | `package.json`/`package-lock.json` 5.0.1；CHANGELOG v5.0.1 节（含「**存档无需重开**」）；[plan/05 §十一](../05-发布留档.md) 双栏 + [v5/05 骨架指针](05-发布留档.md)；`npm run build` → `gate:budget` **761.06KB ≤ 850KB** 0 WARN；干净静态服务（`py -m http.server` 伺服 dist）**双端一键通关 + 768 + v5 自定义出生全流程 exit 0**；`dist.zip` **785,533 字节** sha256 `d5493d23…49eee0`（31 条目） |
 | 12 门禁终值（改后） | 全量复跑 | validate **0 FAIL**（`S` 标签 21 / 图 55 / 覆盖 81.0% / 豁免 56）/ story 七项绿 / rhythm 绿 / **vitest 404**（37 文件；基线 403 → 404）/ tsc 0 / e2e 双端绿（含触控 ≥44px）/ license 0 FAIL（510 件）/ budget **761.06KB** / desens 547 文件 0 命中 / layout 全绿 |
 | 13 Traffic（未到期，复核一次） | `gh api …/traffic/{views,clones}` + repo + issues | views **0** / clones **202**（unique 60，窗口 10-12～10-25，与首查同值，**非当日新增**）/ stars·forks·watchers 0 / `gh issue list --state all` 空 |
-| 14 推送与发布留痕（**推送后补记**） | push（SSH:22）→ CI → Pages → tag v5.0.1 → Release | 待补记：commit 号 / ci run 号 + deploy-pages run 号（双 success）/ 线上双端一键通关 exit 0 / tag v5.0.1 @ commit / Release 五部分 + dist.zip sha256 下载复核一致 |
+| 14 推送与发布留痕 | push（SSH:22）→ CI → Pages → tag v5.0.1 → Release | commit `2c37e84` push 成功（`66556c8..2c37e84`）；ci run **40353070799 success**（三 job：Methodology gates + Vitest node22/24）+ deploy-pages run **40353070810 success**；线上 https://yuluo554.github.io/xinlu/ **双端一键通关 + 768 + v5 自定义出生全流程 exit 0**（含触控 ≥44px 断言）；tag **v5.0.1 @ `2c37e84`**（annotated）+ Release https://github.com/yuluo554/xinlu/releases/tag/v5.0.1 （五部分 + dist.zip **785,533 字节** sha256 `d5493d23…49eee0`，`gh release download` 复核一致 + 解压与本地 `dist/` 逐文件一致 + 重建 dist 逐文件一致） |
 
 **本轮改动清单（工作树，未提交）**：
 
@@ -59,7 +59,7 @@
 8. **四个机检入口**：`tests/scene-misfits.test.ts`（错配棘轮，判红）/ `node tools/v5-scene-audit.mjs`（配图语义回归哨兵，只读恒 0）/ `node tools/v5-scenes-sheet.mjs`（总览图重生成）/ **`npm run e2e`（双端，含事件卡触控 ≥44px 与 L1 行宽 ≤34 字断言，判红）**。注意：**e2e 不在 CI 里**（CI 无浏览器：layout 两门 + typecheck / validate / validate:story / validate:rhythm / vitest）——触控断言只在本地跑得到。
 9. **配图纪律不变**（v5/02 §十四）：映射单源 = `scene-map.json` 的 `keyTag`；变体取图用事件 id 哈希高位（`>>> 16`）；**归属判据**：图标必须是「该类场景（或场景里的核心物件）」——抽象符号（情绪/时间/氛围/社交/舞台）不得硬凑。
 10. **Traffic 下一回 ≈ 2026-11-02**（发布 +7 天，这才是第一次有意义的 v5 回访）：`gh api repos/<user>/<repo>/traffic/views|clones`；基线 views 0 / clones 202（14 天窗口累计，非当日新增）。
-11. **远端状态**：origin/main = 上一棒批次 `81e76ba`；本棒改动见 §一 清单（v5.0.1 的 commit / tag / Release / CI run 号**在推送后补记在 §一 行 14 与 [plan/05 §十一](../05-发布留档.md) 的「tag 后追加」栏**）。
+11. **远端状态**：origin/main = `2c37e84`（本棒 v5.0.1 提交；紧随其后还有一笔收官提交补记留档与本节事实）；**tag v5.0.1 已推**；Pages 线上 = `2c37e84` 构建（deploy-pages 40353070810 success）；Release = v5.0.1（附件 sha256 复核一致）。CI / Release / 线上实开事实见 §一 行 14 与 [plan/05 §十一](../05-发布留档.md)「tag 后追加」栏。
 12. **「口径有、机检无」的坑要主动查**：凡是上一棒交接单写「E2E 的 X 断言已覆盖 YYY」，**先在 `tests/e2e/smoke.mjs` 里 grep 那个判据**再信——本棒就这样补上了「触控 ≥44px」（此前只有 CSS token + 人工清单，零断言）。
 13. **文档数字会反复漂移**：凡是「统计数据 + 分类说明」的段落一律脚本实算，别手抄（已中招四处：判据面 / `heart-*` 12→7 / `docs/v5-scenes.md` 行数 198→197 / 配图 48 张 19 类 → 55 张 21 类）。
 
@@ -139,6 +139,10 @@
 | `npx vitest run tests/scene-misfits.test.ts`（验红轮） | `sunrise` 回流 → **3 项红**（含阳性对照）；复原 → 5/5 绿 |
 | `npm run gate:license` | 0 FAIL（**510 件**；纹理清仓后 512 → 510） |
 | `gh api …/traffic/{views,clones}` + repo + issues | views 0 / clones 202（unique 60，10-12～10-25）/ stars·forks·watchers 0 / issues 空 |
+| `git push origin main`（SSH:22） | `66556c8..2c37e84` 成功；ci **40353070799 success**（3 job）+ deploy-pages **40353070810 success** |
+| 线上实开：`node tests/e2e/smoke.mjs --no-build --base-url https://yuluo554.github.io/xinlu/` | **exit 0**（双端一键通关 + 768 + v5 自定义出生全流程；触控 ≥44px 最小 44） |
+| `git tag -a v5.0.1` + `gh release create v5.0.1 … dist.zip` | tag @ `2c37e84` 推送成功；Release 建成功（五部分说明 + 附件） |
+| `gh release download v5.0.1 --pattern dist.zip` | 785,533 字节 / sha256 `d5493d23…49eee0` **与说明一致**；解压件与本地 `dist/` 逐文件一致；`dist/` 重建到临时目录亦逐文件一致 |
 
 ## 七、命令速查
 
