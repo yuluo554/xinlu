@@ -18,9 +18,9 @@
 | 7 第 16 类修 SI-001（**用户明示**） | 一级摘出 + 二级改挂 + 重画图库 | 摘出 13 个抽象符号键（情绪/时间/氛围/社交/舞台）→ 显式豁免；宠物·玩物·影音·器乐 25 键改挂**新建四类** `pet`/`toy`/`media`/`music`（+`tired-eye`→home、`caterpillar`/`star-formation`→outdoors）；`night`/`meal` 事件归零 → 退役；**新画 11 张线稿**（pet-cat/cage、toy-jigsaw/gamepad、media-tv/radio/phone、music-guitar/piano/mic、funeral-candles）。实测：`node tools/v5-gen-scene-map.mjs` → **标签 21 类 / 图 55 张**、覆盖 **239/295 = 81.0%**、豁免 **56**；`npm run validate` → `S` 区绿（同三个数）；`node tools/v5-scene-audit.mjs` → `✅ 非场景图标已清零……错配键 0 键 / 命中事件 0 条` |
 | 8 防回退（棘轮收紧到 0） | `tests/scene-misfits.test.ts` 改写 + 验红 | 快照 `0 / 0` + **阳性对照**（把黑名单任一键塞回 keyTag 副本必须数出 1）+ 覆盖率仍 ≥60% 的正向证据。**验红实测**：`sunrise` 塞回 `keyTag` → **3 项红**（含阳性对照），复原 → 5/5 绿 |
 | 9 图库总览与目检 | 新工具 `tools/v5-scenes-sheet.mjs` | 用本机 Edge 无头把 55 张排成网格落盘 `docs/assets/v5-scenes-sheet.png`；目检：11 张新图主体可辨（猫/笼/拼图/手柄/电视/收音机/手机/吉他/琴键/话筒/双烛），与事件语义对应 |
-| 10 清仓（**用户明示**） | 删 `assets/cc0/parchment/` 整目录 | 2 件处理版 webp（git 跟踪，`git rm`）+ 本地 jpg 留底（gitignored）一并删；[assets/README.md](../../assets/README.md) 该节改「已清出仓库」并**保留溯源文本**；[00 决策记录](00-README总览.md) 新增推翻行；`npm run gate:license` → 跟踪图像 **512 → 510 件**仍 0 FAIL |
+| 10 清仓（**用户明示**） | 删 `assets/cc0/parchment/` 整目录 | 2 件处理版 webp（git 跟踪，`git rm`）+ 本地 jpg 留底（gitignored）一并删；[assets/README.md](../../assets/README.md) 该节改「已清出仓库」并**保留溯源文本**；[00 决策记录](00-README总览.md) 新增推翻行；`npm run gate:license` → 跟踪图像 **512 → 517 件**仍 0 FAIL（**2026-10-27 订正**：原记 510 有误，只扣了清仓 −2、漏计同笔场景图净增 +7） |
 | 11 版本与发布（**v5.0.1 补丁**） | 版本号 + CHANGELOG + 留档 + 构建 + 冒烟 + push | `package.json`/`package-lock.json` 5.0.1；CHANGELOG v5.0.1 节（含「**存档无需重开**」）；[plan/05 §十一](../05-发布留档.md) 双栏 + [v5/05 骨架指针](05-发布留档.md)；`npm run build` → `gate:budget` **761.06KB ≤ 850KB** 0 WARN；干净静态服务（`py -m http.server` 伺服 dist）**双端一键通关 + 768 + v5 自定义出生全流程 exit 0**；`dist.zip` **785,533 字节** sha256 `d5493d23…49eee0`（31 条目） |
-| 12 门禁终值（改后） | 全量复跑 | validate **0 FAIL**（`S` 标签 21 / 图 55 / 覆盖 81.0% / 豁免 56）/ story 七项绿 / rhythm 绿 / **vitest 404**（37 文件；基线 403 → 404）/ tsc 0 / e2e 双端绿（含触控 ≥44px）/ license 0 FAIL（510 件）/ budget **761.06KB** / desens 547 文件 0 命中 / layout 全绿 |
+| 12 门禁终值（改后） | 全量复跑 | validate **0 FAIL**（`S` 标签 21 / 图 55 / 覆盖 81.0% / 豁免 56）/ story 七项绿 / rhythm 绿 / **vitest 404**（37 文件；基线 403 → 404）/ tsc 0 / e2e 双端绿（含触控 ≥44px）/ license 0 FAIL（517 件；订正原记 510）/ budget **761.06KB** / desens 547 文件 0 命中 / layout 全绿 |
 | 13 Traffic（未到期，复核一次） | `gh api …/traffic/{views,clones}` + repo + issues | views **0** / clones **202**（unique 60，窗口 10-12～10-25，与首查同值，**非当日新增**）/ stars·forks·watchers 0 / `gh issue list --state all` 空 |
 | 14 推送与发布留痕 | push（SSH:22）→ CI → Pages → tag v5.0.1 → Release | commit `2c37e84` push 成功（`66556c8..2c37e84`）；ci run **40353070799 success**（三 job：Methodology gates + Vitest node22/24）+ deploy-pages run **40353070810 success**；线上 https://yuluo554.github.io/xinlu/ **双端一键通关 + 768 + v5 自定义出生全流程 exit 0**（含触控 ≥44px 断言）；tag **v5.0.1 @ `2c37e84`**（annotated）+ Release https://github.com/yuluo554/xinlu/releases/tag/v5.0.1 （五部分 + dist.zip **785,533 字节** sha256 `d5493d23…49eee0`，`gh release download` 复核一致 + 解压与本地 `dist/` 逐文件一致 + 重建 dist 逐文件一致） |
 
@@ -112,7 +112,7 @@
 - [x] Traffic 复核（未到期）与仓库指标采集
 - [x] **SI-001 修复**（用户明示）：一级摘出 + 二级改挂 + 退役两标签 + 新画 11 张；终值 55 张 / 21 类 / 81.0% / 豁免 56
 - [x] **棘轮收紧到 0/0 + 验红实测**（含阳性对照）
-- [x] **纹理素材清仓**（用户明示）：目录删除 + 台账保留溯源 + 决策记录推翻行 + 许可门复跑 510 件
+- [x] **纹理素材清仓**（用户明示）：目录删除 + 台账保留溯源 + 决策记录推翻行 + 许可门复跑 517 件（原记 510，2026-10-27 订正）
 - [x] **v5.0.1 补丁发布**：版本号 + CHANGELOG（存档无需重开）+ [plan/05 §十一](../05-发布留档.md) 双栏 + 构建 + 干净静态服务双端冒烟 exit 0 + dist.zip（785,533 字节 / sha256）+ push
 - [x] 代码面改动全部走新提交（未在 tag 后改任何已发布面）
 - [x] **每条发现带可复现证据**（命令 + 输出，见 §一 表与 backlog 周自查记录）
@@ -137,7 +137,7 @@
 | `node tools/v5-scene-audit.mjs` | `✅ 非场景图标已清零`（错配键 0 / 命中事件 0）；死图 0 |
 | `node tools/v5-scenes-doc.mjs` / `v5-scenes-sheet.mjs` | 留痕表 216 行（md5 稳定）/ 总览图 55 张 21 类 |
 | `npx vitest run tests/scene-misfits.test.ts`（验红轮） | `sunrise` 回流 → **3 项红**（含阳性对照）；复原 → 5/5 绿 |
-| `npm run gate:license` | 0 FAIL（**510 件**；纹理清仓后 512 → 510） |
+| `npm run gate:license` | 0 FAIL（**517 件**；纹理清仓 −2 + SI-001 场景图净增 +7，512 → 517；原记 510 于 2026-10-27 订正） |
 | `gh api …/traffic/{views,clones}` + repo + issues | views 0 / clones 202（unique 60，10-12～10-25）/ stars·forks·watchers 0 / issues 空 |
 | `git push origin main`（SSH:22） | `66556c8..2c37e84` 成功；ci **40353070799 success**（3 job）+ deploy-pages **40353070810 success** |
 | 线上实开：`node tests/e2e/smoke.mjs --no-build --base-url https://yuluo554.github.io/xinlu/` | **exit 0**（双端一键通关 + 768 + v5 自定义出生全流程；触控 ≥44px 最小 44） |
@@ -165,7 +165,7 @@ node tools/v5-gen-scenes.mjs         # 画稿 → assets/web-ready/scenes/*.svg�
 node tools/v5-gen-scene-map.mjs      # 映射 → src/data/scene-map.json（改 KEY_TAG/VARIANTS 后跑）
 node tools/v5-scenes-doc.mjs         # 重生 docs/v5-scenes.md（改映射后必跑）
 node tools/v5-scenes-sheet.mjs       # 重生 docs/assets/v5-scenes-sheet.png（图库变动后跑）
-npm run gate:license                 # 许可门（实测 510 件跟踪图像）
+npm run gate:license                 # 许可门（实测 517 件跟踪图像；原记 510 已订正）
 npm run gate:budget                  # 预算门（850KB 线；实测 761.06KB）
 gh api repos/<user>/<repo>/traffic/views   # Traffic 周记（clones 同路径；下一回 ≈ 2026-11-02）
 gh release view v5.0.1               # Release 核对（v5.0.0 同例）
