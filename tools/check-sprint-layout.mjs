@@ -47,6 +47,15 @@ const REQUIRED_FILES = [
   "plan/v4/05-发布留档.md",
   "plan/v4/06-运维节奏.md",
   "plan/v4/backlog.md",
+  // v5.0 执行计划套件（装订见 plan/00 文档索引 v5 行；2026-10-26 装订棒落位）
+  "plan/v5/00-README总览.md",
+  "plan/v5/01-题目文档.md",
+  "plan/v5/02-数据与口径.md",
+  "plan/v5/03-模块清单与验收.md",
+  "plan/v5/04-里程碑任务分解.md",
+  "plan/v5/05-发布留档.md",
+  "plan/v5/06-运维节奏.md",
+  "plan/v5/backlog.md",
 ];
 
 /**
@@ -83,6 +92,15 @@ const REQUIRED_SECTIONS = {
   "plan/v4/05-发布留档.md": ["发布概要", "tag 时点事实", "tag 后追加事实"],
   "plan/v4/06-运维节奏.md": ["运维节奏", "v4 扩展缺口"],
   "plan/v4/backlog.md": ["队列"],
+  // v5 套件：小节关键词取自各档实有标题（02/03 用 v5 自己的口径名，不复用 v1/v2/v4 关键词）
+  "plan/v5/00-README总览.md": ["文档索引", "决策记录", "承诺-证据台账", "里程碑总表"],
+  "plan/v5/01-题目文档.md": ["任务要求", "验收标准", "边界与非目标"],
+  "plan/v5/02-数据与口径.md": ["家庭槽位口径", "偶遇层", "节奏变体", "文本长度口径", "卡片三层"],
+  "plan/v5/03-模块清单与验收.md": ["模块依赖图", "家庭与偶遇", "门禁与发布"],
+  "plan/v5/04-里程碑任务分解.md": ["里程碑任务分解", "风险与恢复"],
+  "plan/v5/05-发布留档.md": ["发布概要", "tag 时点事实", "tag 后追加事实"],
+  "plan/v5/06-运维节奏.md": ["运维节奏", "v5 扩展缺口"],
+  "plan/v5/backlog.md": ["队列"],
 };
 
 // HANDOFF 七节（与 skill 硬约束①一致）。断言"必需节都存在"，不断言"节数恰好等于 7"
@@ -96,11 +114,68 @@ const EXEMPT_MILESTONES = ["M0"];
 /** 末棒要不要交接单：false = 要（写"收官交接单"）。 */
 const HANDOFF_EXEMPT_LAST = false;
 
-/** 里程碑 ID 统一为字符串键：v1 = "M0"–"M6"；v2 = "v2-M1'"–"v2-M4'"；v4 = "v4-M1'''"–"v4-M4'''"
+/** 计划腿（leg）登记表——**新腿只在这里加一行**：状态行正则 / 排序 / 交接单路径 / 台账 + 队列扫描面
+ *  全部由它派生（判别：凡"加一条腿就要改五处常量"的地方，常量就是错的）。
+ *  apostrophes = 文档口径里的撇号数（v2 一撇 / v4 三撇 / v5 四撇），交接单文件名一律不带撇号。
+ *  wired = 该腿是否已接门。**未接门的腿要在这里显式登记**（不是靠正则漏掉它）：
+ *    v3 腿的交接单按"编号随棒顺延"落成 HANDOFF-v3-M<k+1>，与门的最低校验口径（每 ✅ 里程碑一份
+ *    HANDOFF-<leg>-M<k>）不同构，故显式声明未接门、纪律双维护（见 AGENTS.md 与 plan/v3/backlog.md 观察区）。
+ *    未接门腿的状态行仍被**计数并打印**（在 STATUS 结论里可见），只是不参与一致性判定——避免"静默掉出待检集合"。 */
+const LEG_CONFIG = {
+  v3: { rank: 500, apostrophes: 2, dir: "plan/v3", wired: false },
+  v2: { rank: 1000, apostrophes: 1, dir: "plan/v2", wired: true },
+  v4: { rank: 2000, apostrophes: 3, dir: "plan/v4", wired: true },
+  v5: { rank: 3000, apostrophes: 4, dir: "plan/v5", wired: true },
+};
+const LEG_ORDER = Object.keys(LEG_CONFIG);
+const WIRED_LEGS = LEG_ORDER.filter((leg) => LEG_CONFIG[leg].wired);
+const legOf = (k) => LEG_ORDER.find((leg) => k.startsWith(`${leg}-`)) ?? null;
+const apostrophesOf = (leg) => "'".repeat(LEG_CONFIG[leg].apostrophes);
+const isWired = (k) => {
+  const leg = legOf(k);
+  return leg === null || LEG_CONFIG[leg].wired;
+};
+
+/** 里程碑 ID 统一为字符串键：v1 = "M0"–"M6"；v2 = "v2-M1'"；v4 = "v4-M1'''"；v5 = "v5-M1''''"
  *  （撇号数是文档口径的一部分，交接单文件名不带撇号）。排序/判空全走 milestoneRank，别再对键做数字减法。 */
-const milestoneRank = (k) =>
-  (k.startsWith("v2-") ? 1000 : k.startsWith("v4-") ? 2000 : 0) +
-  Number(k.replace(/^v[24]-/, "").replace(/\D/g, ""));
+const milestoneRank = (k) => {
+  const leg = legOf(k);
+  return (leg === null ? 0 : LEG_CONFIG[leg].rank) + Number(k.replace(/^v\d+-/, "").replace(/\D/g, ""));
+};
+
+/** ✅ 里程碑的交接单路径：v1 落 plan/HANDOFF-M<k>.md；腿内落 plan/<leg>/HANDOFF-<leg>-M<k>.md。 */
+function handoffPath(k) {
+  const leg = legOf(k);
+  if (leg === null) return `plan/HANDOFF-${k}.md`;
+  return `${LEG_CONFIG[leg].dir}/HANDOFF-${leg}-M${k.match(/-M(\d+)/)[1]}.md`;
+}
+
+/** 把状态行里抓到的腿内里程碑号（撇号数可能写错）规范化成登记口径：v5-M1 → v5-M1''''。 */
+function normalizeLegKey(raw) {
+  const leg = legOf(raw);
+  if (leg === null) return raw; // 未登记的腿：原样保留，让它在状态一致性判据里自身暴露出来
+  return `${leg}-M${raw.match(/-M(\d+)/)[1]}${apostrophesOf(leg)}`;
+}
+
+/** 里程碑键 → 匹配"引用它"的正则片段（撇号数容错 1+，写错撇号也不少检）。键的撇号已经含在字面量里。 */
+function keyPattern(k) {
+  const leg = legOf(k);
+  const num = k.replace(/^v\d+-/, "").replace(/\D/g, "");
+  // v1 键 "M1" 必须挡住 "v2-M1'" 这类腿内引用（键前不许是字母数字/连字符）
+  return leg === null ? new RegExp(`(?<![0-9A-Za-z-])M${num}(?![0-9])`) : new RegExp(`${leg}-M${num}'+`);
+}
+
+/** backlog 队列行里的"待 <键>"引用。 */
+function queuedRefPattern(k) {
+  const leg = legOf(k);
+  const num = k.replace(/^v\d+-/, "").replace(/\D/g, "");
+  return leg === null
+    ? new RegExp(`待\\s*(?<![0-9A-Za-z-])M${num}(?![0-9])`)
+    : new RegExp(`待\\s*${leg}-M${num}'+`);
+}
+
+/** 台账状态格里的键引用（与 keyPattern 同判据，语义别名便于阅读调用点）。 */
+const ledgerRefPattern = keyPattern;
 
 /** 状态副本：同一里程碑在这几处的状态必须**互相一致**（逐副本独立采集，真值不取自单一副本）。 */
 const STATUS_COPIES = [
@@ -108,9 +183,11 @@ const STATUS_COPIES = [
   { file: "README.md", kind: "状态表" },
 ];
 
-/** 只认"状态行"：表格行且首格是里程碑号（v1 = M<k>，可加粗；v2 = v2-M<k>' / v4 = v4-M<k>'''，不加粗）。
- *  不扫自由文本——散文里的 M0–M6 / v2-M1' / v4-M1''' 不参与判定。 */
-const STATUS_LINE = /^\|\s*(?:\*{0,2}M(\d+)\b|v2-M(\d+)'|v4-M(\d+)''')/;
+/** 只认"状态行"：表格行且首格是里程碑号（v1 = M<k>，可加粗；腿内 = v<leg>-M<k> 后跟撇号，不加粗）。
+ *  撇号按 1+ 宽松匹配再规范化到登记值——**故意不按撇号数精确匹配**：写错撇号数的行若被正则漏掉，
+ *  它就"静默掉出待检集合"（假门族①自我参照的同族），宽匹配 + 规范化才不会让状态不一致隐身。
+ *  不扫自由文本——散文里的 M0–M6 / v2-M1' / v5-M1'''' 不参与判定。 */
+const STATUS_LINE = /^\|\s*(?:\*{0,2}M(\d+)\b|(v\d+-M\d+)'+)/;
 /** 状态格必须以状态符开头才计入（防"DoD 长文被当成状态格"的假读）；🔒 视为已完成冻结态。 */
 const STATUS_DONE = /^[|*\s]*(✅|🔒)/;
 const STATUS_PENDING = /^[|*\s]*(⬜|🟡)/;
@@ -138,16 +215,18 @@ function checkSections() {
 }
 
 /**
- * 逐副本采集状态：Map<k, Set<"done"|"pending">>。真值不取自任何一个副本——
- * 任一里程碑出现两种状态即 FAIL。每份副本单独记命中行数并打进结论（0 行必须可见，
- * 合计 0 行 = 判据空跑 = FAIL）。
+ * 逐副本采集状态：Map<k, Map<copyFile, "done"|"pending">>。真值不取自任何一个副本——
+ * 任一里程碑出现两种状态即 FAIL；**且在已接门腿里，任一里程碑必须在每一份副本上都出现**
+ * （只在 A 副本有、B 副本漏写 = 该里程碑从 B 的视角静默消失，只在"状态冲突"处才可见是不得行的——
+ *  这正是假门族①「自我参照的真值源」的同族：掉出去的行永远不会被判不一致）。
+ * 每份副本单独记命中行数并打进结论（0 行必须可见，合计 0 行 = 判据空跑 = FAIL）。
  */
 function collectStates() {
-  const states = new Map();
+  const states = new Map(); // k -> Map(copyFile -> state)
   const rowsByCopy = new Map();
-  const note = (k, state) => {
-    if (!states.has(k)) states.set(k, new Set());
-    states.get(k).add(state);
+  const note = (k, copyFile, state) => {
+    if (!states.has(k)) states.set(k, new Map());
+    states.get(k).set(copyFile, state);
   };
   for (const copy of STATUS_COPIES) {
     const text = read(copy.file);
@@ -163,8 +242,9 @@ function collectStates() {
       const pending = STATUS_PENDING.test(statusCell);
       if (!done && !pending) continue; // 状态格不是状态符开头 → 不是机读状态行
       rows += 1;
-      const key = m[3] !== undefined ? `v4-M${m[3]}'''` : m[2] !== undefined ? `v2-M${m[2]}'` : `M${m[1]}`;
-      note(key, pending ? "pending" : "done");
+      // 腿内键按登记表规范化撇号数（v2 一撇 / v4 三撇 / v5 四撇）——写错撇号数也只影响显示口径，不影响同一性判定。
+      const key = m[2] === undefined ? `M${m[1]}` : normalizeLegKey(m[2]);
+      note(key, copy.file, pending ? "pending" : "done");
     }
     rowsByCopy.set(copy.file, rows);
   }
@@ -173,47 +253,59 @@ function collectStates() {
 
 function checkStatusAgreement({ states, rowsByCopy }) {
   const conflicts = [];
-  for (const [k, set] of [...states.entries()].sort((a, b) => milestoneRank(a[0]) - milestoneRank(b[0]))) {
-    if (set.size > 1) conflicts.push(`${k} 在副本间状态不一致（${[...set].join(" vs ")}）`);
+  const missing = [];
+  const unwired = [];
+  const copyFiles = [...rowsByCopy.keys()];
+  for (const [k, perCopy] of [...states.entries()].sort((a, b) => milestoneRank(a[0]) - milestoneRank(b[0]))) {
+    if (!isWired(k)) {
+      unwired.push(k);
+      continue; // 未接门腿：可见地计数，不参与一致性判定（纪律双维护，见 LEG_CONFIG）
+    }
+    const distinct = new Set(perCopy.values());
+    if (distinct.size > 1) {
+      conflicts.push(`${k} 在副本间状态不一致（${[...perCopy.entries()].map(([f, s]) => `${f.split("/").pop()}:${s}`).join(" vs ")}）`);
+    }
+    // 已接门腿的里程碑必须在每份副本都出现（缺行 = 从该副本静默消失）
+    const absent = copyFiles.filter((f) => !perCopy.has(f));
+    if (absent.length) missing.push(`${k} 缺行于 ${absent.map((f) => f.split("/").pop()).join("/")}`);
   }
   const total = [...rowsByCopy.values()].reduce((a, b) => a + b, 0);
   const perCopy = [...rowsByCopy.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([file, rows]) => `${file.split("/").pop()}:${rows}`)
     .join(" ");
-  if (conflicts.length === 0 && total === 0) {
+  if (conflicts.length === 0 && missing.length === 0 && total === 0) {
     add("LAYOUT.STATUS", false, `所有副本合计 0 行状态行（判据空跑）：${perCopy}`);
     return;
   }
+  const wiredCount = states.size - unwired.length;
+  const unwiredNote = unwired.length ? `；未接门腿 ${unwired.length} 个不计入（${[...new Set(unwired.map((k) => legOf(k)))].join("/")}，纪律双维护）` : "";
+  const problems = [...conflicts, ...missing];
   add(
     "LAYOUT.STATUS",
-    conflicts.length === 0,
-    conflicts.length ? conflicts.join("；") : `${scanned.copies} 处副本 × ${states.size} 个里程碑 状态全一致（行数 ${perCopy}）`,
+    problems.length === 0,
+    problems.length
+      ? problems.join("；")
+      : `${scanned.copies} 处副本 × ${wiredCount} 个已接门里程碑 状态全一致且无缺行（行数 ${perCopy}）${unwiredNote}`,
   );
 }
 
 /** 交接单判据：每个 ✅ 里程碑一份 HANDOFF（M0 豁免；末棒开关见 AGENTS.md）。
- *  v1 落 plan/HANDOFF-M<k>.md；v2 腿落 plan/v2/HANDOFF-v2-M<k>.md；v4 腿落 plan/v4/HANDOFF-v4-M<k>.md
- *  （腿内文件名一律不带撇号）。 */
+ *  v1 落 plan/HANDOFF-M<k>.md；腿内落 plan/<leg>/HANDOFF-<leg>-M<k>.md（腿内文件名一律不带撇号）。 */
 function checkHandoffs(done, allMilestones) {
   const lastV1 = allMilestones
-    .filter((k) => !k.startsWith("v2-") && !k.startsWith("v4-"))
+    .filter((k) => legOf(k) === null)
     .sort((a, b) => milestoneRank(a) - milestoneRank(b))
     .pop();
   const missing = [];
   for (const k of done) {
     if (EXEMPT_MILESTONES.includes(k)) continue;
-    const isV2 = k.startsWith("v2-");
-    const isV4 = k.startsWith("v4-");
-    if (HANDOFF_EXEMPT_LAST && !isV2 && !isV4 && k === lastV1) continue;
-    const rel = isV2
-      ? `plan/v2/HANDOFF-v2-M${k.match(/v2-M(\d+)'$/)[1]}.md`
-      : isV4
-        ? `plan/v4/HANDOFF-v4-M${k.match(/v4-M(\d+)'''$/)[1]}.md`
-        : `plan/HANDOFF-${k}.md`;
+    if (!isWired(k)) continue; // 未接门腿（v3）：交接单按编号随棒顺延，最低校验口径不同构，显式不判
+    if (HANDOFF_EXEMPT_LAST && legOf(k) === null && k === lastV1) continue;
+    const rel = handoffPath(k);
     const text = read(rel);
     if (text === null) {
-      missing.push(`${rel}(缺${!isV2 && k === lastV1 && !HANDOFF_EXEMPT_LAST ? "：末棒要写收官交接单" : ""})`);
+      missing.push(`${rel}(缺${legOf(k) === null && k === lastV1 && !HANDOFF_EXEMPT_LAST ? "：末棒要写收官交接单" : ""})`);
       continue;
     }
     scanned.handoffs += 1;
@@ -224,15 +316,16 @@ function checkHandoffs(done, allMilestones) {
 }
 
 /**
- * backlog 队列表是状态的隐蔽副本（本项目的"缺口列"）。v1 / v2 / v4 三份 backlog 都扫。
- * 判据收窄：某行状态格挂 ⬜/🟡 **且**行内以"待 M<k>"/"待 v2-M<k>'"/"待 v4-M<k>'''"指名一个已 ✅ 的里程碑 → 该行已过期。
+ * backlog 队列表是状态的隐蔽副本（本项目的"缺口列"）。v1 一份 + 每腿一份 backlog 都扫（扫描面由 LEG_CONFIG 派生）。
+ * 判据收窄：某行状态格挂 ⬜/🟡 **且**行内以"待 M<k>"/"待 v<leg>-M<k>'"指名一个已 ✅ 的里程碑 → 该行已过期。
  * 匹配前剥掉行内代码与文件名（`plan/RELEASE-M6.md` 是文件引用不是状态引用）。
  * 扫描面 = 队列表头 → 首条非表格行即止；行数必须打印（0 行要可区分于"没扫到"）。
  */
 function checkStaleQueue(done) {
   const stale = [];
   let scannedRows = 0;
-  for (const backlogFile of ["plan/backlog.md", "plan/v2/backlog.md", "plan/v4/backlog.md"]) {
+  const scannedFiles = ["plan/backlog.md", ...WIRED_LEGS.map((leg) => `${LEG_CONFIG[leg].dir}/backlog.md`)];
+  for (const backlogFile of scannedFiles) {
     const lines = (read(backlogFile) ?? "").split("\n");
     const headerIdx = lines.findIndex((l) => l.startsWith("|") && l.includes("ID") && l.includes("状态"));
     if (headerIdx < 0) {
@@ -251,7 +344,7 @@ function checkStaleQueue(done) {
       // 先剥"证据在哪份文件"，剩下的才是状态引用
       const row = lines[i].replace(/`[^`]*`/g, " ").replace(/[\w./-]+\.(?:md|mjs|js|json|ts)/g, " ");
       for (const k of done) {
-        if (new RegExp(`待\\s*${k}([^0-9]|$)`).test(row)) {
+        if (queuedRefPattern(k).test(row)) {
           stale.push(`${backlogFile} 第 ${rowsInFile} 行仍"待 ${k}"而该里程碑已 ✅`);
         }
       }
@@ -260,20 +353,22 @@ function checkStaleQueue(done) {
   add(
     "LAYOUT.QUEUE",
     stale.length === 0,
-    stale.length ? stale.join("；") : `backlog 队列（v1+v2+v4）扫了 ${scannedRows} 行，无过期"待 M<k>"`,
+    stale.length
+      ? stale.join("；")
+      : `backlog 队列（${scannedFiles.length} 份，v1+${WIRED_LEGS.join("+")}）扫了 ${scannedRows} 行，无过期"待 M<k>"`,
   );
 }
 
 /**
  * 承诺-证据台账是状态副本（它不含"里程碑"表头，STATUS_COPIES 扫不到，单独一条判据）。
- * v1（plan/00）/ v2（plan/v2/00）/ v4（plan/v4/00）三份台账都扫。
+ * v1（plan/00）+ 每腿（plan/<leg>/00-README总览.md）台账都扫（扫描面由 LEG_CONFIG 派生）。
  * 判据收窄：状态格同时含未完成标记与已 ✅ 里程碑号 → FAIL。
- * 键匹配双护：键前不许是字母数字/连字符/撇号（防 "v2-M1'" 误命中已 ✅ 的 "M1"）、键后不许紧跟撇号。
  */
 function checkLedger(done) {
   const bad = [];
   let rows = 0;
-  for (const ledgerFile of ["plan/00-README总览.md", "plan/v2/00-README总览.md", "plan/v4/00-README总览.md"]) {
+  const scannedFiles = ["plan/00-README总览.md", ...WIRED_LEGS.map((leg) => `${LEG_CONFIG[leg].dir}/00-README总览.md`)];
+  for (const ledgerFile of scannedFiles) {
     const text = read(ledgerFile) ?? "";
     const lines = text.split("\n");
     const headerIdx = lines.findIndex((l) => l.startsWith("|") && l.includes("承诺") && l.includes("状态"));
@@ -290,7 +385,7 @@ function checkLedger(done) {
       const status = cells[cells.length - 2] ?? "";
       if (!/[⬜🟡]/.test(status)) continue;
       for (const k of done) {
-        if (new RegExp(`(?<![0-9A-Za-z'-])${k}(?!')`).test(status)) {
+        if (ledgerRefPattern(k).test(status)) {
           bad.push(`${ledgerFile} 台账行仍挂未完成: ${status.slice(0, 60)}`);
         }
       }
@@ -299,7 +394,35 @@ function checkLedger(done) {
   add(
     "LAYOUT.LEDGER",
     bad.length === 0 && rows > 0,
-    rows === 0 ? "台账表 0 行——判据空跑" : bad.length ? bad.join("；") : `台账（v1+v2+v4）${rows} 行，已成 ✅ 的里程碑无未完成标记`,
+    rows === 0
+      ? "台账表 0 行——判据空跑"
+      : bad.length
+        ? bad.join("；")
+        : `台账（${scannedFiles.length} 份，v1+${WIRED_LEGS.join("+")}）${rows} 行，已成 ✅ 的里程碑无未完成标记`,
+  );
+}
+
+/**
+ * README 行数门（plan/03 §6「≤120 行」+ plan/04 §M5 + v5/04 §M4「README 增量不破行门」）。
+ * **本条落地前，这个被三份文档点名的门没有任何东西在核**（plan/HANDOFF-M6.md 自述"未自动化"）——
+ * 于是每版新增状态行都在悄悄逼近上限，且"超了"没有任何信号。判据 = 行数，常量单源在本条注释。
+ * 已知取舍：README 是产品页，状态表随版本增长，故上限是**硬门**，超了必须压缩旧版本小节而不是抬线。
+ */
+const README_MAX_LINES = 120;
+
+function checkReadmeBudget() {
+  const text = read("README.md");
+  if (text === null) {
+    add("LAYOUT.README", false, "缺 README.md");
+    return;
+  }
+  const lines = text.replace(/\n$/, "").split("\n").length; // 末行换行不算一行
+  const statusRows = (text.match(/^\|\s*(?:\*{0,2}M\d+\b|v\d+-M\d+'+)/gm) ?? []).length;
+  const ok = lines <= README_MAX_LINES;
+  add(
+    "LAYOUT.README",
+    ok,
+    `${lines}/${README_MAX_LINES} 行${ok ? "" : `（超 ${lines - README_MAX_LINES} 行——压缩旧版本小节，别抬线）`}；状态表 ${statusRows} 行`,
   );
 }
 
@@ -311,6 +434,7 @@ function checkLedger(done) {
 const RELEASE_MILESTONE = "M6";
 const RELEASE_MILESTONE_V2 = "v2-M4'";
 const RELEASE_MILESTONE_V4 = "v4-M4'''";
+const RELEASE_MILESTONE_V5 = "v5-M4''''";
 
 function checkReleaseDoc(done) {
   if (!done.includes(RELEASE_MILESTONE)) {
@@ -339,6 +463,12 @@ function checkReleaseDoc(done) {
     ok = ok && v4Section;
     detail += `；v4.0.0 留档节:${v4Section}`;
   }
+  // v5 同例：v5.0.0 节随 v5-M4'''' 翻 ✅ 后要求存在（v5/05 骨架自证约定：并入 plan/05 §十）
+  if (done.includes(RELEASE_MILESTONE_V5)) {
+    const v5Section = /^#{2,4}.*v5\.0\.0/m.test(release);
+    ok = ok && v5Section;
+    detail += `；v5.0.0 留档节:${v5Section}`;
+  }
   add("LAYOUT.RELEASE", ok, detail);
 }
 
@@ -358,7 +488,9 @@ function checkDocumentedToolsExist(doneMilestones) {
   // v2-M3' 清空 check-dist-budget.mjs（预算门随 v2-M3' 3.1 落位，同提交删登记）。
   // v4 套件点名：写实初筛脚本（v4-M1''' 块 1.3 落位 + `npm run validate:story` 同批，落位同提交删本登记）。
   // v4-M1''' B 段已清空 check-story-quality.mjs（2026-10-25 与 243 条重写同提交落位）。
-  const PENDING_TOOLS = {};
+  // v5 套件点名：节奏门 scripts/check-rhythm.mjs（v5-M1'''' 块 1.4 落位 + `npm run validate:rhythm` 同批；
+  //   落位同提交删本登记——已 ✅ 还留着登记会走 stale 分支变红）。
+  const PENDING_TOOLS = { "scripts/check-rhythm.mjs": "v5-M1''''" };
   const docs = ["AGENTS.md", ...(existsSync(join(ROOT, "plan")) ? readdirSyncSafe() : [])];
   const referenced = new Set();
   for (const rel of docs) {
@@ -392,7 +524,7 @@ function checkDocumentedToolsExist(doneMilestones) {
 function readdirSyncSafe() {
   try {
     const rels = [];
-    for (const dir of ["plan", "plan/v2", "plan/v4"]) {
+    for (const dir of ["plan", ...LEG_ORDER.map((leg) => LEG_CONFIG[leg].dir)]) {
       const full = join(ROOT, dir);
       if (!existsSync(full)) continue;
       for (const f of readdirSync(full)) if (f.endsWith(".md")) rels.push(`${dir}/${f}`);
@@ -412,10 +544,15 @@ function main() {
     }
   }
   const { states, rowsByCopy } = collectStates();
-  const done = [...states.entries()].filter(([, set]) => set.has("done")).map(([k]) => k);
+  // states: Map<k, Map<copyFile, state>>——"done" 是**值**不是键（早先写成 set.has("done") 会让 done 恒空，
+  // 于是 HANDOFFS/RELEASE 全部静默不判；这是"判据的单位的选错"同族，改这里必须复跑变异组 3–7）。
+  const done = [...states.entries()]
+    .filter(([, perCopy]) => [...perCopy.values()].includes("done"))
+    .map(([k]) => k);
   const allMilestones = [...states.keys()];
   for (const run of [
     () => checkDocumentedToolsExist(done),
+    checkReadmeBudget,
     () => checkStatusAgreement({ states, rowsByCopy }),
     () => checkHandoffs(done, allMilestones),
     () => checkStaleQueue(done),
