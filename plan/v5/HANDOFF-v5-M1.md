@@ -34,7 +34,7 @@
 5. **README 是硬门，不是建议**：上限 120 行，当前 119。下一版加状态行/特性节前先想好从哪腾量；**不许抬线**（抬线 = 把出口门静默取消，正是 skill「链三」）。
 6. **`scripts/check-rhythm.mjs` 已在 `PENDING_TOOLS` 登记**（值 `v5-M1''''`）。**落位该脚本的同提交必须删这行登记**，否则 v5-M1'''' 翻 ✅ 后走 `stale` 分支报红（这是门的设计，不是 bug）。
 7. **单测基线 298（只加不减）**；vitest 含可达性全量（2496 组）+ 年代轴抽样（936 局），单跑约 16s，其中两个可达性测试各 ~15s 是主要耗时，别当卡死。
-8. **远端**：`origin/main` 起点 = `fed5769`（v4 腿收官）。本棒两笔：视觉基线 `bbaca67` + 装订笔（本档所在）；**push 后 CI 首跑结论回填本节**（无远端验证一律写"本地等价校验"，不许写"CI 绿"）。
+8. **远端**：`origin/main` 起点 = `fed5769`（v4 腿收官）。本棒两笔已 push：视觉基线 `bbaca67` + 装订笔 `ae511a3`。**CI 实测**（2026-10-26，`ae511a3`）：ci run **40269817007** success（三 job 全绿：Methodology gates + Vitest node22 + node24）+ deploy-pages run **40269816998** success。CI 日志已实证跑的是**新版 v5 感知布局门**（`LAYOUT.README 119/120 行` / `LAYOUT.STATUS …19 个已接门里程碑 状态全一致且无缺行` / `LAYOUT.FILES 36 份`），不是旧版。
 9. **发布先例四份**：plan/05 §三/§四（v1）、§七（v2）、§八（v3）、§九（v4）。v5 发布沿 §九 模板，主体落 plan/05 新增 **§十**（`v5/05` 骨架已声明"单源不双写"）——布局门 `RELEASE_MILESTONE_V5` 会在 v5-M4'''' 翻 ✅ 后要求 plan/05 存在 `v5.0.0` 节。
 
 ## 三、下一棒待办（v5-M1'''' 数据与机制层，四块）
@@ -94,7 +94,8 @@
 - [x] `LAYOUT.STATUS` 新增「缺行」判据（原判据会放过整行缺失 → 已修，第 11 组验红）
 - [x] 全门复跑：layout / desens / validate / validate:story / vitest 298 / typecheck / e2e / budget / license 全绿
 - [x] **未提交视觉改造批次入库**（§二.1 已清偿）：独立成笔 `bbaca67`——`src/` 全批（style.css 1859→2618 行 + lines.ts/years.ts 及单测 + screens.ts/app.ts/relations.ts/model.ts/viz/*）+ 40 张 `v5-ui-*` 截图 + 11 张既有截图重留痕 + `plan/v3/02` ▸ v5 界面改造增补 + `.gitignore`/脱敏门 `.taste-skill` 同步；入库前实测 vitest 298/298 + 脱敏 454 文件 0 命中。**v5 代码改动自此可与视觉基线二分回溯**
-- [x] 装订提交（本档所在笔）：`plan/10-5.0优化方案.md` + `plan/v5/` 全套 + `tools/check-sprint-layout.mjs` + `AGENTS.md` + `README.md` + `plan/00`
+- [x] 装订提交（`ae511a3`）：`plan/10-5.0优化方案.md` + `plan/v5/` 全套 + `tools/check-sprint-layout.mjs` + `AGENTS.md` + `README.md` + `plan/00`；已 push
+- [x] **push 后 CI 绿（真跑，非本地等价）**：`ae511a3` → ci run **40269817007** success（Methodology gates + Vitest node22/24 三 job 全绿）+ deploy-pages run **40269816998** success；CI 日志实证跑的是新版 v5 感知布局门
 
 **v5-M1''''（下一棒）**：见 §三 四块表，每块各自 DoD 未勾。
 
