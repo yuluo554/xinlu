@@ -112,6 +112,29 @@
 
 ---
 
+## 八、命令速查（v5-M2'''' 收官时补记；本节由 v5-M2'''' 收官笔补写——布局门 `LAYOUT.HANDOFFS` 在 v5-M2'''' 转 ✅ 后开始校验本档七节齐，缺「命令速查」即报红，属正当补全）
+
+```bash
+# 布局门（第一件事，必须绿）
+node tools/check-sprint-layout.mjs
+node tools/check-desensitized.mjs
+
+# 全门
+npm run validate            # 数据门（0 FAIL）
+npm run validate:story      # 文本长度门（七项）
+npm run validate:rhythm     # 节奏门
+npx vitest run              # 单测（v5-M2 末态 364）
+npx tsc --noEmit            # 类型
+npm run e2e                 # 双端一键通关（含开局四步全流程）
+npm run build && npm run gate:budget && npm run gate:license
+
+# 变异自检（逐条验红再复原）
+node tools/tmp-mutate-v5m2.mjs   # v5-M2：13 组 / 26 项
+node tools/tmp-mutate-v5m1.mjs   # v5-M1 基线：24 项（可复跑）
+```
+
+---
+
 ### 附：本棒提交边界（建议拆笔）
 
 | 笔 | 内容 | 说明 |
