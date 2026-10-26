@@ -172,7 +172,22 @@
 
 infant-012（mirror-mirror）、infant-013（cherish）、toddler-021（stork-delivery）、childhood-004（choice）、childhood-005（cross-mark）、teen-002（shouting）、teen-017（backstab）、adult-015（uncertainty）、adult-021（life-in-the-balance）、midlife-001（crown）、midlife-002（chat-bubble）、teen-019（thought-bubble）、adult-019（diploma）、infant-102（circle）、toddler-101（infinity）、toddler-201（broom）、toddler-203（socks）、youth-102（spy）、adult-202（hidden）、adult-302（health-decrease）、infant-402（baby-face）、toddler-401（walking-scout）、childhood-401（heart-necklace）、childhood-402（chewed-heart）、teen-402（love-mystery）、teen-403（tarot-06-the-lovers）、youth-401（heart-wings）、youth-403（opposite-hearts）、adult-403（nested-hearts）、midlife-403（heart-shield）、elder-401（heart-inside）、elder-402（love-song）、infant-502（图标层已豁免）、toddler-501（blackball）、childhood-503（prank-glasses）、midlife-501（team-idea）、elder-502（ballerina-shoes）、teen-601（brain-freeze）、midlife-603（cigarette）、infant-701（chat-bubble）、childhood-701（blackball）、teen-701（choice）
 
-**豁免的构成**（可复算）：抽象图标（`heart-*` 系 12 个，以及 `choice` / `crossroad` / `despair` / `infinity` / `uncertainty` 等）本来就不是「场景」，硬凑成厨房或街巷会误导，它们继续靠事件图标（Game-Icons）表达；另有 1 条（`infant-502`）在图标层已豁免（`objectKey: null`）。
+**豁免的构成**（从数据实算，见 `node tools/v5-scenes-doc.mjs`；曾手写过一版，与数据漂移过——故改为算出来）：
+
+| 构成 | 条数 | 说明 |
+|---|---|---|
+| `heart-*` 系（情绪符号） | 7 | `heart-necklace` / `chewed-heart` / `heart-wings` / `opposite-hearts` / `nested-hearts` / `heart-shield` / `heart-inside`——画的是一颗心，不是某个场景，硬凑成厨房或街巷只会误导 |
+| 图标层已豁免（`objectKey: null`） | 1 | `infant-502` |
+| 其余抽象符号 / 非场景实物 | 34 | `blackball` ×2 / `chat-bubble` ×2 / `choice` ×2 / `baby-face` / `backstab` / `ballerina-shoes` / `brain-freeze` / `broom` / `cherish` / `cigarette` / `circle` / `cross-mark` / `crown` / `diploma` / `health-decrease` / `hidden` / `infinity` / `life-in-the-balance` / `love-mystery` / `love-song` / `mirror-mirror` / `prank-glasses` / `shouting` / `socks` / `spy` / `stork-delivery` / `tarot-06-the-lovers` / `team-idea` / `thought-bubble` / `uncertainty` / `walking-scout` |
+
+这些事件继续靠事件图标（Game-Icons，295/295 全覆盖）表达量感，不渲染场景图也**不留空框**。
+
+> **⚠ 已知错配（v5-M5 运维首查实测，未修）**：上面这条「抽象符号本就不是场景」的纪律在 `keyTag` 里被自家破了
+> 38 处键 / 52 条事件（17.6%）——情绪与时间图标落进丧事/夜色、
+> 社交图标落进饭桌、宠物与乐器与电子图标落进书桌，画出来是花圈/台灯/碗/书堆，配的却是情绪低落、公园晨练、庙会走丢、兔子与电子琴。
+> 逐条清单与样本见 `node tools/v5-scene-audit.mjs`（只读报告，退出码恒 0）。
+> 处置是产品决策：只摘丧事/夜色/饭桌三级组 → 覆盖 81.0%（豁免 56 条）；全部摘出 → 覆盖 68.1%（豁免 94 条），两者都过 60% 门。
+> 决策登记在 [plan/v5/backlog.md](../plan/v5/backlog.md) SI-001。已映射的 `heart-*` 有 3 个（`heart-organ` / `heart-battery` / `heart-bottle`），它们画的是器官/心电，不属本条错配。
 
 ## §四、与其他门的边界
 
