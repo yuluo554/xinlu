@@ -239,38 +239,138 @@ async function main() {
       const themeDefault = await cdp.evaluate("document.documentElement.dataset.theme ?? '(none)'");
       if (themeDefault !== "paper") throw new Error(`默认主题应为米纸（实得 ${themeDefault}）`);
 
-      // v2-M3' 场景氛围:双端用不同出生环境,断言水域背景随之变化(scene-water filter / scene-clouds opacity)
-      if (vp.env) {
-        const switched = await cdp.evaluate(`(() => {
-          let ok = true;
-          for (const [k, v] of Object.entries(${JSON.stringify(vp.env)})) {
-            const el = document.querySelector('input[name="' + k + '"][value="' + v + '"]');
-            if (el) el.click(); else ok = false;
-          }
-          return ok;
-        })()`);
-        if (!switched) throw new Error(`${vp.width} 档:改选出生环境失败`);
-      }
-
-      // v3-M3'' 开局屏三入口 + v4 三页签（随机/手选/自定义）：提交开局前断言
-      const startTools = await cdp.evaluate(`(() => ({
-        random: !!document.querySelector("[data-random-birth]"),
-        seed: !!document.querySelector("[data-seed-form] .seed-input"),
+      // v5 开局四步（plan/v5/02 §五）：step 1 只有三张玩法卡（其余一概不出现）+ 进度指示 1/4
+      const step1 = await cdp.evaluate(`(() => ({
+        modes: [...document.querySelectorAll("[data-mode]")].map((b) => b.dataset.mode),
+        progress: !!document.querySelector("[data-start-progress]"),
+        count: document.querySelector("[data-start-count]")?.textContent ?? "",
+        stepAttr: document.querySelector(".screen-start")?.dataset.startStep ?? "",
         settings: !!document.querySelector("[data-settings-open]"),
-        tabs: document.querySelectorAll(".start-tablist label").length,
-        customForm: !!document.querySelector("[data-custom-form]"),
-        yearSelect: !!document.querySelector("[data-custom-form] select[name=birthYear]"),
+        gallery: !!document.querySelector("[data-gallery-open]"),
+        formsOnFirstScreen: document.querySelectorAll(".screen-start form, .screen-start .chip").length,
+        cert: !!document.querySelector("[data-cert]"),
       }))()`);
-      if (!startTools.random || !startTools.seed || !startTools.settings) {
-        throw new Error(`${vp.width} 档：开局屏种子码/随机出生/设置入口缺失（${JSON.stringify(startTools)}）`);
+      if (!step1.progress || step1.count !== "1/4" || step1.stepAttr !== "1") {
+        throw new Error(`${vp.width} 档：开局进度指示非法（${JSON.stringify(step1)}）`);
       }
-      if (startTools.tabs !== 3 || !startTools.customForm || !startTools.yearSelect) {
-        throw new Error(`${vp.width} 档：开局屏三页签/自定义表单缺失（${JSON.stringify(startTools)}）`);
+      if (JSON.stringify(step1.modes) !== JSON.stringify(["random", "manual", "custom"])) {
+        throw new Error(`${vp.width} 档：step 1 玩法三选一缺失（${step1.modes.join(",")}）`);
+      }
+      // 一屏一个问题：首屏不得出现任何表单/chip/出生证明（治「首页元素太杂乱」，10 §四.1）
+      if (step1.formsOnFirstScreen !== 0 || step1.cert) {
+        throw new Error(`${vp.width} 档：step 1 混入了表单或出生证明（${step1.formsOnFirstScreen} 个节点）`);
+      }
+      if (!step1.settings) throw new Error(`${vp.width} 档：设置入口缺失`);
+      // 开局四步截图留痕（plan/v5/02 §五/§六：step 1 只有三张玩法卡）
+      if (v === 0) {
+        await cdp.send("Page.captureScreenshot", { format: "png" });
+        const s1 = await cdp.send("Page.captureScreenshot", { format: "png" });
+        writeFileSync(join(ROOT, "docs", "assets", "v5-start-step1-375.png"), Buffer.from(s1.data, "base64"));
       }
 
-      // v3-M2' 时间轴画卷断言:提交开局进入首卡——图标位/状态条/八段轨道在位,mascot 已按 08 §四降级(卡上无鱼)
+      // 回退保值（plan/v5/02 §五 DoD）：手选路径填值 → 回退 → 重进，值仍在
+      // 随后把选择恢复成本档要断言的出生环境（场景水色/云层断言仍按 vp.env 口径）
+      const targetEnv = vp.env ?? { era: "60s", place: "大城", mood: "和睦", style: "权威" };
+      const backKeep = await cdp.evaluate(`(() => {
+        const q = (s) => document.querySelector(s);
+        const pick = (set) => {
+          for (const [k, v] of Object.entries(set)) {
+            const el = q('input[name="' + k + '"][value="' + v + '"]');
+            if (el) el.click();
+          }
+        };
+        q('[data-mode="manual"]').click();
+        pick({ era: "90s", place: "小城", mood: "紧张", style: "忽视" });
+        q("[data-start-back]").click();
+        q('[data-mode="manual"]').click();
+        const got = {};
+        for (const k of ["era", "place", "mood", "style"]) got[k] = q('input[name="' + k + '"]:checked')?.value ?? "";
+        const count = q("[data-start-count]")?.textContent ?? "";
+        pick(${JSON.stringify(targetEnv)});
+        return { got, count, restored: window.__restored ?? true };
+      })()`);
+      const WANT = { era: "90s", place: "小城", mood: "紧张", style: "忽视" };
+      if (JSON.stringify(backKeep.got) !== JSON.stringify(WANT) || backKeep.count !== "2/4") {
+        throw new Error(`${vp.width} 档：回退后重进已填值丢失（${JSON.stringify(backKeep)}）`);
+      }
+      // 开局四步截图留痕：step 2（填要素）
+      if (v === 0) {
+        await cdp.send("Page.captureScreenshot", { format: "png" });
+        const s2 = await cdp.send("Page.captureScreenshot", { format: "png" });
+        writeFileSync(join(ROOT, "docs", "assets", "v5-start-step2-375.png"), Buffer.from(s2.data, "base64"));
+      }
+
+      // 出生证明（step 3）：八因素全显性 + 家庭成员 + 种子码；「再来一次」确实改变结果
+      const certInfo = await cdp.evaluate(`(() => {
+        const q = (s) => document.querySelector(s);
+        q("[data-env-form] button[type=submit]").click();
+        const read = () => {
+          const factors = {};
+          for (const row of document.querySelectorAll("[data-cert-factor]")) {
+            factors[row.dataset.certFactor] = row.querySelector("dd")?.textContent?.trim() ?? "";
+          }
+          return {
+            factors,
+            count: q("[data-start-count]")?.textContent ?? "",
+            seed: q("[data-cert-seed]")?.textContent?.trim() ?? "",
+            members: [...document.querySelectorAll("[data-cert-member]")].map((m) => m.dataset.certMember),
+            reroll: !!q("[data-cert-reroll]"),
+            use: !!q("[data-cert-use]"),
+          };
+        };
+        const first = read();
+        q("[data-cert-reroll]").click();
+        const second = read();
+        // 回到第一张证的口径：手选路径下 env 由玩家填，重掷只换年/画像——env 三格必须不变
+        return { first, second };
+      })()`);
+      const CERT_KEYS = ["birthYear", "region", "place", "structure", "parentsJob", "wealth", "family", "seed"];
+      for (const key of CERT_KEYS) {
+        if (!(certInfo.first.factors[key] ?? "").trim()) {
+          throw new Error(`${vp.width} 档：出生证明缺因素「${key}」（${JSON.stringify(certInfo.first.factors)}）`);
+        }
+      }
+      if (certInfo.first.count !== "3/4") throw new Error(`${vp.width} 档：出生证明步进度非 3/4（${certInfo.first.count}）`);
+      if (!/^XL-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/.test(certInfo.first.seed)) {
+        throw new Error(`${vp.width} 档：出生证明种子码非法「${certInfo.first.seed}」`);
+      }
+      if (certInfo.first.members.length < 1) throw new Error(`${vp.width} 档：出生证明家庭成员为空（应至少父母）`);
+      if (!certInfo.first.reroll || !certInfo.first.use) {
+        throw new Error(`${vp.width} 档：出生证明缺「再来一次」/「用这个」按钮`);
+      }
+      // 「再来一次」＝换种子重派：种子码必变，八因素里至少出生年/家境类某几项随之变（随机态）
+      if (certInfo.second.seed === certInfo.first.seed) {
+        throw new Error(`${vp.width} 档：出生证明「再来一次」未改变种子（${certInfo.first.seed}）`);
+      }
+      const changedCount = CERT_KEYS.filter((k) => certInfo.first.factors[k] !== certInfo.second.factors[k]).length;
+      if (changedCount < 1) {
+        throw new Error(`${vp.width} 档：「再来一次」未改变任何因素（${JSON.stringify(certInfo.first.factors)}）`);
+      }
+      // 出生证明卡截图留痕（此时仍在 step 3：八因素一屏读完 + 用这个/再来一次）
+      if (v === 0) {
+        await cdp.send("Page.captureScreenshot", { format: "png" });
+        const certShot = await cdp.send("Page.captureScreenshot", { format: "png" });
+        writeFileSync(join(ROOT, "docs", "assets", "v5-start-step3-cert-375.png"), Buffer.from(certShot.data, "base64"));
+      }
+
+      // 入场（step 4）：开场白 + 开始按钮；点开始时进度应停在 4/4
+      const step4 = await cdp.evaluate(`(() => {
+        const q = (s) => document.querySelector(s);
+        q("[data-cert-use]").click();
+        return {
+          count: q("[data-start-count]")?.textContent ?? "",
+          opening: q("[data-start-opening]")?.textContent?.trim() ?? "",
+          enter: !!q("[data-start-enter]"),
+          certAway: !q("[data-cert-use]"),
+        };
+      })()`);
+      if (step4.count !== "4/4" || !step4.enter || !step4.opening) {
+        throw new Error(`${vp.width} 档：入场步（4/4）未渲染开场与开始按钮（${JSON.stringify(step4)}）`);
+      }
+      await cdp.evaluate(`document.querySelector("[data-start-enter]").click()`);
+
+      // v3-M2' 时间轴画卷断言:进入首卡——图标位/状态条/八段轨道在位,mascot 已按 08 §四降级(卡上无鱼)
       // v4-M1''':出生年命中锚年时首屏是时代卡（锚先于首事件注入），先穿过再断言事件卡
-      await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
       for (let guard = 0; guard < 4; guard++) {
         const eraFirst = await cdp.evaluate(`!!document.querySelector("[data-era-card]")`);
         if (!eraFirst) break;
@@ -340,6 +440,54 @@ async function main() {
         }
       }
       if (cardInfo.fishOnCard) throw new Error(`${vp.width} 档：事件卡上仍有 mascot（08 §四降级口径：三类出场，卡由图标承担）`);
+
+      // v5 卡片三层（plan/v5/02 §六）：L3 状态条默认折叠为一条细线 + L1 行宽 ≤34 字 + 细看展开对账
+      const layer3 = await cdp.evaluate(`(() => {        const fold = document.querySelector("[data-statebar-fold]");
+        const main = document.querySelector(".event-card .event-text");
+        const card = document.querySelector(".event-card");
+        const detail = card?.querySelector("[data-detail]");
+        const lineEm = main ? getComputedStyle(main).maxWidth : "";
+        // 行宽换算成「一行几个字」：正文 font-size × max-width（em）→ 汉字数
+        const fs = main ? parseFloat(getComputedStyle(main).fontSize) : 0;
+        const maxPx = main ? parseFloat(getComputedStyle(main).maxWidth) : 0;
+        const chars = fs > 0 ? Math.round(maxPx / fs) : 0;
+        const mainText = main?.textContent ?? "";
+        let opened = null;
+        if (detail) {
+          detail.open = true;
+          const el = detail.querySelector(".ev-detail-text");
+          opened = {
+            text: el?.textContent ?? "",
+            prefix: (el?.textContent ?? "").startsWith(mainText.slice(0, 12)),
+            visible: !!el && el.getBoundingClientRect().height > 0,
+          };
+          detail.open = false;
+        }
+        return {
+          foldPresent: !!fold,
+          foldOpen: fold?.open ?? null,
+          dots: fold ? fold.querySelectorAll(".sb-dot").length : 0,
+          rows: fold ? fold.querySelectorAll(".statebar .res").length : 0,
+          maxWidth: lineEm,
+          chars,
+          mainLen: [...mainText].length,
+          detail: opened,
+        };
+      })()`);
+      if (!layer3.foldPresent) throw new Error(`${vp.width} 档：状态条缺折叠壳（L3 默认折叠，02 §六）`);
+      if (layer3.foldOpen !== false) throw new Error(`${vp.width} 档：状态条默认应为折叠态（实得 open=${layer3.foldOpen}）`);
+      if (layer3.dots !== 3) throw new Error(`${vp.width} 档：折叠摘要档位点非 3 个（实得 ${layer3.dots}）`);
+      if (layer3.rows !== 3) throw new Error(`${vp.width} 档：折叠层内状态项非 3（实得 ${layer3.rows}）`);
+      if (!(layer3.chars >= 1 && layer3.chars <= 34)) {
+        throw new Error(`${vp.width} 档：正文行宽 ${layer3.chars} 字超出 ≤34 字口径（max-width ${layer3.maxWidth}）`);
+      }
+      if (layer3.detail) {
+        if (!layer3.detail.visible) throw new Error(`${vp.width} 档：细看层展开后无可见正文`);
+        if (!layer3.detail.prefix) throw new Error(`${vp.width} 档：细看层正文不以主句开头（内容零损失口径，02 §四）`);
+        if ([...layer3.detail.text].length < layer3.mainLen) {
+          throw new Error(`${vp.width} 档：细看层正文短于主句（${layer3.detail.text.length} < ${layer3.mainLen}）`);
+        }
+      }
       // v3-M3'' 自定义第 4 槽离线隐藏口径（v3/02 §七）：默认无 Key/未启用 → 槽不渲染
       const customSlotOffline = await cdp.evaluate(`!!document.querySelector("[data-custom-slot]")`);
       if (customSlotOffline) throw new Error(`${vp.width} 档：离线状态下自定义槽仍渲染（v3/02 §七隐藏口径）`);
@@ -450,8 +598,14 @@ async function main() {
             cont.click();
             return card2 ? "card" : "next";
           }
-          const start = document.querySelector("[data-env-form] button[type=submit]");
-          if (start) { start.click(); return "start"; }
+          // 回到开局屏（重开之后）：四步一键走通（随机 → 出生证明 → 用这个 → 开始）
+          if (document.querySelector("[data-mode]")) {
+            document.querySelector("[data-mode='random']").click();
+            document.querySelector("[data-random-birth]").click();
+            document.querySelector("[data-cert-use]").click();
+            document.querySelector("[data-start-enter]").click();
+            return "start";
+          }
           return "stuck:" + (document.querySelector(".screen")?.className ?? "no-screen");
         })()`);
         if (acted === "ending") {
@@ -718,7 +872,7 @@ async function main() {
         throw new Error(`${vp.width} 档：图鉴返回未回开局屏`);
       }
 
-      // v3-M3'' 设置页：开局屏入口 → 页面渲染（开关默认关）→ 返回
+      // v3-M3'' 设置页：开局屏入口 → 页面渲染（开关默认关）→ v5 补全（字号/动效/清档）→ 返回
       if (v === 0) {
         await cdp.evaluate(`document.querySelector("[data-settings-open]").click()`);
         const settingsSeen = await cdp.evaluate(`(() => ({
@@ -726,11 +880,75 @@ async function main() {
           enabled: document.querySelector(".settings-check input")?.checked ?? null,
           providers: document.querySelectorAll(".settings-form select[name=provider] option").length,
           themeChips: document.querySelectorAll("[data-theme-choice]").length,
+          fontChips: document.querySelectorAll("[data-font-choice]").length,
+          motionChips: document.querySelectorAll("[data-motion-choice]").length,
+          clearBtn: !!document.querySelector("[data-clear-save]"),
+          font: document.documentElement.dataset.font ?? "(none)",
+          motion: document.documentElement.dataset.motion ?? "(none)",
+          texWash: getComputedStyle(document.documentElement).getPropertyValue("--tex-wash").trim(),
+          bodyBgImage: getComputedStyle(document.body, "::before").backgroundImage,
         }))()`);
         if (!settingsSeen.screen) throw new Error(`${vp.width} 档：设置页未渲染`);
         if (settingsSeen.enabled !== false) throw new Error(`${vp.width} 档：旁路开关默认应为关`);
         if (settingsSeen.providers < 4) throw new Error(`${vp.width} 档：服务商预设 < 4`);
         if (settingsSeen.themeChips !== 4) throw new Error(`${vp.width} 档：主题 chips 非 4 款（实得 ${settingsSeen.themeChips}）`);
+        // v5/02 §七 素纸（D8）：纹理层已删——--tex-wash: 0 且 body::before 不再挂背景图
+        if (settingsSeen.texWash !== "0") throw new Error(`${vp.width} 档：素纸 --tex-wash 非 0（实得「${settingsSeen.texWash}」）`);
+        if (settingsSeen.bodyBgImage !== "none") {
+          throw new Error(`${vp.width} 档：纹理层仍在（body::before background-image=${settingsSeen.bodyBgImage}）`);
+        }
+        // v5 设置页补全：字号两档 + 动效两档 + 清档按钮
+        if (settingsSeen.fontChips !== 2) throw new Error(`${vp.width} 档：字号 chips 非 2 档（实得 ${settingsSeen.fontChips}）`);
+        if (settingsSeen.motionChips !== 2) throw new Error(`${vp.width} 档：动效 chips 非 2 档（实得 ${settingsSeen.motionChips}）`);
+        if (!settingsSeen.clearBtn) throw new Error(`${vp.width} 档：设置页缺「清除存档」按钮`);
+        if (settingsSeen.font !== "normal" || settingsSeen.motion !== "full") {
+          throw new Error(`${vp.width} 档：默认阅读偏好非法（${settingsSeen.font}/${settingsSeen.motion}）`);
+        }
+        // 阅读偏好即时生效 + 独立键落盘
+        const prefSwitch = await cdp.evaluate(`(() => {
+          const large = document.querySelector('[data-font-choice][value="large"]');
+          const reduced = document.querySelector('[data-motion-choice][value="reduced"]');
+          large.click();
+          const largeBody = getComputedStyle(document.querySelector(".settings-label p")).fontSize;
+          reduced.click();
+          const reducedAnim = getComputedStyle(document.querySelector(".screen-settings")).animationName;
+          const raw = JSON.parse(localStorage.getItem("xinlu.prefs.v1") ?? "{}");
+          document.querySelector('[data-font-choice][value="normal"]').click();
+          document.querySelector('[data-motion-choice][value="full"]').click();
+          return { largeBody, reducedAnim, raw, back: document.documentElement.dataset.font };
+        })()`);
+        if (prefSwitch.largeBody === "15px") throw new Error(`${vp.width} 档：字号切换未生效（正文仍 ${prefSwitch.largeBody}）`);
+        if (prefSwitch.reducedAnim !== "none") throw new Error(`${vp.width} 档：减弱动效未关掉换屏动画（${prefSwitch.reducedAnim}）`);
+        if (prefSwitch.raw.font !== "large" || prefSwitch.raw.motion !== "reduced") {
+          throw new Error(`${vp.width} 档：阅读偏好未落盘（${JSON.stringify(prefSwitch.raw)}）`);
+        }
+        if (prefSwitch.back !== "normal") throw new Error(`${vp.width} 档：字号未复原（${prefSwitch.back}）`);
+        // 清档：两步确认；只清存档键，主题与偏好保留。
+        // 说明：此处刚重开过（存档键已清），故先放一个哨兵键把按钮点亮——本段只验「清档按钮 →
+        // 两步确认 → 键消失 → 设置不连带被清」这条路；真实存档的写入/续局由上面的整局通关覆盖。
+        const cleared = await cdp.evaluate(`(() => {
+          localStorage.setItem("xinlu.save.v3", "{}");
+          document.querySelector("[data-settings-back]").click();
+          document.querySelector("[data-settings-open]").click();
+          const btn = document.querySelector("[data-clear-save]");
+          const before = localStorage.getItem("xinlu.save.v3") !== null;
+          const enabled = !btn.disabled;
+          btn.click();
+          const armed = btn.textContent;
+          btn.click();
+          return {
+            before,
+            enabled,
+            armed,
+            after: localStorage.getItem("xinlu.save.v3") !== null,
+            theme: localStorage.getItem("xinlu.theme.v1"),
+            prefs: localStorage.getItem("xinlu.prefs.v1") !== null,
+          };
+        })()`);
+        if (!cleared.before || !cleared.enabled) throw new Error(`${vp.width} 档：清档按钮未按存档在位/缺位切换`);
+        if (!cleared.armed.includes("确认")) throw new Error(`${vp.width} 档：清档无两步确认（${cleared.armed}）`);
+        if (cleared.after) throw new Error(`${vp.width} 档：清档后存档键仍在`);
+        if (!cleared.prefs) throw new Error(`${vp.width} 档：清档误删阅读偏好（应只清存档键）`);
         // v4-M2''' 主题四款（02 §五）：切夜航即时生效（data-theme + 深底）+ 独立键落盘；切回米纸复原
         // v4-M3''' 3.3 追加：夜航下内联 SVG 的 var(--surface/--ink) 解析为夜航值（图谱/场景图同机制，防米纸 fallback 死色）
         const themeSwitch = await cdp.evaluate(`(() => {
@@ -769,6 +987,15 @@ async function main() {
           throw new Error(`${vp.width} 档：主题切换背景色未变（${themeSwitch.nightBg}）`);
         }
         if (themeSwitch.backAttr !== "paper") throw new Error(`${vp.width} 档：米纸未复原（${themeSwitch.backAttr}）`);
+        // v5/02 §七：四主题截图留痕（素纸四款各一张，同一设置页同一点位）
+        for (const themeId of ["paper", "moon", "night", "celadon"]) {
+          await cdp.evaluate(`document.querySelector('[data-theme-choice][value="${themeId}"]').click()`);
+          await cdp.evaluate("window.scrollTo(0, 0)");
+          await cdp.send("Page.captureScreenshot", { format: "png" });
+          const themeShot = await cdp.send("Page.captureScreenshot", { format: "png" });
+          writeFileSync(join(ROOT, "docs", "assets", `v5-theme-${themeId}-375.png`), Buffer.from(themeShot.data, "base64"));
+        }
+        await cdp.evaluate(`document.querySelector('[data-theme-choice][value="paper"]').click()`);
         await cdp.evaluate(`document.querySelector("[data-settings-back]").click()`);
         if (!(await cdp.evaluate("!!document.querySelector('.screen-start')"))) {
           throw new Error(`${vp.width} 档：设置返回未回开局屏`);
@@ -790,7 +1017,12 @@ async function main() {
     await cdp.evaluate("localStorage.removeItem('xinlu.save.v3'); localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
     await cdp.send("Page.navigate", { url: pageUrl });
     await cdp.waitEvent("Page.loadEventFired");
-    await cdp.evaluate(`document.querySelector("[data-env-form] button[type=submit]").click()`);
+    await cdp.evaluate(`(() => {
+      document.querySelector("[data-mode='manual']").click();
+      document.querySelector("[data-env-form] button[type=submit]").click();
+      document.querySelector("[data-cert-use]").click();
+      document.querySelector("[data-start-enter]").click();
+    })()`);
     for (let guard = 0; guard < 4; guard++) {
       const eraFirst = await cdp.evaluate(`!!document.querySelector("[data-era-card]")`);
       if (!eraFirst) break;
@@ -823,17 +1055,22 @@ async function main() {
     writeFileSync(join(ROOT, "docs", "assets", "e2e-smoke-768.png"), Buffer.from(shot768.data, "base64"));
     out(`      ✓ 768 档：桌面竖轨 ${mid.railW.toFixed(0)}px + 阶段计数徽标 + 图标 + 状态条，截图 e2e-smoke-768.png`);
 
-    // ── v4-M1''' 自定义出生全流程：三页签切换 → 六因素表单 → 首屏时代卡 → 年份徽章 → 「我的家庭」图谱 ──
-    out("[4.7/5] v4 自定义出生全流程（1956 · 南方 · 大城 · 双孩 · 教师医生 · 一般）…");
+    // ── v4-M1''' 自定义出生全流程（v5 起走开局四步：选玩法 → 八因素 → 出生证明 → 入场）──
+    out("[4.7/5] v5 自定义出生全流程（1956 · 南方 · 大城 · 双孩 · 教师医生 · 一般）…");
     await cdp.evaluate("localStorage.removeItem('xinlu.save.v3'); localStorage.removeItem('xinlu.save.v2'); localStorage.removeItem('xinlu.save.v1')");
     await cdp.send("Page.navigate", { url: pageUrl });
     await cdp.waitEvent("Page.loadEventFired");
     const tabSwitched = await cdp.evaluate(`(() => {
-      document.querySelector("label[for='birth-tab-custom']").click();
-      const panel = document.querySelector("[data-panel='custom']");
-      return { visible: !!panel && panel.offsetParent !== null, form: !!document.querySelector("[data-custom-form]") };
+      document.querySelector("[data-mode='custom']").click();
+      return {
+        step: document.querySelector(".screen-start")?.dataset.startStep ?? "",
+        form: !!document.querySelector("[data-custom-form]"),
+        yearSelect: !!document.querySelector("[data-custom-form] select[name=birthYear]"),
+      };
     })()`);
-    if (!tabSwitched.visible || !tabSwitched.form) throw new Error(`自定义页签切换失败（${JSON.stringify(tabSwitched)}）`);
+    if (tabSwitched.step !== "2" || !tabSwitched.form || !tabSwitched.yearSelect) {
+      throw new Error(`自定义八因素表单未渲染（${JSON.stringify(tabSwitched)}）`);
+    }
     const customSet = await cdp.evaluate(`(() => {
       const form = document.querySelector("[data-custom-form]");
       const year = form.querySelector("select[name=birthYear]");
@@ -845,9 +1082,25 @@ async function main() {
         if (el) el.click(); else ok = false;
       }
       form.querySelector("button[type=submit]").click();
-      return ok;
+      // 自定义态的证：八因素由玩家填定，只有家庭与种子码是派生的
+      const factors = {};
+      for (const row of document.querySelectorAll("[data-cert-factor]")) {
+        factors[row.dataset.certFactor] = row.querySelector("dd")?.textContent?.trim() ?? "";
+      }
+      return { ok, factors, reroll: !!document.querySelector("[data-cert-reroll]") };
     })()`);
-    if (!customSet) throw new Error("自定义六因素表单装配失败（枚举值缺项）");
+    if (!customSet.ok) throw new Error("自定义八因素表单装配失败（枚举值缺项）");
+    // 自定义路径的出生证明：八因素与玩家填的一字不差；成员姓名与 generateFamily 同源（图谱页对账）
+    const CUSTOM_WANT = { birthYear: "1956 年", region: "南方", place: "大城", structure: "双孩", parentsJob: "教师医生", wealth: "一般" };
+    for (const [k, want] of Object.entries(CUSTOM_WANT)) {
+      if (customSet.factors[k] !== want) {
+        throw new Error(`自定义出生证明因素「${k}」不符（预期「${want}」，实得「${customSet.factors[k]}」）`);
+      }
+    }
+    if (!customSet.factors.family || !customSet.factors.seed) throw new Error("自定义出生证明缺家庭成员/种子码");
+    if (customSet.reroll) throw new Error("自定义态不应出现「再来一次」（因素由玩家填定，重掷无意义）");
+    // step 3 → 4 → 入场：首屏 = 1956 时代卡（锚先于首事件注入），无选项
+    await cdp.evaluate(`document.querySelector("[data-cert-use]").click(); document.querySelector("[data-start-enter]").click()`);
     // 首屏 = 1956 时代卡（锚先于首事件注入）：无选项、年份徽章 1956 年 · 0 岁
     const eraFirst = await waitFor(async () => {
       const card = await cdp.evaluate(`(() => {
@@ -898,10 +1151,10 @@ async function main() {
     for (const r of results) {
       out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项2–3 单屏≤160(最长${r.maxScreen}) 节奏变体(${r.variants.join("+")}) 图谱逐位role 图标(无图标卡≤豁免) critical分级/五档词状态条/阶段条聚合(D6=A)/浮动层/小结三观三轴/小结场景图/图谱页/种子码/自定义槽离线隐藏/主题四款切换+夜航SVG联动已断言`);
     }
-    out("PASS  v4 自定义出生全流程：三页签/六因素表单/1956 时代卡首屏/年份徽章/我的家庭图谱(本局姓名)/存档 v3 形状");
-    out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);
+    out("PASS  v5 自定义出生全流程：四步开局（step 2 八因素表单）/ 出生证明八因素逐项对账 / 1956 时代卡首屏 / 年份徽章 / 我的家庭图谱(本局姓名) / 存档 v3 形状");
+    out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")} + v5-start-step{1,2,3}-375 / v5-theme-{paper,moon,night,celadon}-375`);
     out("=".repeat(56));
-    out("结论: e2e 冒烟全绿（375/1280 双端一键通关 + v4 自定义出生全流程）");
+    out("结论: e2e 冒烟全绿（375/1280 双端一键通关 + v5 开局四步与自定义出生全流程）");
   } finally {
     killAll();
     // Edge 退出后句柄释放有延迟：清理失败可容忍（profile 在系统临时目录，不碍事）

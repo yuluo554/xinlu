@@ -94,10 +94,14 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 
 ### CC0 场景底图/纹理（`cc0/parchment/`）
 
+> **v5 状态（2026-10-26，D8 素纸口径）**：这两件纹理**已不被界面引用**——`src/style.css` 删除了 `body::before`
+> 纹理层（`--tex-wash: 0`，素纸无纹理、无背景图）。文件按「留档不删」处理（CC0 台账需可追溯，且是 v3 素材
+> 决策的留痕）；如后续确认永久不用，可单独一笔删除并同步本节。
+
 | 素材 | 来源 | 许可证 | 检索式 | 处理 |
 |---|---|---|---|---|
-| `parchment-bg.webp`（1.9KB） | [OpenGameArt · Parchment background](https://opengameart.org/content/parchment-background)（FelisChaus_ParchmentBackground.jpg，380×421） | CC0（页面明示） | OGA 高级搜索 `keys=paper texture` + 类型=Texture + 许可=CC0，结果第 7 位 | ffmpeg libwebp q60 原尺寸直转 |
-| `parchment-fold.webp`（5.7KB） | [OpenGameArt · Old Parchment Paper](https://opengameart.org/content/old-parchment-paper)（parchment.jpg，640×480） | CC0（作者页明示） | 同上，结果第 3 位 | ffmpeg 中心裁剪 520×360 后 q60（去撕边留十字折痕，画卷质感） |
+| `parchment-bg.webp`（1.9KB） | [OpenGameArt · Parchment background](https://opengameart.org/content/parchment-background)（FelisChaus_ParchmentBackground.jpg，380×421） | CC0（页面明示） | OGA 高级搜索 `keys=paper texture` + 类型=Texture + 许可=CC0，结果第 7 位 | ffmpeg libwebp q60 原尺寸直转（v5 起不再引用） |
+| `parchment-fold.webp`（5.7KB） | [OpenGameArt · Old Parchment Paper](https://opengameart.org/content/old-parchment-paper)（parchment.jpg，640×480） | CC0（作者页明示） | 同上，结果第 3 位 | ffmpeg 中心裁剪 520×360 后 q60（去撕边留十字折痕，画卷质感；v5 起不再引用） |
 | 上游 jpg 留底 | 同上两件原始件 | — | — | 留 `cc0/parchment/` 本地（.gitignore `assets/**/*.jpg` 扩展，原始位图不入 git 纪律延续） |
 
 跟踪策略：`assets/game-icons/`（SVG 原样 + 溯源文本）与 `assets/cc0/**/*.webp`（处理版）入 git；jpg 原始件不入。

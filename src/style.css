@@ -8,13 +8,13 @@
    --tier-1..5 五档色阶随主题联动；夜航 AA 由 src/ui/theme-contrast.test.ts 直读本文件校验。 */
 :root {
   color-scheme: light;
-  /* ── 骨架三色：framed-sheet 的「框 / 白页 / 一档色差」 ── */
-  --ground: #e9e7e2;
-  --surface: #ffffff;
-  --surface-2: #f2f1ed;
-  --sheet-edge: #dcd9d2;
-  --rule: #ebe9e4;
-  --tint: #eeebe4;
+  /* ── 骨架三色：framed-sheet 的「框 / 白页 / 一档色差」——v5 素纸（plan/v5/02 §七）：米白纸底，无纹理 ── */
+  --ground: #f7f4ec;
+  --surface: #fffdf8;
+  --surface-2: #f2eee3;
+  --sheet-edge: #ddd7c6;
+  --rule: #eae5d8;
+  --tint: #efeade;
   /* ── 三级墨 ── */
   --ink: #26241f;
   --ink-2: #5c5850;
@@ -55,8 +55,9 @@
   --gap: 24px;
   --sheet-pad: 28px;
   --rail-w: 236px;
-  /* 米纸纹理强度（02 §五：parchment 调淡 → soft-light 层不透明度；0 = 纯色底） */
-  --tex-opacity: 0.6;
+  /* 素纸（D8，plan/v5/02 §七）：无纹理 —— 单一常量 0，纹理层整段删除；
+     保留 token 名是为了让「纹理已关」是可机检的事实，而不是「某处忘了写」的巧合。 */
+  --tex-wash: 0;
   font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
   /* 六档字号（12 / 14 / 17 / 20 / 28 / 40）；正文 17px，最小可读 12px 只给角标与坐标 */
   --fs-figure: 2.5rem;
@@ -89,7 +90,6 @@
   --ink-veil-strong: rgba(34, 38, 44, 0.08);
   --tier-3: #525a66;
   --tier-5: #3c5a86;
-  --tex-opacity: 0;
 }
 
 [data-theme="night"] {
@@ -126,7 +126,6 @@
   --tier-3: #b7c0cb;
   --tier-4: #74c992;
   --tier-5: #62b5a2;
-  --tex-opacity: 0;
 }
 
 [data-theme="celadon"] {
@@ -151,7 +150,6 @@
   --ink-veil-strong: rgba(38, 51, 45, 0.08);
   --tier-3: #4f5f57;
   --tier-5: #33706f;
-  --tex-opacity: 0.22;
 }
 
 * {
@@ -167,19 +165,9 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 米纸纹理（assets/cc0/parchment 真实扫描件）：一层 fixed 伪元素，强度由 --tex-opacity 控。
-   soft-light 与地色融合，不叠渐变——纹理是实拍材质，不是渐变效果。 */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: url("../assets/cc0/parchment/parchment-bg.webp");
-  background-size: 300px;
-  mix-blend-mode: soft-light;
-  opacity: var(--tex-opacity);
-}
+/* 素纸（D8，plan/v5/02 §七）：纹理层整段删除——没有伪元素、没有背景图、没有渐变。
+   质感靠排印与留白撑：纸底 --ground 微暖米白、白页 --surface 一档亮、1px 线分栏。
+   `--tex-wash: 0` 留在 :root，作为「纹理已关」的机检事实（src/ui/theme-contrast.test.ts）。 */
 
 #app {
   min-height: 100vh;
@@ -431,6 +419,74 @@ body::before {
 
 .line-health .line-bar i.on {
   background: var(--line-health);
+}
+
+/* ── L3 辅助：状态条默认折叠为一条细线（plan/v5/02 §六），点开才看三项读数 ── */
+.statebar-fold {
+  margin: 0;
+}
+
+.statebar-sum {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 24px;
+  padding: 2px 0;
+  list-style: none;
+  cursor: pointer;
+}
+
+.statebar-sum::-webkit-details-marker {
+  display: none;
+}
+
+.sb-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border-strong);
+  opacity: 0.7;
+}
+
+.sb-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.sb-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.sb-dot.tier-1 {
+  background: var(--tier-1);
+}
+
+.sb-dot.tier-2 {
+  background: var(--tier-2);
+}
+
+.sb-dot.tier-3 {
+  background: var(--tier-3);
+}
+
+.sb-dot.tier-4 {
+  background: var(--tier-4);
+}
+
+.sb-dot.tier-5 {
+  background: var(--tier-5);
+}
+
+.sb-hint {
+  font-size: var(--fs-meta);
+  color: var(--ink-3);
+  letter-spacing: 0.08em;
+}
+
+.statebar-fold[open] .statebar {
+  margin-top: 10px;
 }
 
 /* ── 状态条：三项（心境 / 积蓄 / 健康），五档词 + 细色条 ── */
@@ -786,6 +842,24 @@ body::before {
   }
 }
 
+/* ══ 阅读偏好（plan/v5/02 §七 ▸ 设置页补全；键 xinlu.prefs.v1，挂 <html data-font/data-motion>）══
+   字号只放大正文档（--fs-body / --fs-label / --fs-meta / --fs-section 同步一档），版式骨架不变；
+   减弱动效 = 关掉换屏 rise 与浮动层（晕动与低配设备友好），信息一个不少。 */
+[data-font="large"] {
+  --fs-figure: 2.75rem;
+  --fs-title: 1.9375rem;
+  --fs-section: 1.375rem;
+  --fs-body: 1.1875rem;
+  --fs-label: 1.0625rem;
+  --fs-meta: 0.9375rem;
+}
+
+[data-motion="reduced"] .screen,
+[data-motion="reduced"] .floater,
+[data-motion="reduced"] .res.bump .res-word {
+  animation: none;
+}
+
 /* ══ 事件卡：白页上不另加框，靠 1px 线与留白分段 ══ */
 .card {
   background: none;
@@ -892,17 +966,19 @@ body::before {
   color: var(--ink-2);
 }
 
+/* ── L1 正文：视觉焦点（大字号 + 最大留白 + 行宽 ≤34 字，plan/v5/02 §六）──
+   34em ≈ 34 个汉字一行（汉字宽 ≈ 1em）；超出即换行，读一行不用回头找。 */
 .event-text {
-  margin: 0 0 28px;
-  font-size: var(--fs-body);
-  line-height: 1.8;
+  margin: 0 0 32px;
+  font-size: var(--fs-section);
+  line-height: 1.75;
   color: var(--ink);
-  max-width: 46em;
+  max-width: 34em;
 }
 
-/* 重大抉择：靠排印与留白（正文字号 +1 档、选项间距 +2 档、页边一条墨线），不靠加粗边框 */
+/* 重大抉择：靠排印与留白（页边一条墨线 + 徽章），字号与常规 L1 同级 */
 .event-card.critical .event-text {
-  font-size: 1.1875rem;
+  font-size: var(--fs-section);
   line-height: 1.75;
 }
 
@@ -995,7 +1071,7 @@ body::before {
   color: var(--ink-2);
   font-size: 1rem;
   line-height: 1.85;
-  max-width: 44em;
+  max-width: 34em;
 }
 
 /* quick 变体：紧凑两列短词按钮（同样的选项，更低的阅读成本；02 §三） */
@@ -1218,54 +1294,231 @@ body::before {
   line-height: 1.7;
 }
 
-/* 三页签 = 文字页签 + 2px 墨色下划线（framed-sheet 的选中语言） */
-.start-tabs {
-  margin: 0 0 22px;
-}
+/* ══ 开局四步（plan/v5/02 §五）：一屏一个问题 ══ */
 
-.birth-tab-input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.start-tablist {
+/* 进度指示 1/4–4/4：一条细带，四步 + 当前计数 */
+.start-progress {
   display: flex;
-  gap: 26px;
+  align-items: center;
+  gap: 22px;
+  margin: 0 0 30px;
+  padding: 0 0 12px;
+  list-style: none;
   border-bottom: 1px solid var(--rule);
+  font-size: var(--fs-meta);
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
 }
 
-.start-tablist label {
-  position: relative;
-  padding: 0 0 10px;
-  margin-bottom: -1px;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  font-size: var(--fs-label);
-  color: var(--ink-2);
-  transition: color 0.15s ease, border-color 0.15s ease;
+.start-progress li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
 }
 
-.start-tablist label:hover {
+.start-progress .sp-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+
+.start-progress li.done,
+.start-progress li.now {
   color: var(--ink);
 }
 
-#birth-tab-random:checked ~ .start-tablist label[for="birth-tab-random"],
-#birth-tab-manual:checked ~ .start-tablist label[for="birth-tab-manual"],
-#birth-tab-custom:checked ~ .start-tablist label[for="birth-tab-custom"] {
-  color: var(--ink);
-  border-bottom-color: var(--ink);
+.start-progress li.done .sp-num::after {
+  content: "·";
+  margin-left: 2px;
+}
+
+.start-progress li.now {
   font-weight: 600;
 }
 
-.start-panel {
-  display: none;
+.start-progress .sp-count {
+  margin-left: auto;
 }
 
-#birth-tab-random:checked ~ [data-panel="random"],
-#birth-tab-manual:checked ~ [data-panel="manual"],
-#birth-tab-custom:checked ~ [data-panel="custom"] {
-  display: block;
+.start-progress .sp-count b {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+/* step 1：三张大按钮 */
+.start-modes {
+  display: grid;
+  gap: 14px;
+  margin: 0 0 8px;
+}
+
+@media (min-width: 720px) {
+  .start-modes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mode-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-height: 132px;
+  padding: 22px 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.mode-card:hover {
+  border-color: var(--ink);
+  background: var(--tint);
+}
+
+.mode-card b {
+  font-size: var(--fs-section);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mode-card span {
+  font-size: var(--fs-label);
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+.start-step-head h2 {
+  font-size: var(--fs-section);
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.start-step-head p {
+  margin: 0 0 20px;
+  font-size: var(--fs-label);
+  color: var(--ink-2);
+}
+
+/* step 3：出生证明卡（档案页上的第二张「证」） */
+.cert {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 26px var(--sheet-pad) 20px;
+  background: var(--surface-2);
+}
+
+.cert-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.cert-kicker {
+  font-size: var(--fs-meta);
+  letter-spacing: 0.28em;
+  color: var(--ink-2);
+}
+
+.cert-figure {
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.cert-rows {
+  margin: 0;
+}
+
+.cert-row {
+  display: grid;
+  grid-template-columns: 5.5em minmax(0, 1fr);
+  gap: 14px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.cert-row dt {
+  font-size: var(--fs-label);
+  color: var(--ink-2);
+}
+
+.cert-row dd {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--ink);
+}
+
+.cert-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cert-member {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.cert-member .cert-role {
+  font-size: var(--fs-meta);
+  color: var(--ink-3);
+}
+
+.cert-member .cert-name {
+  font-size: var(--fs-body);
+  color: var(--ink);
+}
+
+.cert-seed dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.cert-seed code,
+.start-enter code {
+  font-family: inherit;
+  font-size: var(--fs-body);
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.cert-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* step 4：入场白 */
+.start-enter .enter-line {
+  margin: 0 0 12px;
+  font-size: var(--fs-section);
+  line-height: 1.7;
+  color: var(--ink);
+  max-width: 34em;
+}
+
+.start-enter .options-row {
+  margin-top: 20px;
 }
 
 .env-form {

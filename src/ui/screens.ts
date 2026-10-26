@@ -24,6 +24,17 @@ import { moneyDisplay, resTier, type MoneyBand } from "./resources";
 import { LINE_BAR_CELLS, lineBars } from "./lines";
 import { decadeBands, yearTicks } from "./years";
 import { THEMES, type ThemeId } from "./theme";
+import {
+  START_MODES,
+  START_MODE_META,
+  START_STEP_COUNT,
+  openingLineOf,
+  type StartCert,
+  type StartDraft,
+  type StartMode,
+} from "./start-flow";
+import type { Prefs } from "./prefs";
+import { FONT_OPTIONS, MOTION_OPTIONS } from "./prefs";
 import { iconStyle } from "./icons";
 import { NPC_PROFILES, TAG_COLORS, relationsVM, renderRelations } from "./relations";
 import { PROVIDERS, type LlmSettings } from "../llm/config";
@@ -119,7 +130,8 @@ function lineBarRows(lines: LineProgress): string {
 }
 
 /** 三项状态（心境 / 积蓄 / 健康）：五档词 + 细色条；积蓄换算「元」（数字只在浮动层）。
- *  E2E 契约：.statebar .res[data-res] / .res-word / .res-tier-bar i 宽度 / data-tier。 */
+ *  v5 卡片三层 L3（02 §六）：辅助信息弱化——状态条默认折叠成一条细线，点开才看三项读数。
+ *  E2E 契约：.statebar .res[data-res] / .res-word / .res-tier-bar i 宽度 / data-tier（折叠不删节点）。 */
 function statebar(resources: Resources | null, bump: readonly ResKey[], band: MoneyBand): string {
   if (!resources) return "";
   const items = RES_KEYS.map((key) => {
@@ -139,7 +151,15 @@ function statebar(resources: Resources | null, bump: readonly ResKey[], band: Mo
       <span class="res-tier-bar" aria-hidden="true"><i style="width:${resources[key]}%"></i></span>
     </span>`;
   }).join("");
-  return `<div class="statebar" role="status" aria-label="状态">${items}</div>`;
+  // L3：折叠摘要 = 一条细线 + 三项档位小点（不抢注意力，但一眼知道有没有异常）
+  const dots = RES_KEYS.map((key) => {
+    const tier = key === "money" ? 3 : resTier(resources[key]).tier;
+    return `<i class="sb-dot tier-${tier}" data-sb-dot="${key}"></i>`;
+  }).join("");
+  return `<details class="statebar-fold" data-statebar-fold>
+    <summary class="statebar-sum" data-statebar-sum><span class="sb-rule" aria-hidden="true"></span><span class="sb-dots" aria-hidden="true">${dots}</span><span class="sb-hint" aria-hidden="true">状态</span></summary>
+    <div class="statebar" role="status" aria-label="状态">${items}</div>
+  </details>`;
 }
 
 function topbar(stageIndex: number, family = false): string {
@@ -209,18 +229,20 @@ function floatLayer(floaters: readonly Floater[]): string {
   return `<div class="float-layer" aria-hidden="true">${items}</div>`;
 }
 
-/** 单选 chip 组（手选/自定义页签共用）。 */
-function chipGroup(name: string, values: readonly string[], label: string): string {
+/** 单选 chip 组（手选/自定义页签共用）。current = 回退重进时要回填的已选值（回退不丢）。 */
+function chipGroup(name: string, values: readonly string[], label: string, current?: string): string {
   const chips = values
-    .map(
-      (value, i) =>
-        `<label class="chip"><input type="radio" name="${name}" value="${esc(value)}"${i === 0 ? " checked" : ""}><span>${esc(value)}</span></label>`,
-    )
+    .map((value, i) => {
+      const checked = current !== undefined ? current === value : i === 0;
+      return `<label class="chip"><input type="radio" name="${name}" value="${esc(value)}"${checked ? " checked" : ""}><span>${esc(value)}</span></label>`;
+    })
     .join("");
   return `<fieldset class="env-group"><legend>${esc(label)}</legend><div class="chips">${chips}</div></fieldset>`;
 }
 
 export interface StartScreenVM {
+  /** 开局四步的草稿（唯一的渲染输入；回退保值是本结构上的性质，plan/v5/02 §五）。 */
+  draft: StartDraft;
   env: Record<keyof BirthEnv, string[]>;
   profile: Record<"region" | "structure" | "parentsJob" | "wealth", string[]>;
   years: number[];
@@ -268,61 +290,27 @@ function yearRuler(years: readonly number[]): string {
     </div>`;
 }
 
-/** 开局屏（档案封面：三页签 + 八段一览 + 年份跨度写进正文）。 */
+/** 开局屏（v5 开局四步：选玩法 → 填要素 → 出生证明 → 入场；口径单源 plan/v5/02 §五）。
+ *  一屏一个问题：step 1 只有三张大按钮，其余一概不出现；要素表单、出生证明、入场白各占一屏。
+ *  进度指示 1/4–4/4 由 draft.step 直接派生；任何一步可回退（已填值在 draft 上，不靠 DOM 残留）。 */
 export function startScreen(vm: StartScreenVM): string {
-  const manualGroups = ELEMENT_META.map(({ key, label }) => chipGroup(key, vm.env[key], label)).join("");
-  const customGroups = PROFILE_META.map(({ key, label }) => chipGroup(key, vm.profile[key], label)).join("");
-  const yearOptions = vm.years
-    .map((y, i) => `<option value="${y}"${i === Math.floor(vm.years.length / 2) ? " selected" : ""}>${y} 年</option>`)
-    .join("");
-  const stageStrip = STAGES.map((s) => `<span>${STAGE_LABEL[s]}</span>`).join("");
+  const draft = vm.draft;
   const first = vm.years[0] ?? 1955;
   const last = vm.years[vm.years.length - 1] ?? 2015;
+  const body = ((): string => {
+    if (draft.step === 1) return startStepMode();
+    if (draft.step === 2) return startStepFill(vm, first, last);
+    if (draft.step === 3) return draft.cert ? startStepCert(draft.cert) : startStepMode();
+    return draft.cert ? startStepEnter(draft.cert) : startStepMode();
+  })();
   return `
-    <section class="screen screen-start screen-narrow">
+    <section class="screen screen-start screen-narrow" data-start-step="${draft.step}">
       <div class="screen-head">
         <h1>心路</h1>
-        <p class="lede">从 ${first} 到 ${last} 之间挑一个出生年，走完八个阶段。四维倾向值随着每一次抉择慢慢长成人格；同一种子码，重走同一段人生。</p>
+        ${draft.step === 1 ? `<p class="lede">从 ${first} 到 ${last} 之间挑一个出生年，走完八个阶段。四维倾向值随着每一次抉择慢慢长成人格；同一种子码，重走同一段人生。</p>` : ""}
       </div>
-      <div class="start-tabs">
-        <input type="radio" name="birthTab" id="birth-tab-random" class="birth-tab-input" checked>
-        <input type="radio" name="birthTab" id="birth-tab-manual" class="birth-tab-input">
-        <input type="radio" name="birthTab" id="birth-tab-custom" class="birth-tab-input">
-        <div class="start-tablist" role="tablist" aria-label="出生方式">
-          <label for="birth-tab-random">随机出生</label>
-          <label for="birth-tab-manual">手选环境</label>
-          <label for="birth-tab-custom">自定义六因素</label>
-        </div>
-        <section class="start-panel" data-panel="random">
-          <p class="muted">出生年、家庭结构、父母职业、家境，全部交给种子决定。</p>
-          <div class="seed-tools">
-            <button type="button" class="btn btn-primary" data-random-birth>随机出生</button>
-            <form class="seed-form" data-seed-form>
-              <input class="seed-input" name="seedCode" placeholder="或输入种子码 XL-XXXX-XXXX" autocomplete="off" spellcheck="false" aria-label="种子码">
-              <button type="submit" class="btn btn-ghost">以此码开局</button>
-            </form>
-          </div>
-        </section>
-        <section class="start-panel" data-panel="manual">
-          <form class="env-form" data-env-form>
-            ${manualGroups}
-            <p class="fine-print">出生年与其余四项（南北 / 家庭结构 / 父母职业 / 家境）按年代概率派生。</p>
-            <button type="submit" class="btn btn-primary btn-start">开始这一生</button>
-          </form>
-        </section>
-        <section class="start-panel" data-panel="custom">
-          <form class="env-form" data-custom-form>
-            <fieldset class="env-group"><legend>出生年</legend>
-              <select class="year-select" name="birthYear" aria-label="出生年">${yearOptions}</select>
-            </fieldset>
-            ${chipGroup("place", vm.env.place, "城乡")}
-            ${customGroups}
-            <button type="submit" class="btn btn-primary btn-start">以这副牌开始一生</button>
-          </form>
-        </section>
-      </div>
-      ${yearRuler(vm.years)}
-      <div class="stage-strip" aria-label="人生八阶段">${stageStrip}</div>
+      ${startProgress(draft.step)}
+      ${body}
       ${vm.error ? `<p class="form-error">${esc(vm.error)}</p>` : ""}
       <p class="fine-print">单机运行，进度存在本机浏览器，不需要网络与账号。</p>
       <p class="about-links">
@@ -331,6 +319,161 @@ export function startScreen(vm: StartScreenVM): string {
         <a href="./credits.md" target="_blank" rel="noopener">素材与许可说明</a>
       </p>
     </section>`;
+}
+
+/** 进度指示 1/4–4/4（已走过的步骤标 done，当前标 now）。 */
+function startProgress(step: number): string {
+  const labels = ["选玩法", "填要素", "出生证明", "入场"];
+  const items = labels
+    .map((label, i) => {
+      const n = i + 1;
+      const cls = n < step ? "done" : n === step ? "now" : "todo";
+      return `<li class="${cls}" data-start-step-item="${n}"><span class="sp-num">${n}</span>${label}</li>`;
+    })
+    .join("");
+  return `<ol class="start-progress" data-start-progress aria-label="开局进度，第 ${step} 步（共 ${START_STEP_COUNT} 步）">
+    ${items}
+    <li class="sp-count" aria-hidden="true"><b data-start-count>${step}/${START_STEP_COUNT}</b></li>
+  </ol>`;
+}
+
+/** step 1：三张大按钮，别的一概不出现（治「首页元素太杂乱」）。 */
+function startStepMode(): string {
+  const cards = START_MODES.map(
+    (mode: StartMode) => `<button type="button" class="mode-card" data-mode="${mode}">
+      <b>${esc(START_MODE_META[mode].label)}</b>
+      <span>${esc(START_MODE_META[mode].note)}</span>
+    </button>`,
+  ).join("");
+  return `<div class="start-modes" data-start-modes>${cards}</div>`;
+}
+
+/** step 2：按玩法给一张表单（随机 → 种子与年份尺；手选 → 四要素；自定义 → 八因素）。
+ *  current = draft 上的已填值——回退重进时按它回填，这是「回退不丢值」的渲染侧。 */
+function startStepFill(vm: StartScreenVM, first: number, last: number): string {
+  const draft = vm.draft;
+  const mode = draft.mode ?? "random";
+  const head = `<div class="start-step-head">
+    <h2>${esc(START_MODE_META[mode].label)}</h2>
+    <p>${mode === "random" ? `直接掷一次，或点年份尺上的某一年——点哪一年，就从那一年开始。` : `填完这些，下一步给你一张出生证明。`}</p>
+  </div>`;
+  const backBtn = `<button type="button" class="btn btn-ghost" data-start-back>← 换一种玩法</button>`;
+  if (mode === "random") {
+    return `${head}
+      <div class="seed-tools">
+        <button type="button" class="btn btn-primary" data-random-birth>掷一次</button>
+        <form class="seed-form" data-seed-form>
+          <input class="seed-input" name="seedCode" placeholder="或输入种子码 XL-XXXX-XXXX" autocomplete="off" spellcheck="false" aria-label="种子码">
+          <button type="submit" class="btn btn-ghost">以此码开局</button>
+        </form>
+      </div>
+      ${yearRuler(vm.years)}
+      <div class="options-row">${backBtn}</div>`;
+  }
+  if (mode === "manual") {
+    const manualGroups = ELEMENT_META.map(({ key, label }) =>
+      chipGroup(key, vm.env[key], label, draft.manualEnv?.[key]),
+    ).join("");
+    return `${head}
+      <form class="env-form" data-env-form>
+        ${manualGroups}
+        <p class="fine-print">出生年与其余四项（南北 / 家庭结构 / 父母职业 / 家境）按年代概率派生。${first}–${last} 之间都能出生。</p>
+        <button type="submit" class="btn btn-primary btn-start">下一步：出生证明</button>
+      </form>
+      <div class="options-row">${backBtn}</div>`;
+  }
+  const custom = draft.customBirth;
+  const yearOptions = vm.years
+    .map(
+      (y) =>
+        `<option value="${y}"${(custom?.birthYear ?? vm.years[Math.floor(vm.years.length / 2)]) === y ? " selected" : ""}>${y} 年</option>`,
+    )
+    .join("");
+  const customGroups = PROFILE_META.map(({ key, label }) =>
+    chipGroup(key, vm.profile[key], label, custom?.profile[key]),
+  ).join("");
+  return `${head}
+    <form class="env-form" data-custom-form>
+      <fieldset class="env-group"><legend>出生年</legend>
+        <select class="year-select" name="birthYear" aria-label="出生年">${yearOptions}</select>
+      </fieldset>
+      ${chipGroup("place", vm.env.place, "城乡", custom?.place)}
+      ${customGroups}
+      <button type="submit" class="btn btn-primary btn-start">下一步：出生证明</button>
+    </form>
+    <div class="options-row">${backBtn}</div>`;
+}
+
+/** 出生证明八因素的机读键（顺序 = 卡上显示序；E2E 按此逐个断言齐）。 */
+export const CERT_FACTOR_KEYS = [
+  "birthYear",
+  "region",
+  "place",
+  "structure",
+  "parentsJob",
+  "wealth",
+  "family",
+  "seed",
+] as const;
+
+/** step 3：出生证明卡（八因素全显性 + 用这个 / 再来一次）。 */
+function startStepCert(cert: StartCert): string {
+  const rows: Array<{ key: (typeof CERT_FACTOR_KEYS)[number]; label: string; value: string }> = [
+    { key: "birthYear", label: "出生年", value: `${cert.birthYear} 年` },
+    { key: "region", label: "南北", value: cert.profile.region },
+    { key: "place", label: "城乡", value: cert.env.place },
+    { key: "structure", label: "家庭结构", value: cert.profile.structure },
+    { key: "parentsJob", label: "父母职业", value: cert.profile.parentsJob },
+    { key: "wealth", label: "家境", value: cert.profile.wealth },
+  ];
+  const factors = rows
+    .map(
+      (r) =>
+        `<div class="cert-row" data-cert-factor="${r.key}"><dt>${esc(r.label)}</dt><dd>${esc(r.value)}</dd></div>`,
+    )
+    .join("");
+  const members = cert.family
+    .map(
+      (m) =>
+        `<li class="cert-member" data-cert-member="${esc(m.slot)}"><span class="cert-role">${esc(m.role)}</span><span class="cert-name">${esc(m.name)}</span></li>`,
+    )
+    .join("");
+  return `
+    <article class="cert" data-cert>
+      <header class="cert-head">
+        <span class="cert-kicker">出生证明</span>
+        <b class="cert-figure">${cert.birthYear}</b>
+      </header>
+      <dl class="cert-rows">${factors}</dl>
+      <div class="cert-row cert-family" data-cert-factor="family">
+        <dt>家庭成员</dt>
+        <dd><ul class="cert-members">${members || '<li class="cert-member muted">这个家里，只有你</li>'}</ul></dd>
+      </div>
+      <div class="cert-row cert-seed" data-cert-factor="seed">
+        <dt>种子码</dt>
+        <dd><code data-cert-seed>${esc(cert.seedCode)}</code><span class="fine-print"> 同码同人生；想重走或分享，下次输这个码即可。</span></dd>
+      </div>
+      <div class="cert-actions">
+        ${cert.rerollable ? '<button type="button" class="btn btn-ghost" data-cert-reroll>再来一次</button>' : ""}
+        <button type="button" class="btn btn-primary" data-cert-use>用这个</button>
+        <button type="button" class="btn btn-ghost" data-start-back>← 回上一步</button>
+      </div>
+    </article>`;
+}
+
+/** step 4：一句开场白 + 开始（八段一览在这一屏作为「接下来」的结构说明）。 */
+function startStepEnter(cert: StartCert): string {
+  const stageStrip = STAGES.map((s) => `<span>${STAGE_LABEL[s]}</span>`).join("");
+  return `
+    <div class="start-enter">
+      <p class="enter-line" data-start-opening>${esc(openingLineOf(cert))}</p>
+      <p class="fine-print">种子码 <code data-cert-seed>${esc(cert.seedCode)}</code>　·　八段人生，从 <b>${cert.birthYear}</b> 年开始。</p>
+      <div class="stage-strip" aria-label="人生八阶段">${stageStrip}</div>
+      <div class="options-row">
+        <button type="button" class="btn btn-primary" data-start-enter>开始这一生</button>
+        <button type="button" class="btn btn-ghost" data-start-back>← 回出生证明</button>
+      </div>
+    </div>`;
 }
 
 export function cardAskScreen(vm: {
@@ -833,8 +976,16 @@ export function relationsScreen(npcs: RunState["npcs"]): string {
 }
 
 /** 设置页：标签列 + 面板两栏（framed-sheet settings-two-column）。
- *  主题四款即时切换（独立键 xinlu.theme.v1）；BYO Key 明文存本机；未启用时全部字段不生效。 */
-export function settingsScreen(vm: { settings: LlmSettings; theme: ThemeId; error?: string }): string {
+ *  主题四款即时切换（独立键 xinlu.theme.v1）+ 阅读偏好（字号/动效，键 xinlu.prefs.v1）+ 清档；
+ *  BYO Key 明文存本机；未启用时全部字段不生效。 */
+export function settingsScreen(vm: {
+  settings: LlmSettings;
+  theme: ThemeId;
+  prefs: Prefs;
+  /** 本机是否有存档（清档按钮据此显示是否可用；无档时置灰）。 */
+  hasSave: boolean;
+  error?: string;
+}): string {
   const providerOptions = PROVIDERS.map(
     (p) => `<option value="${esc(p.id)}"${p.id === vm.settings.provider ? " selected" : ""}>${esc(p.label)}</option>`,
   ).join("");
@@ -842,6 +993,18 @@ export function settingsScreen(vm: { settings: LlmSettings; theme: ThemeId; erro
     (t) =>
       `<label class="chip"><input type="radio" name="theme" value="${t.id}" data-theme-choice${t.id === vm.theme ? " checked" : ""}><span>${esc(t.label)}<span class="theme-swatch" data-theme="${t.id}" aria-hidden="true"><i class="sw-ground"></i><i class="sw-surface"></i><i class="sw-accent"></i></span><i class="theme-note">${esc(t.note)}</i></span></label>`,
   ).join("");
+  const prefChips = (
+    name: string,
+    options: ReadonlyArray<{ id: string; label: string; note: string }>,
+    current: string,
+    hook: string,
+  ): string =>
+    options
+      .map(
+        (o) =>
+          `<label class="chip"><input type="radio" name="${name}" value="${o.id}" ${hook}${o.id === current ? " checked" : ""}><span>${esc(o.label)}<i class="theme-note">${esc(o.note)}</i></span></label>`,
+      )
+      .join("");
   return `
     <section class="screen screen-settings">
       <div class="screen-head">
@@ -850,10 +1013,29 @@ export function settingsScreen(vm: { settings: LlmSettings; theme: ThemeId; erro
       <div class="settings-section">
         <div class="settings-label">
           <h3>界面主题</h3>
-          <p>即时生效，存在本机，不随存档走。</p>
+          <p>即时生效，存在本机，不随存档走。四款都是素纸：无纹理、无背景图，靠排印与留白。</p>
         </div>
         <div class="settings-panel">
           <div class="chips theme-chips">${themeChips}</div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">
+          <h3>阅读偏好</h3>
+          <p>即时生效，存在本机。字号只放大正文与选项，不动版面结构。</p>
+        </div>
+        <div class="settings-panel">
+          <div class="chips pref-chips" data-pref-font>${prefChips("font", FONT_OPTIONS, vm.prefs.font, "data-font-choice")}</div>
+          <div class="chips pref-chips" data-pref-motion>${prefChips("motion", MOTION_OPTIONS, vm.prefs.motion, "data-motion-choice")}</div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-label">
+          <h3>本机存档</h3>
+          <p>${vm.hasSave ? "清掉存档只影响这一局：图鉴与设置保留。" : "当前没有进行中的存档。"}</p>
+        </div>
+        <div class="settings-panel">
+          <button type="button" class="btn btn-ghost" data-clear-save${vm.hasSave ? "" : " disabled"}>清除存档</button>
         </div>
       </div>
       <form data-settings-form>

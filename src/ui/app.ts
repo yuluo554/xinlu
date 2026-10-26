@@ -11,7 +11,6 @@ import {
   birthEnvOptions,
   createRun,
   encounterFor,
-  envFromBirth,
   eraEventById,
   eraEventFor,
   eventById,
@@ -20,7 +19,6 @@ import {
   optionLocks,
   pickEvent,
   profileOptions,
-  randomBirth,
   resolveEnding,
 } from "../engine/engine";
 import { runYearOf } from "../engine/year";
@@ -61,6 +59,21 @@ import {
 import { timelineVM, choiceFloats, RES_KEYS, LINE_META } from "./timeline";
 import { moneyBandOf, type MoneyBand } from "./resources";
 import { applyTheme, loadTheme, saveTheme, type ThemeId } from "./theme";
+import { applyPrefs, loadPrefs, savePrefs, type FontScale, type MotionPref } from "./prefs";
+import {
+  back,
+  chooseMode,
+  initialDraft,
+  preview,
+  previewYear,
+  reroll,
+  startInput,
+  useCert,
+  withCustomBirth,
+  withManualEnv,
+  type StartDraft,
+  type StartMode,
+} from "./start-flow";
 import { objectKeyOf } from "./icons";
 import { renderRelations } from "./relations";
 import { exportShareCard } from "./share-card";
@@ -82,6 +95,8 @@ type View =
 let root: HTMLElement;
 let state: RunState | null = null;
 let view: View = "start";
+// 开局四步草稿（plan/v5/02 §五）：一步一屏；回退保值靠它，不靠 DOM 残留。
+let startDraft: StartDraft = initialDraft();
 // 图谱页的返回目标（小结或终局进入时各记一笔）。
 let relationsReturn: View = "summary";
 // 自定义槽错误（渲染时消费一次即清）。
@@ -132,8 +147,9 @@ function persist(): void {
 
 export function mountApp(el: HTMLElement): void {
   root = el;
-  // 主题先于首屏（v4/02 §五：默认米纸；键独立于存档）
+  // 主题与阅读偏好先于首屏（v4/02 §五：默认米纸；v5/02 §七 素纸；键独立于存档）
   applyTheme(loadTheme());
+  applyPrefs(loadPrefs());
   const started = boot();
   if (started.kind === "resume") {
     state = started.state;
@@ -197,17 +213,42 @@ function render(): void {
   }
 }
 
+/** 开局四步渲染（plan/v5/02 §五）：一屏一个问题；draft 是唯一状态，回退不丢值靠它。 */
 function renderStart(error?: string): void {
   const years: number[] = [];
   for (let y = 1955; y <= 2015; y++) years.push(y);
-  root.innerHTML = S.startScreen({ env: birthEnvOptions(), profile: profileOptions(), years, error });
-  const begin = (env: BirthEnv, seed: number, birth?: { birthYear: number; profile: BirthProfile }): void => {
-    state = createRun(env, seed, birth);
+  root.innerHTML = S.startScreen({ draft: startDraft, env: birthEnvOptions(), profile: profileOptions(), years, error });
+  // 入场：用出生证明里的 seed/env/年/画像建局（createRun 入参同构，判定核零改动）
+  const begin = (): void => {
+    const input = startInput(startDraft);
+    state = createRun(input.env, input.seed, { birthYear: input.birthYear, profile: input.profile });
+    startDraft = initialDraft();
     persist();
     view = "card";
     render();
   };
-  // 手选出生（v3/02 §六：手选路径不改；v4 其余因素按年代概率派生并随种子可复现）
+  const fail = (message: string): void => {
+    renderStart(message);
+  };
+  // step 1 → 2：选玩法（已填值保留，来回切换不丢）
+  for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-mode]")) {
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.mode as StartMode | undefined;
+      if (!mode) return;
+      startDraft = chooseMode(startDraft, mode);
+      render();
+    });
+  }
+  // 回退一步（step 1 原地不动）：先把当前表单的已填值抄进 draft，再回退——
+  // 「回退不丢值」的真实语义是「离开这一步时已经填的都算数」，不是「提交过的才算数」。
+  for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-start-back]")) {
+    btn.addEventListener("click", () => {
+      startDraft = syncStartForm(startDraft);
+      startDraft = back(startDraft);
+      render();
+    });
+  }
+  // step 2 手选：记下四要素 → 派生出生证明（回退重进按 manualEnv 回填选中态）
   const form = root.querySelector<HTMLFormElement>("[data-env-form]");
   form?.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -219,12 +260,13 @@ function renderStart(error?: string): void {
       style: String(data.get("style") ?? ""),
     };
     try {
-      begin(env, randomSeed());
+      startDraft = preview(withManualEnv(startDraft, env), randomSeed());
+      render();
     } catch {
-      renderStart("出生环境无效，请重新选择后再开始。");
+      fail("出生环境无效，请重新选择后再试试。");
     }
   });
-  // 自定义六因素（v4/02 §三 ▸ M1''' 增补）：六因素全选 → env 由派生表定（mood/style 不再直接选）
+  // step 2 自定义八因素（v4/02 §三 ▸ M1''' 增补）：玩家填的因素直接成证（mood/style 由派生表定）
   const customForm = root.querySelector<HTMLFormElement>("[data-custom-form]");
   customForm?.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -239,45 +281,73 @@ function renderStart(error?: string): void {
     } as BirthProfile;
     const place = String(data.get("place") ?? "");
     try {
-      begin(envFromBirth(birthYear, profile, place), randomSeed(), { birthYear, profile });
+      startDraft = preview(withCustomBirth(startDraft, { birthYear, place, profile }), randomSeed());
+      render();
     } catch {
-      renderStart("出生六因素无效，请重新选择后再开始。");
+      fail("出生八因素无效，请重新选择后再试试。");
     }
   });
-  // 随机出生（v4/02 §一 ▸ M1''' 增补）：seed 派生全部六因素 + 四要素，同码必同人生
+  // step 2 随机：掷一次 → 出生证明（seed 派生全部八因素，同码必同人生）
   root.querySelector<HTMLButtonElement>("[data-random-birth]")?.addEventListener("click", () => {
-    const seed = randomSeed();
-    const born = randomBirth(seed);
-    begin(born.env, seed, { birthYear: born.birthYear, profile: born.profile });
+    try {
+      startDraft = preview(startDraft, randomSeed());
+      render();
+    } catch {
+      fail("这一把没掷出来，请再点一次。");
+    }
   });
-  // 种子码开局：输入码 → 还原 seed → 派生同一出生（v4 起含出生年/画像/家庭）
+  // step 2 种子码：输入码 → 还原 seed → 同一出生（八因素与家庭全部可复现）
   const seedForm = root.querySelector<HTMLFormElement>("[data-seed-form]");
   seedForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const code = String(new FormData(seedForm).get("seedCode") ?? "");
     const seed = seedFromCode(code);
     if (seed === null) {
-      renderStart("种子码没认出来——格式应为 XL-XXXX-XXXX（不含 0、1、O、I）。");
+      fail("种子码没认出来——格式应为 XL-XXXX-XXXX（不含 0、1、O、I）。");
       return;
     }
-    const born = randomBirth(seed);
-    begin(born.env, seed, { birthYear: born.birthYear, profile: born.profile });
+    try {
+      startDraft = preview(startDraft, seed);
+      render();
+    } catch {
+      fail("这个码派不出人生，请换一个再试。");
+    }
   });
-  // 年份尺点选（v5）：种子定画像与城乡，年份用玩家点的那一年——与自定义页签同一派生链
-  // （envFromBirth 单源），不新增口径。同一年 + 同一种子 = 同一副牌。
+  // step 2 年份尺点选：锁定该年 + 随机派生 → 直接出出生证明（同一年 + 同一种子 = 同一副牌）
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-birth-year]")) {
     btn.addEventListener("click", () => {
       const birthYear = Number(btn.dataset.birthYear);
       if (!Number.isInteger(birthYear)) return;
-      const seed = randomSeed();
-      const born = randomBirth(seed);
       try {
-        begin(envFromBirth(birthYear, born.profile, born.env.place), seed, { birthYear, profile: born.profile });
+        startDraft = previewYear(startDraft, randomSeed(), birthYear);
+        render();
       } catch {
-        renderStart("这一年的牌没有派出来，请再点一次。");
+        fail("这一年的牌没有派出来，请再点一次。");
       }
     });
   }
+  // step 3 再来一次（随机态可用）：换种子重派，年份尺锁定的年份不变
+  root.querySelector<HTMLButtonElement>("[data-cert-reroll]")?.addEventListener("click", () => {
+    try {
+      startDraft = reroll(startDraft, randomSeed());
+      render();
+    } catch {
+      fail("这一把没掷出来，请再点一次。");
+    }
+  });
+  // step 3 → 4：用这份出生证明
+  root.querySelector<HTMLButtonElement>("[data-cert-use]")?.addEventListener("click", () => {
+    startDraft = useCert(startDraft);
+    render();
+  });
+  // step 4：开始这一生
+  root.querySelector<HTMLButtonElement>("[data-start-enter]")?.addEventListener("click", () => {
+    try {
+      begin();
+    } catch {
+      fail("这局人生没能开局，请回出生证明再试。");
+    }
+  });
   root.querySelector<HTMLButtonElement>("[data-gallery-open]")?.addEventListener("click", () => {
     view = "gallery";
     render();
@@ -286,6 +356,36 @@ function renderStart(error?: string): void {
     view = "settings";
     render();
   });
+}
+
+/** 把当前 step 2 表单的已选值抄进 draft（回退/离开这一步前调用）。
+ *  这是「回退不丢值」的落地点：玩家改过但没提交的选择，回退再进来必须还在。
+ *  表单不在位（step 1/3/4 或玩法不匹配）时原样返回。 */
+function syncStartForm(draft: StartDraft): StartDraft {
+  const envForm = root.querySelector<HTMLFormElement>("[data-env-form]");
+  if (envForm) {
+    const data = new FormData(envForm);
+    return withManualEnv(draft, {
+      era: String(data.get("era") ?? ""),
+      place: String(data.get("place") ?? ""),
+      mood: String(data.get("mood") ?? ""),
+      style: String(data.get("style") ?? ""),
+    });
+  }
+  const customForm = root.querySelector<HTMLFormElement>("[data-custom-form]");
+  if (customForm) {
+    const data = new FormData(customForm);
+    const birthYear = Number(data.get("birthYear"));
+    if (!Number.isInteger(birthYear)) return draft;
+    const profile = {
+      region: String(data.get("region") ?? ""),
+      structure: String(data.get("structure") ?? ""),
+      parentsJob: String(data.get("parentsJob") ?? ""),
+      wealth: String(data.get("wealth") ?? ""),
+    } as BirthProfile;
+    return withCustomBirth(draft, { birthYear, place: String(data.get("place") ?? ""), profile });
+  }
+  return draft;
 }
 
 /** 时代卡渲染与「我的家庭」入口绑定（card/era/aftermath 三屏共用）。 */
@@ -676,10 +776,18 @@ function hydrateCommentary(ending: Ending): void {
   });
 }
 
-/** 设置页（v3/02 §七 + v4/02 §五）：服务商预选自动填 Base URL；主题四款即时切换（独立键，不随表单提交）；保存回开局屏。 */
+/** 设置页（v3/02 §七 + v4/02 §五 + v5/02 §七）：主题四款 / 阅读偏好（字号·动效）/ 清档 / AI 旁路。
+ *  即时项（主题、字号、动效）各自走独立键并当场生效，不随表单提交；保存只提交旁路配置。 */
 function renderSettings(error?: string): void {
   const settings = loadLlmSettings();
-  root.innerHTML = S.settingsScreen({ settings, theme: loadTheme(), error });
+  const prefs = loadPrefs();
+  let hasSave = false;
+  try {
+    hasSave = hasSaveKey();
+  } catch {
+    hasSave = false;
+  }
+  root.innerHTML = S.settingsScreen({ settings, theme: loadTheme(), prefs, hasSave, error });
   // 主题即时切换（02 §五「设置页即时切换」）：CSS variables 全局接管，无需重渲染
   for (const input of root.querySelectorAll<HTMLInputElement>("[data-theme-choice]")) {
     input.addEventListener("change", () => {
@@ -688,6 +796,38 @@ function renderSettings(error?: string): void {
       saveTheme(id);
     });
   }
+  // 阅读偏好即时切换（v5/02 §七 ▸ 设置页补全）：<html data-font / data-motion> 接管字号与动画
+  for (const input of root.querySelectorAll<HTMLInputElement>("[data-font-choice]")) {
+    input.addEventListener("change", () => {
+      const next = { ...loadPrefs(), font: input.value as FontScale };
+      applyPrefs(next);
+      savePrefs(next);
+    });
+  }
+  for (const input of root.querySelectorAll<HTMLInputElement>("[data-motion-choice]")) {
+    input.addEventListener("change", () => {
+      const next = { ...loadPrefs(), motion: input.value as MotionPref };
+      applyPrefs(next);
+      savePrefs(next);
+    });
+  }
+  // 清档（设置页就地清，不跳开局屏）：只清存档键，图鉴与设置保留
+  root.querySelector<HTMLButtonElement>("[data-clear-save]")?.addEventListener("click", (e) => {
+    const btn = e.currentTarget as HTMLButtonElement;
+    if (btn.dataset.armed !== "1") {
+      btn.dataset.armed = "1";
+      btn.textContent = "确认清除？";
+      return;
+    }
+    try {
+      clear();
+    } catch {
+      // 存储不可用：无档可清
+    }
+    delete btn.dataset.armed;
+    btn.textContent = "已清除";
+    btn.disabled = true;
+  });
   const form = root.querySelector<HTMLFormElement>("[data-settings-form]");
   form?.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -825,6 +965,7 @@ function restart(): void {
     // 存储不可用也照样回开局屏
   }
   state = null;
+  startDraft = initialDraft();
   pendingAftermath = null;
   pendingFeedback = null;
   choiceFeedback = null;
