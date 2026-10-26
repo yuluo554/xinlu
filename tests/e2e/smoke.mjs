@@ -545,6 +545,10 @@ async function main() {
       const sceneFiles = new Set();
       let eraCards = 0;
       let summarySeen = null;
+      // v5/02 §三 L2「触控 ≥44px」机检（v5-M6 补）：口径此前只有 CSS token（`.option` 56 / `.option-quick` 48 / `.btn` 44）
+      // 与 docs/M3-手动清单 的目检项，**无自动断言**——CSS 一改就静默破口径。这里把全程事件卡内
+      // `[data-option]` / `[data-continue]` 的最小边长记下来双端判红（判据面见 plan/v5/02 §三）。
+      let touchMin = Infinity;
       for (let step = 0; step < MAX_STEPS; step++) {
         const acted = await cdp.evaluate(`(() => {
           if (document.querySelector(".screen-ending")) return "ending";
@@ -773,6 +777,17 @@ async function main() {
               kind: window.__kind ?? "",
               detail: !!window.__detail,
               scene: document.querySelector(".event-card [data-ev-scene]")?.dataset.evScene ?? "",
+              // v5/02 §三 L2：事件卡内的触控目标（选项按钮 / 「继续」按钮）边长实测
+              ctrls: (() => {
+                const bs = [...document.querySelectorAll(".event-card [data-option], .event-card [data-continue]")];
+                const rects = bs.map((b) => b.getBoundingClientRect());
+                const round = (n) => Math.round(n * 10) / 10;
+                return {
+                  n: bs.length,
+                  minH: rects.length ? round(Math.min(...rects.map((r) => r.height))) : 0,
+                  minW: rects.length ? round(Math.min(...rects.map((r) => r.width))) : 0,
+                };
+              })(),
             };
           })()`);
           ageSeq.push(sample.age);
@@ -793,6 +808,16 @@ async function main() {
             throw new Error(`${vp.width} 档：单屏可见 ${sample.screen} 字 > 160（02 §四；卡 ${sample.age} 月龄）`);
           }
           singleScreen.push(sample.screen);
+          // v5/02 §三 L2「触控 ≥44px」：逐卡实测事件卡内控件边长（口径机检补齐，v5-M6）
+          if (sample.ctrls.n > 0) {
+            touchMin = Math.min(touchMin, sample.ctrls.minH, sample.ctrls.minW);
+            if (sample.ctrls.minH < 44 || sample.ctrls.minW < 44) {
+              throw new Error(
+                `${vp.width} 档：触控目标 <44px（实测 ${sample.ctrls.minH}×${sample.ctrls.minW}；卡 ${sample.age} 月龄 / 变体 ${sample.variant}；` +
+                  `v5/02 §三 L2 触控 ≥44px——CSS 里 .option / .option-quick / .btn 的最小高度别改小）`,
+              );
+            }
+          }
           if (sample.detail) detailCards++;
           if (sample.opts > 0) {
             // v5/02 §二：偶遇卡允许单选项「就这样走过去」；此处只统计主线/支线的选项数下限
@@ -1147,7 +1172,7 @@ async function main() {
         }
       }
 
-      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share, cards: ageSeq.length, ageSpan: `${ageSeq[0]}–${ageSeq[ageSeq.length - 1]}`, eraPolls: eraCards, variants: [...variantsSeen], maxScreen: Math.max(...singleScreen) });
+      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share, cards: ageSeq.length, ageSpan: `${ageSeq[0]}–${ageSeq[ageSeq.length - 1]}`, eraPolls: eraCards, variants: [...variantsSeen], maxScreen: Math.max(...singleScreen), touchMin });
       out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄；年份徽章 ${yearSeq[0]}→${yearSeq[yearSeq.length - 1]} 单调；时代卡轮询 ${eraCards} 次；节奏变体 ${[...variantsSeen].join("+")}；单屏最长 ${Math.max(...singleScreen)} 字；细看层卡 ${detailCards} 张`);
     }
 
@@ -1294,7 +1319,7 @@ async function main() {
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项2–3 单屏≤160(最长${r.maxScreen}) 节奏变体(${r.variants.join("+")}) 图谱逐位role 图标(无图标卡≤豁免) critical分级/五档词状态条/阶段条聚合(D6=A)/浮动层/小结三观三轴/小结场景图/图谱页/种子码/自定义槽离线隐藏/主题四款切换+夜航SVG联动已断言`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项2–3 单屏≤160(最长${r.maxScreen}) 触控≥44px(最小${r.touchMin}) 节奏变体(${r.variants.join("+")}) 图谱逐位role 图标(无图标卡≤豁免) critical分级/五档词状态条/阶段条聚合(D6=A)/浮动层/小结三观三轴/小结场景图/图谱页/种子码/自定义槽离线隐藏/主题四款切换+夜航SVG联动已断言`);
     }
     out("PASS  v5 自定义出生全流程：四步开局（step 2 八因素表单）/ 出生证明八因素逐项对账 / 1956 时代卡首屏 / 年份徽章 / 我的家庭图谱(本局姓名) / 存档 v3 形状");
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")} + v5-start-step{1,2,3}-375 / v5-theme-{paper,moon,night,celadon}-375`);
