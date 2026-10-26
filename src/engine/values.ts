@@ -2,6 +2,9 @@
 // 本文件是判定核心的一部分：零 DOM、零存储、零过网（fetch 禁入 engine/，grep 守护）。
 import stageDriftRaw from "../data/stage-drift.json" with { type: "json" };
 import monologuesRaw from "../data/monologues.json" with { type: "json" };
+// 家庭注册槽分组单源（plan/v5/02 §一）。这里直接读数据文件而不是 import family.ts：
+// family.ts 反向依赖本档的 tagOfBond，走模块会成环（实测循环初始化时表为 undefined）。
+import familySlotsRaw from "../data/family-slots.json" with { type: "json" };
 import {
   DIM_KEYS,
   LINE_STATES,
@@ -176,7 +179,17 @@ export function tagOfBond(bond: number): import("./model").NpcTag {
 /**
  * 关系增量入账：未在册 NPC 以 NPC_SPAWN_BOND 入册后按序应用增量；
  * bond 钳制 [0,100] 整数，tag 随 bond 重算。返回新状态，不改入参。
+ *
+ * v5 例外（plan/v5/02 §一 ▸ 增补）：**家庭注册槽 id 不按需入册**——`mother/father/grandma/...`
+ * 是结构事实（单亲-父家庭没有母亲、隔代可能父母皆不在），缺了就缺了；若照旧按需补人，
+ * 一句「和母亲说话」就会在单亲-父家庭里凭空长出一位母亲（v4 单亲恒母、父系引用少，
+ * 该洞存在但很少被踩到；v5 单亲父/母两形态后会被踩到）。支线 NPC（伴侣/挚友/师/上司/医生）
+ * 仍按需入册——那正是「路上遇见的人」的语义。
  */
+const FAMILY_REGISTRY_IDS = new Set(
+  Object.keys((familySlotsRaw as unknown as { groups: Record<string, string> }).groups),
+);
+
 export function applyBonds(state: RunState, bondDeltas: Record<string, number>): RunState {
   const entries = Object.entries(bondDeltas).filter(([, v]) => typeof v === "number" && v !== 0);
   if (entries.length === 0) return state;
@@ -184,6 +197,7 @@ export function applyBonds(state: RunState, bondDeltas: Record<string, number>):
   for (const [id, raw] of entries) {
     let npc = npcs.find((n) => n.id === id);
     if (!npc) {
+      if (FAMILY_REGISTRY_IDS.has(id)) continue; // 家庭成员缺席 = 结构事实，不入册
       npc = { id, bond: NPC_SPAWN_BOND, tag: tagOfBond(NPC_SPAWN_BOND) };
       npcs.push(npc);
     }

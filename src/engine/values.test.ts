@@ -251,6 +251,23 @@ describe("applyBonds（入册 / 衰减 / 钳制 / 重 tag）", () => {
     expect(npc?.tag).toBe("亲密");
   });
 
+  it("v5：家庭注册槽 id 不按需入册（缺席 = 结构事实，防单亲-父局凭空长出母亲）", () => {
+    const state = createRun(ENV, 42);
+    // 支线 NPC 仍按需入册（「路上遇见的人」语义不变）
+    const withBestie = applyBonds(state, { bestie: 12 });
+    expect(withBestie.npcs.some((n) => n.id === "bestie")).toBe(true);
+    // 缺席的家庭成员：给它的关系增量落空，不得入册
+    const noFather: RunState = { ...state, npcs: state.npcs.filter((n) => n.id !== "father") };
+    const next = applyBonds(noFather, { father: 10 });
+    expect(next.npcs.some((n) => n.id === "father"), "缺席的父亲不应被关系增量凭空补出").toBe(false);
+    expect(next.npcs.length).toBe(noFather.npcs.length);
+    // 已入册的家庭成员照常入账
+    const onMother = applyBonds(state, { mother: 5 });
+    expect(onMother.npcs.find((n) => n.id === "mother")!.bond).toBeGreaterThan(
+      state.npcs.find((n) => n.id === "mother")!.bond,
+    );
+  });
+
   it("已入册 NPC 增量按当前 values 轴衰减（values=100 → 减半）", () => {
     const state = { ...createRun(ENV, 42), values3: { worldview: 50, outlook: 50, values: 100 } };
     const next = applyBonds(state, { mother: 15 });

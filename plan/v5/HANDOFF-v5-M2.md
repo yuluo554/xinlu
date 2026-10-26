@@ -8,25 +8,26 @@
 
 | 块 | 落位 | 证据（当轮实跑） |
 |---|---|---|
-| 1.1 家庭槽位逐位命名 | `src/data/family-slots.json`（新，单源）+ `src/data/npcs.json`（加 `group`）+ `src/engine/family.ts`（按槽生成）+ `src/engine/model.ts`（`NpcState.slot?`）+ `src/storage/storage.ts`（旧档回填）+ `src/ui/relations.ts`（role 取槽位表）+ validate `F` 区 | `npm run validate` → `PASS 家庭槽位（v5/02 §一）：槽位 10 枚（role 逐位、无泛称）+ 结构 5 种（↔槽区间合法）+ 注册组 7 项 + 南北侧系闭合`；`family.test.ts` 14 项（含 1500 组合 fuzz 槽位零重复、单亲父/母两形态、隔代南北侧系）；`relations.test.ts` +3 项（外婆/外公/姐姐逐位 + 泛称禁令）；`storage.test.ts` +2 项（slot 回填、slot 类型非法拒绝）；E2E 图谱逐位 role（含泛称禁令） |
+| 1.1 家庭槽位逐位命名 | `src/data/family-slots.json`（新，单源）+ `src/data/npcs.json`（加 `group`）+ `src/engine/family.ts`（按槽生成）+ `src/engine/values.ts`（家庭 id 不按需入册）+ `src/engine/model.ts`（`NpcState.slot?`）+ `src/storage/storage.ts`（旧档回填）+ `src/ui/relations.ts`（role 取槽位表）+ validate `F` 区 | `npm run validate` → `PASS 家庭槽位（v5/02 §一）：槽位 10 枚（role 逐位、无泛称）+ 结构 5 种（↔槽区间合法）+ 注册组 7 项 + 南北侧系闭合`；`family.test.ts` 14 项（含 1500 组合 fuzz 槽位零重复、单亲父/母两形态、隔代南北侧系）；`relations.test.ts` +3 项（外婆/外公/姐姐逐位 + 泛称禁令）；`storage.test.ts` +2 项（slot 回填、slot 类型非法拒绝）；E2E 图谱逐位 role（含泛称禁令） |
 | 1.2 偶遇层 40 条 | `src/data/events.json`（40 条 `type: encounter`，每阶段 5）+ `src/data/icon-map.json`（+40，全部既有 SVG）+ `src/engine/engine.ts`（`encounterQuota/encounterFor/applyEncounterChoice`）+ `src/engine/values.ts`（`lineGainOf` 对 encounter 恒 0）+ validate `E.ENC` | validate → `PASS 事件库 283 条：… 偶遇层 40 条（每阶段 ≥5，v5/02 §二）`；`rhythm.test.ts` 注入 5 项（配额 0–3 且种子决定 / 实出 ≤ 配额 / 存在 0 条阶段（留白）/ 不推 line / 不连发） |
 | 1.3 文本瘦身 243 条 | `tools/v5-slim-events.mjs`（一次性迁移，幂等 + `--dry`）→ `src/data/events.json`（`text` 主句 + `detail` 原文 + `options[].text` 短句 + `options[].detail` 原话）+ `scripts/check-story-quality.mjs`（v4 四项改扫 `detail ?? text`；新增 `S.LEN2`/`S.OPT`/`S.DETAIL`） | `npm run validate:story` → `绿（七项全过）`：主句 中位 104 / P90 118 / 最长 120；选项 中位 8 / 最长 16 / ≥20 字占比 0%；detail 缺 0 / 超长 0 / 非前缀 0；单屏 >160 0 条。零损失核对（脚本比对 v4 原文）：243/243 `detail` 逐字等于原文，`stage/type/line/ageHint/ageMonths/lineGain/rescue/pre` 与选项 `deltas3/resourceDeltas/bondDeltas/requires/flag/aftermath` **零改动** |
 | 1.4 节奏变体引擎 | `src/engine/rhythm.ts`（五种变体 + `oddsOf/rollOdds/drawCard` + 防单调 relay）+ `scripts/check-rhythm.mjs` + `npm run validate:rhythm` + `src/engine/rhythm.test.ts`(16 项) + 布局门 `PENDING_TOOLS` 删登记 | `npm run validate:rhythm` → 8 局 × 8 阶段全 PASS（每阶段 4–5 种变体、非 critical 段连片 ≤3、critical 段实测 2–4 单列）；critical 22 张 risk 档齐（无 risk 会全落 draw 被门抓到） |
 | 呈现面最小接线 | `src/ui/screens.ts`（`data-detail` 细看折叠层 + `data-variant` 变体控件 + `option-quick` 紧凑按钮 + `variant-note`）+ `src/ui/app.ts`（偶遇分支、read「继续」、变体派生）+ `src/style.css`（细看层/紧凑按钮/提示句样式） | E2E 双端：243/245 张卡全部带细看层、单屏最长 158 字、各见 4 种变体（choice+draw+quick+odds） |
 
-**出口门实测（2026-10-26 当轮）**：布局门全绿（`LAYOUT.DOC_TOOLS 10 个脚本全部在位`、`README 119/120`、`STATUS 2 处副本 × 19 里程碑一致无缺行`、`LEDGER 45 行无未完成`）/ 脱敏门 487 文件 0 命中 / 许可门 0 FAIL / 预算门 31 件 745.46KB ≤ 850KB 无 WARN / validate 0 FAIL（283 事件，`--full` 全量）/ validate:story 七项绿 / validate:rhythm 绿 / vitest **324/324**（基线 298，+26）/ typecheck 0 / e2e 双端一键通关 + v4 自定义出生段全绿 / 变异自检 **24/24**（`node tools/tmp-mutate-v5m1.mjs`）。
+**出口门实测（2026-10-26 当轮）**：布局门全绿（`LAYOUT.DOC_TOOLS 10 个脚本全部在位`、`README 119/120`、`STATUS 2 处副本 × 19 里程碑一致无缺行`、`LEDGER 45 行无未完成`）/ 脱敏门 487 文件 0 命中 / 许可门 0 FAIL / 预算门 31 件 745.46KB ≤ 850KB 无 WARN / validate 0 FAIL（283 事件，`--full` 全量）/ validate:story 七项绿 / validate:rhythm 绿 / vitest **325/325**（基线 298，+27）/ typecheck 0 / e2e 双端一键通关 + v4 自定义出生段全绿 / 变异自检 **24/24**（`node tools/tmp-mutate-v5m1.mjs`）。
 
 ## 二、当前事实·状态不变量（下一棒动手前必须知道）
 
-1. **vitest 基线升到 324**（只加不减）：v5-M1'''' 增量 26 项 = `family.test.ts`（14）+ `relations.test.ts`（+3）+ `storage.test.ts`（+2）+ `rhythm.test.ts`（16，其中 family/relations 的旧断言被改写而非新增，净差 +26）。
+1. **vitest 基线升到 325**（只加不减）：v5-M1'''' 增量 27 项 = `family.test.ts`（14）+ `relations.test.ts`（+3）+ `storage.test.ts`（+2）+ `values.test.ts`（+1，家庭 id 不按需入册）+ `rhythm.test.ts`（16）；其中 family/relations 的部分旧断言被改写而非新增，净差 +27。
 2. **文本面新形态**：全库事件都有 `detail`（= v4 原文整段，且**以 `text` 为前缀**）；563/729 个选项有 `options[].detail`（短句化前的原话）。**改文案必须同时改 `detail`**，否则 `S.DETAIL 非前缀` 会红——这是「内容零损失」的机检形式，不是可选建议。
 3. **选项数口径已改**：`2–3`（v3 的「≥3」废止）；**偶遇卡允许单选项**「就这样走过去」（validate `E.OPTIONS` 与 E2E 分别按 `type: encounter` 放宽下限；E2E 只统计非偶遇卡的下限）。
 4. **节奏门判据面**：`每阶段变体种类 ≥3` + `非 critical 段同变体连续 ≤3`（critical 段单列观测）。critical 的 22 张都带 `risk`（`low|mid|high`），**新增 critical 必须带 risk**，否则 `rhythm.test.ts` 的「全部 critical 标了 risk」会红——那张测试守的就是「teen 四张全落 draw」这个坑。
 5. **quick 阈值是 13 字**（`src/engine/rhythm.ts` 常量，02 §三 ▸ 增补有实测表）。改这个数字必须同步 02 §三 的实测表，否则就是口径漂移。
 6. **偶遇注入规则**（`encounterFor`）：配额 0–3（`seededDraw(seed, 900 + stageIndex×13)` 四等分）；只在 `floor ≥ 0` 且 `floor ≤ 偶遇月龄 ≤ 下一张主线卡月龄` 时插（不抢开场、保单调）；上一张是偶遇或 critical 时不插；`pickEvent` 候选池已排除 `encounter`。
 7. **存档**：`xinlu.save.v3` 版本号未变；`NpcState.slot` 是**新增可选字段**；`readNpcs` 已接受 `name/slot` 两个可选键；旧档在 `load()` 里按 seed 复算回填（不覆盖既有值、不新增成员）。
-8. **UI 契约（E2E 钉住的钩子，别删）**：`.event-card[data-age-months]`、`[data-option]`、`[data-continue]`、`[data-detail]`、`.event-card[data-variant]`（新增，值 ∈ choice/draw/odds/read/quick）、`.statebar .res-word`（三项）、`[data-year-badge]`、`[data-relations-chart]`、`.rel-list .rel-role`（逐位 role）、`[data-family-open]`。**状态条 3 项 / 阶段条高度恒定 / money 无档色条 / year-badge 在卡内**这些既有钩子未动。
-9. **`tools/` 下三个本棒工具**：`v5-slim-events.mjs`、`v5-add-encounters.mjs`（幂等迁移）、`tmp-mutate-v5m1.mjs`（变异自检；**名字带 tmp 是有意的**——它不是门，只作留档，可在 v5-M2 复跑）。
+8. **家庭成员不按需入册**（`values.applyBonds`）：`mother/father/grandma/...`（`family-slots.json` 的 `groups` 键）缺席时，给它的 `bondDeltas` **落空不入册**——单亲-父家庭没有母亲是结构事实；支线 NPC（伴侣/挚友/师/上司/医生）仍按需入册。实测 240 局单亲模拟「凭空长出家庭成员」0 次。注意 `values.ts` 直接读 `family-slots.json` 而非 import `family.ts`（后者反向依赖 `tagOfBond`，走模块会成环）。
+9. **UI 契约（E2E 钉住的钩子，别删）**：`.event-card[data-age-months]`、`[data-option]`、`[data-continue]`、`[data-detail]`、`.event-card[data-variant]`（新增，值 ∈ choice/draw/odds/read/quick）、`.statebar .res-word`（三项）、`[data-year-badge]`、`[data-relations-chart]`、`.rel-list .rel-role`（逐位 role）、`[data-family-open]`。**状态条 3 项 / 阶段条高度恒定 / money 无档色条 / year-badge 在卡内**这些既有钩子未动。
+10. **`tools/` 下三个本棒工具**：`v5-slim-events.mjs`、`v5-add-encounters.mjs`（幂等迁移）、`tmp-mutate-v5m1.mjs`（变异自检；**名字带 tmp 是有意的**——它不是门，只作留档，可在 v5-M2 复跑）。
 
 ## 三、下一棒待办（v5-M2'''' 呈现层一，四块）
 
@@ -39,7 +40,7 @@
 | 2.3 | **素纸主题（D8）**：删纹理层（`--tex-wash: 0`）+ 提对比 + 四主题保留 + 设置页补全 | 四主题截图留痕；夜航 AA（`theme-contrast.test` 11 组合 ≥4.5）不退化；`--tex-wash: 0` 断言 |
 | 2.4 | **卡片三层**：L1 正文焦点（大字/大留白/行宽 ≤34 字）+ 细看折叠（已在 M1 接线，本棒做视觉分层与展开对账）+ L3 辅助弱化（状态条默认折叠为细线，点击展开） | 单屏字数 ≤160 断言（已在 M1 落）+ 细看展开内容对账（展开后与 `detail` 逐字一致）+ 三档截图 |
 
-**公共出口门**：validate 0 FAIL + validate:story 七项绿 + **validate:rhythm 绿** + vitest ≥ 324（只加不减）+ typecheck 0 + e2e 双端绿 + 布局门/脱敏门绿 + README ≤120 行 + 预算门重审（**删纹理应为负增量**）。
+**公共出口门**：validate 0 FAIL + validate:story 七项绿 + **validate:rhythm 绿** + vitest ≥ 325（只加不减）+ typecheck 0 + e2e 双端绿 + 布局门/脱敏门绿 + README ≤120 行 + 预算门重审（**删纹理应为负增量**）。
 
 **评审门（强核查）**：02 §五/§六/§七 ↔ 实现 ↔ 单测/E2E 三方一致；**卡片三层改动不得破坏 E2E 既有钩子清单（见 §二.8）**；主题改动不得动 `theme-contrast.test.ts` 的判据面。
 
@@ -76,7 +77,7 @@
 - [x] 1.3 文本瘦身：243 条主句（中位 104 / 最长 120）+ 原文整段迁 `detail` 零损失 + 选项短句化（中位 8 / 最长 16）+ 每题 2–3（validate 口径）+ `validate:story` 七项
 - [x] 1.4 节奏变体：`rhythm.ts` 五种变体 + 概率判定（种子化）+ 防单调 relay + `scripts/check-rhythm.mjs` + `npm run validate:rhythm`（同批删布局门 `PENDING_TOOLS` 登记）
 - [x] 呈现面最小接线：卡片 `data-detail` 细看折叠层 + `data-variant` 变体控件（read/quick/draw/odds）
-- [x] 出口门：validate 0 FAIL / validate:story 七项绿 / validate:rhythm 绿 / vitest 324（+26）/ typecheck 0 / e2e 双端全绿 / 布局·脱敏·许可·预算全绿
+- [x] 出口门：validate 0 FAIL / validate:story 七项绿 / validate:rhythm 绿 / vitest 325（+27）/ typecheck 0 / e2e 双端全绿 / 布局·脱敏·许可·预算全绿
 - [x] 变异自检 24/24（`node tools/tmp-mutate-v5m1.mjs`）
 - [x] 计划面翻齐：两处状态副本 v5-M1'''' ✅ + v5/00 台账七行 ✅ + v5/00 决策记录四行 + v5/02 §十二 增补 + v5/03 模块 1/2 ✅（模块 3 部分）/模块 6 🟡 + v5/backlog 启用 + README 119/120
 - [x] 本档七节齐
@@ -92,7 +93,7 @@
 | `npm run validate` | **0 FAIL**（283 事件；图标 283/283；F 区绿；偶遇 40 条；--full 全量） |
 | `npm run validate:story` | **绿（七项）**：S.LEN 243 / S.ERA 243 / S.SENSE 243 / S.REF 122；主句 104/118/120；选项 8/16/0%；detail 0 缺/0 超长/0 非前缀；单屏 >160 = 0 |
 | `npm run validate:rhythm` | **绿**：8 局 × 8 阶段，每阶段 4–5 种变体、非 critical 段连片 ≤3 |
-| `npx vitest run` | **324/324**（31 文件；~17s） |
+| `npx vitest run` | **325/325**（31 文件；~17s） |
 | `npx tsc --noEmit` | **0 错** |
 | `npm run e2e` | **全绿**（375/1280 双端一键通关 94–245 张卡 + v4 自定义出生全流程；单屏最长 158 字） |
 | `npm run build` + `gate:budget` | 31 件，gzip **745.46KB ≤ 850KB**，无 WARN |
@@ -107,6 +108,7 @@
 4. **quick 阈值不可达（1.4）**：02 §三 原表写「≤6 字」；瘦身后按 6 字筛每阶段仅 0–2 张可用 → choice 连片 28 张，节奏门「连续 ≤3」自己不可达。处置 = 实测定档 13 字 + 把实测表写进 02 §三 ▸ 增补（**门不许自己制造它要防的现象**）。
 5. **critical 全落 draw（1.4）**：22 张 critical 原本都没有 `risk` → 全走 `draw`，teen 四张连发。处置 = 按事件性质逐张标 `risk`，并在单测里钉「全部 critical 必须带 risk」。
 6. **变异自检第一次「没红」的两处**：一处是我的变异没真正越界（偶遇文案 +13 字仍在 80 字内 → 改成按原长补足到 100+）；一处变异没打中门的判据（删 teen 偶遇后仍有 era/read + relay/quick 撑起 ≥3 种 → 改成拆掉整阶段的变体来源）。判别口诀：**「变异没红」先查「变异真发生了几次字节变化」与「它打的是不是这条判据的靶面」**。
+7. **家庭成员被按需「补」出来（1.1 连带）**：`applyBonds` 原语义「未在册 NPC 以中位 50 入册」对支线 NPC 是对的，对家庭成员是错的——v4 单亲恒母，v5 单亲分父/母两形态后，单亲-**父**局里 66 处「与母亲有关」的关系增量会长出一位从未生成过的母亲。处置 = `applyBonds` 对 `family-slots.json` 的 `groups` 键缺席即落空 + 单测；实测 240 局单亲模拟「凭空长人」0 次。同笔踩到并修掉一个**模块环**：`values.ts` import `family.ts` 会成环（`family.ts` 反向依赖 `tagOfBond`），表现为 `Cannot read properties of undefined (reading 'groups')`——正解是两处都直接读数据文件。
 
 ---
 
