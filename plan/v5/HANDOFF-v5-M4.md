@@ -114,3 +114,20 @@
 9. **选择器挂在自己身上（3.3）**：`[data-clue]` 挂在 `section.screen-clue` 上，写成 `.screen-clue [data-clue]`（后代选择器）永远找不到。处置 = `.screen-clue[data-clue]`。判别口诀：**同一个元素既当容器又当锚点时，后代选择器必然落空。**
 10. **截图拍在淡入动画中途（3.1 留痕）**：图谱页截图整页发白——`.screen` 有淡入动画，`captureScreenshot` 抢在动画中。处置 = 等 700ms 再拍（或等 `animationend`）。判别口诀：**任何「截出来怪怪的」先怀疑时机，再怀疑样式。**
 11. **脱敏门抓自己的临时探针（环境坑连带）**：为目检写的 `tests/tmp-probe-scenes.test.ts` 里写了绝对盘符路径，脱敏门当场 4 处命中。处置 = 探针用完立刻删；要留就写相对路径。判别口诀：**临时脚本也进扫描面**——「跑完就删」是纪律，不是可选项。
+
+## 八、命令速查（v5-M4'''' 收官时补记；本节由 v5-M4'''' 收官笔补写——布局门 `LAYOUT.HANDOFFS` 在 v5-M4'''' 转 ✅ 后开始校验本档七节齐，缺「命令速查」即报红，属正当补全）
+
+```bash
+node tools/check-sprint-layout.mjs   # 布局门（= npm run gate:layout）
+node tools/check-desensitized.mjs    # 脱敏门（= npm run gate:desens）
+npm run validate                     # 数据门（14 区；F 槽位 / C 线索 / S 配图）
+npm run validate:story               # 文本长度 + 写实机检七项
+npm run validate:rhythm              # 节奏门（每阶段变体 ≥3）
+npm test                             # vitest（v5.0.0 后基线 399）
+npm run typecheck                    # tsc --noEmit
+npm run e2e                          # E2E 全量（build + 双端 + 768 + v5 段）
+node tests/e2e/smoke.mjs --no-build --base-url <url>   # 发布冒烟（外部静态服务/线上 Pages 同口径）
+npm run build && npm run gate:budget # 构建 + 预算门（850KB 线；v5.0.0 实测 760.43KB）
+npm run gate:license                 # 许可门
+gh api repos/<user>/<repo>/traffic/views   # Traffic 周记（clones 同路径）
+```

@@ -11,7 +11,7 @@ node tools/check-sprint-layout.mjs    # 布局门；必须绿，红了先修布�
 - 续接对话：读 `plan/HANDOFF-M<k>.md`（那是第 k 棒的收尾交接单），**先跑上面这条门**。
 - v2 腿（`plan/v2/` 套件）：读 `plan/v2/HANDOFF-v2-M<k>.md`（v2-M<k>' 里程碑的交接单，文件名不带撇号），同样先跑布局门。
 - v4 腿（`plan/v4/` 套件）：读 `plan/v4/HANDOFF-v4-M<k>.md`（v4-M<k>''' 里程碑的交接单，文件名不带撇号），同样先跑布局门。
-- **v5 腿（`plan/v5/` 套件，当前进行中）**：读 `plan/v5/HANDOFF-v5-M<k>.md`（v5-M<k>'''' 里程碑的交接单，文件名不带撇号），同样先跑布局门。v5 是当前活跃腿，其余腿为留档。
+- **v5 腿（`plan/v5/` 套件，v5.0.0 已发布）**：读 `plan/v5/HANDOFF-v5-M<k>.md`（v5-M<k>'''' 里程碑的交接单，文件名不带撇号），同样先跑布局门。v5 全腿收官（v5-M1''''–M4'''' 全 ✅，进入运维期，其余腿为留档）。
 - 接手对话（无 HANDOFF）：先读 `plan/00`、`plan/05`、`plan/06` 与各 HANDOFF，重建"当前状态 + K 口径清单"再动手。
 - **门不存在 = 本项目没装订** → 先补第零步，再做别的。
 
@@ -31,7 +31,7 @@ node tools/check-sprint-layout.mjs    # 布局门；必须绿，红了先修布�
 | 缺口队列 | `plan/backlog.md`、`plan/v2/backlog.md`、`plan/v4/backlog.md` 与 `plan/v5/backlog.md` 队列表 | "待 M<k>"/"待 v2-M<k>'"/"待 v4-M<k>'''"/"待 v5-M<k>''''"的行在其里程碑 ✅ 后必须清理或关闭（v3/backlog 纪律双维护） |
 | 发布留档 | `plan/05-发布留档.md`（各腿发布节并入：v2.0.0 / v4.0.0 / v5.0.0） | M6 ✅ 时要求两栏齐（tag 时点事实 / tag 后追加事实）+ 覆盖对账小节；腿内发布里程碑 ✅ 后追加对应版本节 |
 | 文档点名的工具 | `tools/`、`scripts/` | 文档引用的脚本必须有实物，或登记进布局门 `PENDING_TOOLS`（未到该里程碑）；落位与删登记同提交 |
-| CI | `.github/workflows/ci.yml` | layout job 两条门步骤 + test job typecheck / validate / validate:story / validate:rhythm / vitest（v5-M1'''' 起把文本长度门与节奏门并入远端；**该改动本轮尚未 push，远端实证待推送后回填，不虚报**）。历史实证：v3.0.0 发布链 ci run 40113677118 / deploy-pages run 40113677108 双 success（2026-10-25），v5 装订笔 ci run 40269817007 / deploy-pages run 40269816998 双 success（2026-10-26），两次均为 CI 日志实证而非本地等价 |
+| CI | `.github/workflows/ci.yml` | layout job 两条门步骤 + test job typecheck / validate / validate:story / validate:rhythm / vitest（v5-M1'''' 起把文本长度门与节奏门并入远端，v5-M4'''' 发布态已推送并实证）。历史实证（CI 日志，非本地等价）：v3.0.0 发布链 ci run 40113677118 / deploy-pages run 40113677108 双 success（2026-10-25）；v5 装订笔 ci run 40269817007 / deploy-pages run 40269816998 双 success（2026-10-26）；**v5.0.0 发布态 ci run 40332053102 / deploy-pages run 40332053077 双 success**（2026-10-26，三 job 全绿：Methodology gates + Vitest node 22/24） |
 
 ## 环境事实与禁忌（实测 2026-10-23）
 
