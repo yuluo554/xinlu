@@ -109,6 +109,7 @@ const moodMap = readJson("fish-mood-map.json");
 const stageDrift = readJson("stage-drift.json");
 const monologues = readJson("monologues.json");
 const npcRegistry = readJson("npcs.json");
+const cluesFile = readJson("clues.json");
 
 // ── 〇、NPC 注册表（v3/02 §五 ▸ M3'' 增补：bondDeltas 键与图谱名字/职责的唯一事实源）──
 const NPC_ID_RE = /^[a-z][a-z0-9-]*$/;
@@ -136,6 +137,22 @@ if (npcRegistry && typeof npcRegistry === "object" && !Array.isArray(npcRegistry
 
 // ── 一、事件库（plan/02 §二 + plan/v3/02 ▸ M1'' 增补：ageMonths / line / deltas3 / 资源 / ≥3 选项 / 单调）──
 const flagsDefined = new Set(); // 按库内顺序累积：pre 只许引用更早事件定义的 flag（§二第 3 项，防不可达死锁）
+/**
+ * 线索 flag（v5/02 §十 ▸ v5-M3''''）：由 src/engine/clues.ts 的 resolveClue 写入，**不是**选项 flag。
+ * 它们先于事件库进 `flagsDefined`，让线索解锁事件的 `pre` 能引用它们；
+ * 但「线索 flag 是否真有人写」由下面 C 区单独守门（不靠事件库自证，防自我参照）。
+ */
+const clueFlags = new Set();
+if (cluesFile && Array.isArray(cluesFile.clues)) {
+  for (const clue of cluesFile.clues) {
+    for (const ch of clue.choices ?? []) {
+      if (typeof ch.flag === "string") {
+        clueFlags.add(ch.flag);
+        flagsDefined.add(ch.flag);
+      }
+    }
+  }
+}
 const firstFlagSource = new Map();
 const perStage = new Map(STAGES.map((s) => [s, { main: 0, context: 0, critical: 0, rescue: 0, encounter: 0 }]));
 const perStageLine = new Map(STAGES.map((s) => [s, Object.fromEntries(LINE_KEYS.map((l) => [l, 0]))]));
@@ -684,6 +701,184 @@ if (iconMap && events && Array.isArray(events)) {
   iconStats = { covered: eventIds.length - missingIds.length, total: eventIds.length, disk: diskIcons.size, exempt: exempt.length, exemptMax };
 }
 
+// ── C、轻量线索（v5/02 §十 D10 ▸ v5-M3''''）──
+// 判据只查「cross-reference 的事实」，不复写判定逻辑（判定单源 = src/engine/clues.ts，单测守）：
+//   C.SCHEMA 形状 / C.REF 锚定与解锁事件必须真实存在 / C.STAGE 阶段与锚事件一致 /
+//   C.LEN 文案长度（prompt ≤20 字、2–3 条；choice ≤12 字、恰好 2 个）/ C.FLAG flag 命名与唯一 /
+//   C.DENSITY 每阶段 ≤1 处 / C.UNLOCK 解锁事件必须真的把该 flag 写进 pre（否则线索不改变任何事）。
+let clueStats = null;
+if (cluesFile && Array.isArray(cluesFile.clues) && Array.isArray(events)) {
+  const eventById = new Map(events.filter((e) => e && typeof e.id === "string").map((e) => [e.id, e]));
+  const perStageClues = new Map(STAGES.map((s) => [s, 0]));
+  const seenClueIds = new Set();
+  const seenClueFlags = new Set();
+  let total = 0;
+  for (const clue of cluesFile.clues) {
+    const at = `clues.json ${clue?.id ?? "?"}`;
+    if (!clue || typeof clue !== "object" || Array.isArray(clue)) {
+      fail("C.SCHEMA", `${at} 不是对象`);
+      continue;
+    }
+    if (typeof clue.id !== "string" || !/^clue-[a-z]+-\d{2}$/.test(clue.id)) {
+      fail("C.SCHEMA", `${at} id 非法（应 clue-{stage}-NN）`);
+    } else if (seenClueIds.has(clue.id)) {
+      fail("C.SCHEMA", `${at} id 重复`);
+    } else seenClueIds.add(clue.id);
+    if (!STAGES.includes(clue.stage)) {
+      fail("C.SCHEMA", `${at} stage 非法：${JSON.stringify(clue.stage)}`);
+      continue;
+    }
+    perStageClues.set(clue.stage, perStageClues.get(clue.stage) + 1);
+    total += 1;
+
+    // 锚事件：必须存在、属同一阶段、且不是 critical（critical 是本阶段末尾锚，线索要早于它才有下落）
+    const anchor = eventById.get(clue.anchorEventId);
+    if (!anchor) fail("C.REF", `${at} anchorEventId「${clue.anchorEventId}」在事件库不存在`);
+    else {
+      if (anchor.stage !== clue.stage) fail("C.STAGE", `${at} anchor 阶段 ${anchor.stage} ≠ 线索阶段 ${clue.stage}`);
+      if (anchor.type === "critical") fail("C.STAGE", `${at} anchor 不得是 critical（本阶段末尾出牌，线索来不及触发）`);
+    }
+
+    // prompts：2–3 条、每条 ≤20 字、非空去重
+    const prompts = clue.prompts;
+    if (!Array.isArray(prompts) || prompts.length < 2 || prompts.length > 3) {
+      fail("C.LEN", `${at} prompts 应为 2–3 条（实为 ${Array.isArray(prompts) ? prompts.length : "非数组"}）`);
+    } else {
+      const seenPrompt = new Set();
+      for (const p of prompts) {
+        if (typeof p !== "string" || !p.trim()) fail("C.LEN", `${at} prompt 缺非空文案`);
+        else if ([...p].length > 20) fail("C.LEN", `${at} prompt「${p}」${[...p].length} 字 > 20`);
+        else if (seenPrompt.has(p)) fail("C.LEN", `${at} prompt 重复：「${p}」`);
+        else seenPrompt.add(p);
+      }
+    }
+
+    // choices：恰好 2 个、每个 ≤12 字、flag 合法且全库唯一
+    const choices = clue.choices;
+    if (!Array.isArray(choices) || choices.length !== 2) {
+      fail("C.SCHEMA", `${at} choices 应恰好 2 个（实为 ${Array.isArray(choices) ? choices.length : "非数组"}）`);
+      continue;
+    }
+    for (const ch of choices) {
+      if (!ch || typeof ch !== "object" || Array.isArray(ch)) {
+        fail("C.SCHEMA", `${at} choice 不是对象`);
+        continue;
+      }
+      if (typeof ch.text !== "string" || !ch.text.trim()) fail("C.LEN", `${at} choice 缺非空文案`);
+      else if ([...ch.text].length > 12) fail("C.LEN", `${at} choice「${ch.text}」${[...ch.text].length} 字 > 12`);
+      if (typeof ch.flag !== "string" || !FLAG_RE.test(ch.flag)) fail("C.FLAG", `${at} choice flag 命名非法：${JSON.stringify(ch.flag)}`);
+      else if (seenClueFlags.has(ch.flag)) fail("C.FLAG", `${at} choice flag 重复（两条解读必须写不同的 flag）：${ch.flag}`);
+      else seenClueFlags.add(ch.flag);
+    }
+
+    // unlockEventIds：与 choices 同序、恰好 2 个、事件存在且 `pre` 真的含对应 flag
+    const unlockIds = clue.unlockEventIds;
+    if (!Array.isArray(unlockIds) || unlockIds.length !== 2) {
+      fail("C.SCHEMA", `${at} unlockEventIds 应为 2 个（与 choices 同序）`);
+      continue;
+    }
+    for (let i = 0; i < 2; i++) {
+      const uid = unlockIds[i];
+      const flag = choices[i]?.flag;
+      const target = eventById.get(uid);
+      if (!target) {
+        fail("C.REF", `${at} unlockEventIds[${i}]「${uid}」在事件库不存在`);
+        continue;
+      }
+      if (target.stage !== clue.stage) fail("C.STAGE", `${at} 解锁事件 ${uid} 阶段 ${target.stage} ≠ 线索阶段 ${clue.stage}`);
+      if (!Array.isArray(target.pre) || !target.pre.includes(flag)) {
+        fail("C.UNLOCK", `${at} 解锁事件 ${uid} 的 pre 未包含 flag「${flag}」（线索写了 flag 却不改变任何事）`);
+      }
+    }
+  }
+  for (const s of STAGES) {
+    const n = perStageClues.get(s) ?? 0;
+    if (n > 1) fail("C.DENSITY", `阶段 ${s} 线索 ${n} 处 > 口径 1 处（v5/02 §十：每阶段 ≤1）`);
+  }
+  // 反向：事件库里出现、但 clues.json 从未声明的 `clue-` 前缀 flag（防两处各记一份）
+  for (const f of flagsDefined) {
+    if (typeof f === "string" && f.startsWith("clue-") && !clueFlags.has(f)) {
+      fail("C.FLAG", `flag「${f}」以 clue- 开头但 clues.json 未声明（线索 flag 单源在 clues.json）`);
+    }
+  }
+  clueStats = { total, stages: perStageClues.size, flags: clueFlags.size };
+} else {
+  fail("C.SCHEMA", "clues.json 缺 clues 数组（v5/02 §十）");
+}
+
+// ── S、v5 语义配图（plan/v5/02 §九 D9 ▸ v5-M3''''）──
+// 判据：标签封闭且 ≥16 类 / 每个标签 ≥2 张 / 场景图文件实物存在 / keyTag 不含死键 /
+//       覆盖率 ≥60% / 豁免清单可复算（不写死数字，随 icon-map 与事件库变化重算）。
+let sceneStats = null;
+const sceneMap = readJson("scene-map.json");
+if (sceneMap && Array.isArray(events)) {
+  const SCENE_MIN_TAGS = 16;
+  const SCENE_MIN_PER_TAG = 2;
+  const SCENE_COVERAGE_MIN = 0.6;
+  const sceneDir = join(ROOT, "assets", "web-ready", "scenes");
+  const diskScenes = new Set();
+  if (existsSync(sceneDir)) {
+    for (const name of readdirSync(sceneDir)) {
+      if (name.endsWith(".svg")) diskScenes.add(name);
+    }
+  }
+  const tags = sceneMap.tags;
+  const keyTag = sceneMap.keyTag;
+  if (!tags || typeof tags !== "object" || Array.isArray(tags)) {
+    fail("S.SCHEMA", "scene-map.json 缺 tags 表（{标签: [场景图文件名…]}，v5/02 §九）");
+  } else if (!keyTag || typeof keyTag !== "object" || Array.isArray(keyTag)) {
+    fail("S.SCHEMA", "scene-map.json 缺 keyTag 表（{objectKey: 标签}，v5/02 §九）");
+  } else {
+    const tagNames = Object.keys(tags);
+    if (tagNames.length < SCENE_MIN_TAGS) {
+      fail("S.TAG", `语义标签 ${tagNames.length} 类 < 口径 ${SCENE_MIN_TAGS} 类（v5/02 §九「首批 ≥16」）`);
+    }
+    const referenced = new Set();
+    for (const [tag, list] of Object.entries(tags)) {
+      if (!/^[a-z][a-z-]*$/.test(tag)) fail("S.TAG", `标签名非法（应小写 kebab）：${tag}`);
+      if (!Array.isArray(list) || list.length < SCENE_MIN_PER_TAG) {
+        fail("S.TAG", `标签「${tag}」场景图 ${Array.isArray(list) ? list.length : "非数组"} 张 < 口径 ${SCENE_MIN_PER_TAG} 张（一图多事件的前提是同类里至少有选择）`);
+        continue;
+      }
+      for (const file of list) {
+        if (typeof file !== "string" || !/^[a-z][a-z0-9-]*\.svg$/.test(file)) {
+          fail("S.FILE", `标签「${tag}」场景文件名非法：${JSON.stringify(file)}`);
+          continue;
+        }
+        if (!file.startsWith(`${tag}-`)) fail("S.NAME", `场景图「${file}」前缀与标签「${tag}」不一致`);
+        if (!diskScenes.has(file)) fail("S.FILE", `场景图「${file}」在 assets/web-ready/scenes/ 无实物`);
+        referenced.add(file);
+      }
+    }
+    // 反向：磁盘上存在但映射表没登记的图（防「画了没用上」，也防漏登记导致覆盖虚低）
+    const orphan = [...diskScenes].filter((f) => !referenced.has(f));
+    if (orphan.length) fail("S.EXTRA", `assets/web-ready/scenes/ 有 ${orphan.length} 张图未登记进 scene-map.json：${orphan.slice(0, 6).join(",")}${orphan.length > 6 ? "…" : ""}`);
+
+    // keyTag：每个值必须是已声明标签；每个键必须是 icon-map 真用到的 objectKey（死键 = 静默无效）
+    const liveKeys = new Set(Object.values(iconMap ?? {}).map((v) => v?.objectKey).filter(Boolean));
+    for (const [key, tag] of Object.entries(keyTag)) {
+      if (!(tag in tags)) fail("S.TAG", `keyTag「${key}」指向未声明标签「${tag}」`);
+      if (!liveKeys.has(key)) fail("S.KEY", `keyTag 含 icon-map 里不存在的 objectKey「${key}」（死键：对覆盖率零贡献）`);
+    }
+
+    // 覆盖率（口径 ≥60%）：按事件逐个复算，不写死数字
+    let covered = 0;
+    const exempt = [];
+    for (const ev of events) {
+      const key = iconMap?.[ev.id]?.objectKey ?? null;
+      if (key && keyTag[key]) covered += 1;
+      else exempt.push(ev.id);
+    }
+    const ratio = covered / events.length;
+    if (ratio < SCENE_COVERAGE_MIN) {
+      fail("S.COVER", `配图覆盖 ${covered}/${events.length} = ${(ratio * 100).toFixed(1)}% < 口径 ${SCENE_COVERAGE_MIN * 100}%（v5/02 §九）`);
+    }
+    sceneStats = { tags: tagNames.length, files: referenced.size, covered, total: events.length, ratio, exempt: exempt.length };
+  }
+} else {
+  fail("S.SCHEMA", "scene-map.json 读取失败或事件库缺失（v5/02 §九）");
+}
+
 // ── R、v4 历法/年代库/画像/家庭（plan/v4/02 §一/二/三 ▸ M1''' 增补；区字母 E 已被 v1 事件库占用）──
 const eraEvents = readJson("era-events.json");
 const namesPool = readJson("names.json");
@@ -1037,6 +1232,8 @@ const lines = [
   ["I", `图标对照（v3/02 §九 + v4/02 §六 objectKey）：${iconStats ? `覆盖 ${iconStats.covered}/${iconStats.total} 条事件 + SVG 实物 ${iconStats.disk} 枚（Game-Icons CC-BY）+ 豁免 ${iconStats.exempt} 条（≤${iconStats.exemptMax}）` : "未完成校验"}`],
   ["R", `v4 历法/画像/家庭（v4/02 ▸ M1'''）：era ${eraStats ? `${eraStats.count}/76 主锚逐年无缺（国际 ${eraStats.intl}/≤${ERA_INTL_MAX}；✅${eraStats.verified}/典型 ${eraStats.typical}）+ 查证表对账` : "—"}；names 池 ${namesStats ? `姓 ${namesStats.surnames} + 名 ${namesStats.given}` : "—"}；家庭注册槽 5；birth-map 八因素 ${v4Combos}/${V4_BIRTH_COMBOS} 组合落域`],
   ["F", `家庭槽位（v5/02 §一）：${familyStats ? `槽位 ${familyStats.slots} 枚（role 逐位、无泛称）+ 结构 ${familyStats.structures} 种（↔槽区间合法）+ 注册组 ${familyStats.groups} 项 + 南北侧系闭合` : "未完成校验"}`],
+  ["C", `轻量线索（v5/02 §十 D10）：${clueStats ? `${clueStats.total} 条（${clueStats.stages} 阶段各 ≤1）+ 解读 flag ${clueStats.flags} 个 + 锚/解锁事件闭合 + 文案长度` : "未完成校验"}`],
+  ["S", `语义配图（v5/02 §九 D9）：${sceneStats ? `标签 ${sceneStats.tags} 类 / 场景图 ${sceneStats.files} 张（实物在位、无孤儿）+ 覆盖 ${sceneStats.covered}/${sceneStats.total} = ${(sceneStats.ratio * 100).toFixed(1)}%（≥60%）+ 豁免 ${sceneStats.exempt} 条` : "未完成校验"}`],
 ];
 for (const [p, label] of lines) out(`${areaOk(p) ? "PASS" : "FAIL"}  ${label}`);
 for (const f of fails) out(`FAIL  ${f}`);

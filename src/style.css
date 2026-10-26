@@ -966,6 +966,35 @@ body {
   color: var(--ink-2);
 }
 
+/* ── v5 语义配图（plan/v5/02 §九 D9）：卡片上半屏的画幅 ──
+   纪律：配图不得顶掉年份戳（year-stamp 在它上方、顺序不变），也不得把单屏可见字数推过 160
+   （配图不计字数，但它只占图区高度，正文与选项的计量口径未变）。
+   豁免事件不渲染此节（不留空框）——选择器只在节点存在时生效。 */
+.ev-scene {
+  margin: 0 0 22px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ev-scene svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 375 档：图区压到 96px 高（正文才是焦点；画幅是「这张卡在说什么」的答案，不是主角） */
+@media (max-width: 640px) {
+  .ev-scene {
+    margin-bottom: 18px;
+    max-height: 104px;
+  }
+
+  .ev-scene svg {
+    max-height: 104px;
+  }
+}
+
 /* ── L1 正文：视觉焦点（大字号 + 最大留白 + 行宽 ≤34 字，plan/v5/02 §六）──
    34em ≈ 34 个汉字一行（汉字宽 ≈ 1em）；超出即换行，读一行不用回头找。 */
 .event-text {
@@ -1072,6 +1101,32 @@ body {
   font-size: 1rem;
   line-height: 1.85;
   max-width: 34em;
+}
+
+/* ── 线索卡（plan/v5/02 §十 D10）：几条观察摆在一起，问「你怎么理解」 ──
+   视觉上比事件卡更轻：观察是列表（不是正文段落），选项仍走整行主操作。 */
+.clue-card .clue-prompts {
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  max-width: 34em;
+}
+
+.clue-card .clue-prompts li {
+  padding-left: 16px;
+  border-left: 2px solid var(--rule);
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.clue-ask {
+  margin: 0 0 12px;
+  font-size: var(--fs-label);
+  color: var(--ink-3);
+  letter-spacing: 0.02em;
 }
 
 /* quick 变体：紧凑两列短词按钮（同样的选项，更低的阅读成本；02 §三） */
@@ -2303,7 +2358,135 @@ body {
   align-items: baseline;
   gap: 4px 12px;
   padding: 11px 0;
+  border: none;
   border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.rel-row:hover {
+  background: var(--ink-veil);
+}
+
+/* 视图切换（家谱树 / 关系网）：一行 chip，在图谱上方 */
+.rel-views {
+  display: flex;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+/* 图谱 SVG 节点可点（v5/02 §八 节点详情）：光标 + 悬停加粗圈 */
+.relations-slot [data-rel-node] {
+  cursor: pointer;
+}
+
+.relations-slot [data-rel-node]:hover circle {
+  stroke-width: 3;
+}
+
+/* 节点详情面板：关系值 + 变化记录（点节点或清单行后出现） */
+.rel-detail {
+  margin: 14px 0 0;
+  padding: 14px 16px;
+  border-left: 2px solid var(--border-strong);
+  background: var(--surface-2);
+}
+
+.rel-detail[hidden] {
+  display: none;
+}
+
+.rel-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  margin: 0 0 10px;
+}
+
+.rel-detail-name {
+  font-size: var(--fs-label);
+  color: var(--ink);
+}
+
+.rel-detail-role {
+  font-size: var(--fs-meta);
+  color: var(--ink-3);
+}
+
+.rel-detail-bond {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+  font-size: var(--fs-meta);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.rel-detail-bond i {
+  display: block;
+  height: 100%;
+}
+
+.rel-detail-bar {
+  display: block;
+  width: 42px;
+  height: 3px;
+  flex: none;
+  background: var(--border-soft);
+}
+
+.rel-detail-bond b {
+  font-weight: 600;
+}
+
+.rel-detail-bond em {
+  font-style: normal;
+  color: var(--ink-3);
+}
+
+.rel-detail-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.rel-detail-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 10px;
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+}
+
+.rd-when {
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rd-what {
+  color: var(--ink-2);
+}
+
+.rd-delta {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+
+.rel-detail-empty {
+  margin: 0;
+  font-size: var(--fs-meta);
+  color: var(--ink-3);
 }
 
 .rel-name {

@@ -847,5 +847,41 @@
   },
   "elder-705": {
     "objectKey": "piano-keys"
+  },
+  "childhood-018": {
+    "objectKey": "secret-book"
+  },
+  "childhood-020": {
+    "objectKey": "secret-book"
+  },
+  "teen-018": {
+    "objectKey": "envelope"
+  },
+  "teen-020": {
+    "objectKey": "envelope"
+  },
+  "youth-018": {
+    "objectKey": "night-sleep"
+  },
+  "youth-020": {
+    "objectKey": "night-sleep"
+  },
+  "adult-018": {
+    "objectKey": "paw-print"
+  },
+  "adult-020": {
+    "objectKey": "paw-print"
+  },
+  "midlife-018": {
+    "objectKey": "love-letter"
+  },
+  "midlife-020": {
+    "objectKey": "love-letter"
+  },
+  "elder-404": {
+    "objectKey": "photo-camera"
+  },
+  "elder-405": {
+    "objectKey": "photo-camera"
   }
 }

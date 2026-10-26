@@ -75,7 +75,9 @@ import {
   type StartMode,
 } from "./start-flow";
 import { objectKeyOf } from "./icons";
-import { renderRelations } from "./relations";
+import { sceneFileOf } from "./scenes";
+import { pendingClue, resolveClue, type Clue } from "../engine/clues";
+import { renderRelations, relationDetail, type RelationView } from "./relations";
 import { exportShareCard } from "./share-card";
 import { GALLERY_TYPES, loadGallery, recordRun, representativeDims } from "./gallery";
 import portraits from "../data/portraits.json" with { type: "json" };
@@ -99,6 +101,8 @@ let view: View = "start";
 let startDraft: StartDraft = initialDraft();
 // 图谱页的返回目标（小结或终局进入时各记一笔）。
 let relationsReturn: View = "summary";
+// 图谱视图（plan/v5/02 §八：tree 默认 / ring 切换）；表现态，不进存档、不落 localStorage。
+let relationView: RelationView = "tree";
 // 自定义槽错误（渲染时消费一次即清）。
 let customSlotError: string | null = null;
 // context 变体改写缓存（eventId → 改写文本；表现态，重开即弃）。
@@ -434,6 +438,12 @@ function renderCard(feedback: typeof pendingFeedback): void {
     renderEraCard();
     return;
   }
+  // v5 轻量线索（plan/v5/02 §十）：锚事件作答后、本阶段内插一张线索卡（判定零随机，见 engine/clues.ts）
+  const clue = pendingClue(state);
+  if (clue) {
+    renderClueCard(clue);
+    return;
+  }
   // v5 偶遇层：优先级次于时代卡、先于主线（plan/v5/02 §二；注入在 pickEvent 之外）
   const encounter = encounterFor(state);
   if (encounter) {
@@ -446,6 +456,34 @@ function renderCard(feedback: typeof pendingFeedback): void {
     return;
   }
   renderEventCard(event, feedback);
+}
+
+/** 线索卡（plan/v5/02 §十 D10）：2–3 条观察 + 2 个「你怎么理解」。
+ *  选完只写 flag（resolveClue），不掷骰、不改三观与资源；flag 再解锁后续事件。 */
+function renderClueCard(clue: Clue): void {
+  if (!state) return;
+  const stage = STAGES[state.stageIndex]!;
+  root.innerHTML = S.clueScreen({
+    stageIndex: state.stageIndex,
+    stage,
+    prompts: clue.prompts,
+    choices: clue.choices.map((c) => c.text),
+    backdrop: sceneBackdrop(state.env),
+    timeline: timelineVM(state),
+    resources: state.resources,
+    lines: state.lines,
+    band: bandOfState(state),
+  });
+  for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-clue-choice]")) {
+    btn.addEventListener("click", () => {
+      if (!state) return;
+      state = resolveClue(state, clue.id, Number(btn.dataset.clueChoice));
+      persist();
+      view = "card";
+      render();
+    });
+  }
+  bindFamilyOpen();
 }
 
 /** 事件卡渲染（主线/支线/偶遇共用；变体只改呈现密度，选项与判定同一条通道）。 */
@@ -485,6 +523,8 @@ function renderEventCard(event: GameEvent, feedback: typeof pendingFeedback): vo
     band: bandForYear(runYearOf(state.birthYear, event.ageMonths)),
     variant,
     kind: event.type,
+    // v5 语义配图（02 §九 D9）：objectKey → 标签 → 场景图；豁免返回 null（不渲染空框）
+    sceneFile: sceneFileOf(event.id, objectKeyOf(event.id) || null),
   });
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-option]")) {
     btn.addEventListener("click", () => onChoose(Number(btn.dataset.option)));
@@ -638,11 +678,11 @@ function renderAftermath(feedback: typeof pendingFeedback): void {
   bindRestart();
 }
 
-/** 应答后的推进：还有事件（含 v5 偶遇卡）→ 下一张卡；取尽 → advanceStage（终局或阶段小结）。 */
+/** 应答后的推进：还有事件（含 v5 偶遇卡与线索卡）→ 下一张卡；取尽 → advanceStage（终局或阶段小结）。 */
 function toNext(): void {
   if (!state) return;
   pendingAftermath = null;
-  if (pickEvent(state) || encounterFor(state)) {
+  if (pickEvent(state) || encounterFor(state) || pendingClue(state)) {
     view = "card";
     render();
     return;
@@ -704,12 +744,43 @@ function renderSummary(): void {
   bindRestart();
 }
 
-/** 图谱页：SVG 水合进图表槽（与鱼像/雷达同一水合纪律）；返回到进入时的屏幕。 */
+/** 图谱页：SVG 水合进图表槽（与鱼像/雷达同一水合纪律）+ 双视图切换 + 节点详情；返回到进入时的屏幕。 */
 function renderRelationsView(): void {
   if (!state) return;
-  root.innerHTML = S.relationsScreen(state.npcs);
+  root.innerHTML = S.relationsScreen(state.npcs, relationView);
   const slot = root.querySelector("[data-relations-chart]");
-  if (slot) slot.innerHTML = renderRelations(state.npcs);
+  const detailBox = root.querySelector<HTMLElement>("[data-rel-detail]");
+  const showDetail = (npcId: string): void => {
+    if (!state) return;
+    const detail = relationDetail(state.history, state.npcs, npcId);
+    if (!detail) return;
+    if (detailBox) {
+      detailBox.removeAttribute("hidden");
+      detailBox.innerHTML = S.relationDetailPanel(detail);
+    }
+  };
+  /** 重绘 SVG 并重绑节点点击（innerHTML 会换掉整棵 SVG，事件必须重挂）。 */
+  const paint = (): void => {
+    if (!state || !slot) return;
+    slot.innerHTML = renderRelations(state.npcs, relationView);
+    for (const g of slot.querySelectorAll<SVGGElement>("[data-rel-node]")) {
+      const id = g.dataset.relNode;
+      if (!id || id === "__you__") continue;
+      g.addEventListener("click", () => showDetail(id));
+    }
+  };
+  paint();
+  for (const btn of root.querySelectorAll<HTMLButtonElement>(".rel-list [data-npc]")) {
+    btn.addEventListener("click", () => showDetail(btn.dataset.npc!));
+  }
+  // 双视图切换（v5/02 §八：tree 默认 / ring 切换）；切视图保留当前详情面板
+  for (const input of root.querySelectorAll<HTMLInputElement>("[data-rel-view]")) {
+    input.addEventListener("change", () => {
+      relationView = (input.dataset.relView as RelationView | undefined) ?? "tree";
+      root.querySelector(".screen-relations")?.setAttribute("data-rel-view-mode", relationView);
+      paint();
+    });
+  }
   root.querySelector<HTMLButtonElement>("[data-relations-back]")?.addEventListener("click", () => {
     view = relationsReturn;
     render();

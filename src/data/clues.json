@@ -1,0 +1,95 @@
+{
+  "_meta": "轻量线索单源（plan/v5/02 §十 D10）。判定零随机：纯 flag 映射——选中哪条解读就写哪个 flag，不掷骰、不看三观。每条线索挂在一个既有事件上（anchorEventId，作答后线索卡出现）；两条解读各写一个 flag，各解锁一条后续事件（unlockEventIds 与 choices 同序）。文案上限：prompts 2–3 条、每条 ≤20 字；choices 2 个、每个 ≤12 字。",
+  "clues": [
+    {
+      "id": "clue-childhood-01",
+      "stage": "childhood",
+      "anchorEventId": "childhood-017",
+      "unlockEventIds": ["childhood-018", "childhood-020"],
+      "prompts": [
+        "字条是从作业本上撕下来的",
+        "右下角画了个歪歪的笑脸",
+        "落款只写了「同桌」两个字"
+      ],
+      "choices": [
+        { "text": "他一直想跟你说话", "flag": "clue-note-liked" },
+        { "text": "只是顺手帮个忙", "flag": "clue-note-casual" }
+      ]
+    },
+    {
+      "id": "clue-teen-01",
+      "stage": "teen",
+      "anchorEventId": "teen-015",
+      "unlockEventIds": ["teen-018", "teen-020"],
+      "prompts": [
+        "信封上的邮戳是外省的",
+        "信纸有淡淡的栀子味",
+        "落款只写了「老同学」"
+      ],
+      "choices": [
+        { "text": "这是你妈年轻时的字", "flag": "clue-letter-mother" },
+        { "text": "也许是别人的旧信", "flag": "clue-letter-stranger" }
+      ]
+    },
+    {
+      "id": "clue-youth-01",
+      "stage": "youth",
+      "anchorEventId": "youth-015",
+      "unlockEventIds": ["youth-018", "youth-020"],
+      "prompts": [
+        "通讯录翻到最后是空页",
+        "冰箱的嗡嗡声停过两秒",
+        "楼道里有人也在开锁"
+      ],
+      "choices": [
+        { "text": "隔壁也醒着", "flag": "clue-night-neighbor" },
+        { "text": "只是楼道风响", "flag": "clue-night-wind" }
+      ]
+    },
+    {
+      "id": "clue-adult-01",
+      "stage": "adult",
+      "anchorEventId": "adult-013",
+      "unlockEventIds": ["adult-018", "adult-020"],
+      "prompts": [
+        "藤筐底下压着一只旧项圈",
+        "项圈上的名牌磨得看不清字",
+        "孩子把饭盆擦干收进了书包"
+      ],
+      "choices": [
+        { "text": "他还没准备好告别", "flag": "clue-collar-grief" },
+        { "text": "他想留个念想", "flag": "clue-collar-keep" }
+      ]
+    },
+    {
+      "id": "clue-midlife-01",
+      "stage": "midlife",
+      "anchorEventId": "midlife-014",
+      "unlockEventIds": ["midlife-018", "midlife-020"],
+      "prompts": [
+        "奖状底下压着一封没寄的信",
+        "信封上是你三十岁前的地址",
+        "邮票是二十年前的面值"
+      ],
+      "choices": [
+        { "text": "当年有话没说完", "flag": "clue-unsent-unfinished" },
+        { "text": "只是忘了寄", "flag": "clue-unsent-forgot" }
+      ]
+    },
+    {
+      "id": "clue-elder-01",
+      "stage": "elder",
+      "anchorEventId": "elder-402",
+      "unlockEventIds": ["elder-404", "elder-405"],
+      "prompts": [
+        "铁盒夹层还有一张票根",
+        "票根日期在你俩认识之前",
+        "老伴看到它时停了一下"
+      ],
+      "choices": [
+        { "text": "她也有过没说的事", "flag": "clue-ticket-secret" },
+        { "text": "只是旧物混在一起", "flag": "clue-ticket-mixed" }
+      ]
+    }
+  ]
+}

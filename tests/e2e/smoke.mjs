@@ -537,6 +537,12 @@ async function main() {
       let countGrew = false;
       let railFixed = true;
       let relationsChecked = false;
+      // v5 线索卡（plan/v5/02 §十）：本轮见过的线索数 + 首条线索的内容快照
+      let clueCount = 0;
+      let clueSeen = null;
+      // v5 配图（plan/v5/02 §九）：见过配图的卡数 + 见过的场景图文件名集合 + 豁免卡数
+      let sceneCards = 0;
+      const sceneFiles = new Set();
       let eraCards = 0;
       let summarySeen = null;
       for (let step = 0; step < MAX_STEPS; step++) {
@@ -598,6 +604,25 @@ async function main() {
             cont.click();
             return card2 ? "card" : "next";
           }
+          // v5 轻量线索卡（plan/v5/02 §十 D10）：2–3 条观察 + 2 个解读。
+          // 采集一次（首见即记）后按下标点击继续；线索只写 flag，不产生后果屏。
+          const clue = document.querySelector(".screen-clue[data-clue]");
+          if (clue) {
+            if (!window.__clueDone) {
+              window.__clueDone = true;
+              window.__clue = {
+                prompts: [...clue.querySelectorAll("[data-clue-prompt]")].map((e) => e.textContent ?? ""),
+                choices: [...clue.querySelectorAll("[data-clue-choice]")].map((e) => e.textContent ?? ""),
+                // 线索卡不得带三观增量读数（它只写 flag，不改判定核）
+                deltas: clue.querySelectorAll(".deltas").length,
+              };
+            }
+            const btn = clue.querySelector("[data-clue-choice]");
+            if (btn) {
+              btn.click();
+              return "clue";
+            }
+          }
           // 回到开局屏（重开之后）：四步一键走通（随机 → 出生证明 → 用这个 → 开始）
           if (document.querySelector("[data-mode]")) {
             document.querySelector("[data-mode='random']").click();
@@ -625,10 +650,107 @@ async function main() {
           if (rel.nodes < 3) throw new Error(`${vp.width} 档：图谱节点 ${rel.nodes} < 3（中心 + 父母）`);
           if (rel.edges < 2) throw new Error(`${vp.width} 档：图谱连线 ${rel.edges} < 2（父母各一线）`);
           if (rel.legend !== 4) throw new Error(`${vp.width} 档：tag 图例非 4 项（实得 ${rel.legend}）`);
+          // v5/02 §八：双视图（tree 默认 / ring 切换）+ 节点详情。
+          // 树视图层级：祖辈 y < 父母 y < 玩家 y；节点带 data-rel-node（详情入口）。
+          const tree = await cdp.evaluate(`(() => {
+            const gs = [...document.querySelectorAll("[data-relations-chart] [data-rel-node]")];
+            const box = (id) => { const n = gs.find((g) => g.dataset.relNode === id); return n ? n.getBoundingClientRect().top : null; };
+            return {
+              mode: document.querySelector(".screen-relations")?.dataset.relViewMode ?? "",
+              viewChips: document.querySelectorAll("[data-rel-view]").length,
+              treeChecked: document.querySelector("[data-rel-view='tree']")?.checked ?? false,
+              father: box("father"),
+              mother: box("mother"),
+              grandma: box("grandma"),
+              you: box("__you__"),
+            };
+          })()`);
+          if (tree.mode !== "tree") throw new Error(`${vp.width} 档：图谱默认视图不是 tree（实得「${tree.mode}」，v5/02 §八）`);
+          if (tree.viewChips !== 2) throw new Error(`${vp.width} 档：视图切换控件 ${tree.viewChips} 个 ≠ 2（家谱树/关系网）`);
+          if (!tree.treeChecked) throw new Error(`${vp.width} 档：默认未选中家谱树`);
+          if (tree.you === null) throw new Error(`${vp.width} 档：树视图缺玩家节点`);
+          // 层级 y 序：祖辈在父母之上，父母在玩家之上（缺该成员时跳过该条）
+          if (tree.grandma !== null && tree.father !== null && !(tree.grandma < tree.father)) {
+            throw new Error(`${vp.width} 档：树视图层级错（祖辈 y=${tree.grandma} 未在父母 y=${tree.father} 之上）`);
+          }
+          if (tree.father !== null && !(tree.father < tree.you)) {
+            throw new Error(`${vp.width} 档：树视图层级错（父母 y=${tree.father} 未在玩家 y=${tree.you} 之上）`);
+          }
+          // 切到关系网：产物要换（连线用曲线 path）、切回树
+          const ring = await cdp.evaluate(`(() => {
+            const input = document.querySelector("[data-rel-view='ring']");
+            input.checked = true;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+            const svg = document.querySelector("[data-relations-chart] svg");
+            return {
+              mode: document.querySelector(".screen-relations")?.dataset.relViewMode ?? "",
+              paths: svg?.querySelectorAll("path").length ?? 0,
+              label: svg?.getAttribute("aria-label") ?? "",
+              nodes: svg?.querySelectorAll("[data-rel-node]").length ?? 0,
+            };
+          })()`);
+          if (ring.mode !== "ring") throw new Error(`${vp.width} 档：切到关系网未生效（mode=${ring.mode}）`);
+          if (ring.label !== "关系图谱") throw new Error(`${vp.width} 档：关系网 aria-label 非法「${ring.label}」`);
+          if (ring.nodes < 3) throw new Error(`${vp.width} 档：关系网节点 ${ring.nodes} < 3`);
+          // 节点详情：点右列清单行 → 面板出现（关系值 + 变化记录/「还没变过」）
+          const detail = await cdp.evaluate(`(() => {
+            const row = document.querySelector(".rel-list [data-npc]");
+            if (!row) return { ok: false };
+            row.click();
+            const box = document.querySelector("[data-rel-detail]");
+            return {
+              ok: true,
+              hidden: box?.hasAttribute("hidden") ?? true,
+              name: box?.querySelector(".rel-detail-name")?.textContent ?? "",
+              bond: box?.querySelector(".rel-detail-bond b")?.textContent ?? "",
+              hasRecords: (box?.querySelectorAll(".rel-detail-list li").length ?? 0) > 0,
+              empty: !!box?.querySelector(".rel-detail-empty"),
+            };
+          })()`);
+          if (!detail.ok) throw new Error(`${vp.width} 档：图谱页无人物清单行（节点详情无从点开）`);
+          if (detail.hidden) throw new Error(`${vp.width} 档：点清单行后详情面板仍隐藏（节点详情未接线）`);
+          if (!detail.name) throw new Error(`${vp.width} 档：详情面板缺姓名`);
+          if (!/^\d+$/.test(detail.bond ?? "")) throw new Error(`${vp.width} 档：详情面板关系值非法「${detail.bond}」`);
+          if (!detail.hasRecords && !detail.empty) {
+            throw new Error(`${vp.width} 档：详情面板既无变化记录也无「还没变过」提示（留了空白区）`);
+          }
           // v5/02 §一：图谱标签逐位命名（父亲/母亲/祖父/…），禁「父母/祖辈/同辈」泛称
           roleLabels = rel.roles;
+          // 截图留痕（v5/02 §八 双视图）：切回树视图后各拍一张。
+          // 必须等换屏淡入动画走完，否则截到的是半透明帧（本轮踩过：整页发白）。
+          await cdp.evaluate(`(() => {
+            const t = document.querySelector("[data-rel-view='tree']");
+            t.checked = true;
+            t.dispatchEvent(new Event("change", { bubbles: true }));
+          })()`);
+          await sleep(700);
+          const treeShot = await cdp.send("Page.captureScreenshot", { format: "png" });
+          writeFileSync(join(ROOT, "docs", "assets", `v5-relations-tree-${vp.width}.png`), Buffer.from(treeShot.data, "base64"));
+          await cdp.evaluate(`(() => {
+            const r = document.querySelector("[data-rel-view='ring']");
+            r.checked = true;
+            r.dispatchEvent(new Event("change", { bubbles: true }));
+          })()`);
+          await sleep(500);
+          const ringShot = await cdp.send("Page.captureScreenshot", { format: "png" });
+          writeFileSync(join(ROOT, "docs", "assets", `v5-relations-ring-${vp.width}.png`), Buffer.from(ringShot.data, "base64"));
           await cdp.evaluate(`document.querySelector("[data-relations-back]").click()`);
           relationsChecked = true;
+          continue;
+        }
+        if (acted === "clue") {
+          // 线索卡首轮即断言：2–3 条观察 + 恰好 2 个解读 + 不带三观增量读数
+          clueCount++;
+          const info = await cdp.evaluate("window.__clue ?? null");
+          if (info) {
+            if (info.prompts.length < 2 || info.prompts.length > 3) {
+              throw new Error(`${vp.width} 档：线索观察 ${info.prompts.length} 条不在 2–3（v5/02 §十）`);
+            }
+            if (info.prompts.some((p) => !p.trim())) throw new Error(`${vp.width} 档：线索观察有空文案`);
+            if (info.choices.length !== 2) throw new Error(`${vp.width} 档：线索解读 ${info.choices.length} 个 ≠ 2`);
+            if (info.deltas !== 0) throw new Error(`${vp.width} 档：线索卡不应出现三观增量读数（只写 flag）`);
+            clueSeen = info;
+          }
           continue;
         }
         if (acted === "card") {
@@ -650,9 +772,15 @@ async function main() {
               variant: window.__variant ?? "",
               kind: window.__kind ?? "",
               detail: !!window.__detail,
+              scene: document.querySelector(".event-card [data-ev-scene]")?.dataset.evScene ?? "",
             };
           })()`);
           ageSeq.push(sample.age);
+          // v5 语义配图（plan/v5/02 §九）：有配图的卡记文件名；无配图 = 显式豁免（不渲染空框）
+          if (sample.scene) {
+            sceneCards++;
+            sceneFiles.add(sample.scene);
+          }
           const yearMatch = /^(19|20|21)\d{2} 年 · /.exec(sample.badge);
           if (!yearMatch) throw new Error(`${vp.width} 档：年份徽章格式非法「${sample.badge}」（v4/02 §一）`);
           yearSeq.push(Number(sample.badge.slice(0, 4)));
@@ -713,6 +841,23 @@ async function main() {
         }
       }
       if (!floatSeen) throw new Error(`${vp.width} 档：全程未观察到后果浮动层（微反馈缺失）`);
+      // v5 语义配图（plan/v5/02 §九）：一局跑下来要有配图，且配图不止一张（变体轮换生效）；
+      // 文件名必须形如 <tag>-<variant>.svg（不是空串 / 不是随便什么）
+      if (sceneCards < 10) throw new Error(`${vp.width} 档：全局带配图的卡仅 ${sceneCards} 张（配图接线疑似回归）`);
+      if (sceneFiles.size < 6) {
+        throw new Error(`${vp.width} 档：只用过 ${sceneFiles.size} 张不同的场景图（变体轮换疑似失效）`);
+      }
+      for (const f of sceneFiles) {
+        if (!/^[a-z][a-z0-9-]*\.svg$/.test(f)) throw new Error(`${vp.width} 档：场景图文件名非法「${f}」`);
+      }
+      // v5 轻量线索（plan/v5/02 §十）：非线索局允许 0 处；出现时必须合口径（上面 acted==="clue" 已逐项断言）
+      // v5 轻量线索（plan/v5/02 §十）：一局走完必须真的遇到线索卡——
+      // 「出现时才断言」会漏掉「永远不出现」这种回归，故这里要求 ≥1 次实证
+      //（36 局 × 3 环境的引擎实证见 src/engine/clues.test.ts；E2E 只钉浏览器侧接线）。
+      if (clueCount < 1) throw new Error(`${vp.width} 档：全程未遇到线索卡（v5/02 §十 线索未接线）`);
+      if (clueSeen && clueSeen.choices.length !== 2) {
+        throw new Error(`${vp.width} 档：线索解读数 ${clueSeen.choices.length} ≠ 2`);
+      }
       if (noIconCards > exemptTotal) {
         throw new Error(`${vp.width} 档：无图标卡 ${noIconCards} 张 > 豁免总数 ${exemptTotal}（图标接线回归）`);
       }

@@ -36,7 +36,25 @@ import {
 import type { Prefs } from "./prefs";
 import { FONT_OPTIONS, MOTION_OPTIONS } from "./prefs";
 import { iconStyle } from "./icons";
-import { NPC_PROFILES, TAG_COLORS, relationsVM, renderRelations } from "./relations";
+import { NPC_PROFILES, RELATION_VIEWS, TAG_COLORS, relationsVM, renderRelations, type NodeDetail, type RelationView } from "./relations";
+// 语义配图（plan/v5/02 §九 D9）：raw SVG 内联 → 与主题变量联动、无额外请求（K2：静态资源，不经运行时库）
+const SCENE_SVGS = import.meta.glob("../../assets/web-ready/scenes/*.svg", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+}) as Record<string, string>;
+/** 文件名（含 .svg）→ 内联 SVG 串。scene-map 的 tags 值就是文件名，两处同一套键。 */
+const SCENE_BY_FILE: Record<string, string> = {};
+for (const [path, raw] of Object.entries(SCENE_SVGS)) {
+  SCENE_BY_FILE[path.split("/").pop()!] = raw;
+}
+/** 事件配图槽：豁免（sceneFile 为 null）时返回空串——不渲染空框（v5/02 §九）。 */
+function sceneImage(file: string | null, alt: string): string {
+  if (!file) return "";
+  const svg = SCENE_BY_FILE[file];
+  if (!svg) return "";
+  return `<figure class="ev-scene" data-ev-scene="${esc(file)}" role="img" aria-label="${esc(alt)}">${svg}</figure>`;
+}
 import { PROVIDERS, type LlmSettings } from "../llm/config";
 import type { RunState } from "../engine/model";
 // 16 型画像一句话（图鉴解锁格用；未解锁不渲染，不留假内容）
@@ -508,6 +526,8 @@ export function cardAskScreen(vm: {
   variant?: RhythmVariant;
   /** v5 事件层级（02 §二）：encounter = 偶遇卡（单选项「就这样走过去」合法，e2e 按此放宽下限）。 */
   kind?: "main" | "context" | "critical" | "rescue" | "encounter";
+  /** v5 语义配图（02 §九 D9）：场景图文件名；null = 显式豁免（不渲染、不留空框）。 */
+  sceneFile?: string | null;
 }): string {
   const line = LINE_META[vm.line];
   const variant = vm.variant ?? "choice";
@@ -578,6 +598,7 @@ export function cardAskScreen(vm: {
           <article class="card event-card${vm.critical ? " critical" : ""}${variant === "quick" ? " quick" : ""}${vm.kind === "encounter" ? " encounter" : ""}" data-age-months="${vm.ageMonths}" data-variant="${esc(variant)}"${vm.kind ? ` data-kind="${esc(vm.kind)}"` : ""}>
             ${yearStamp(vm.yearBadge)}
             ${head}
+            ${sceneImage(vm.sceneFile ?? null, `${line.label}场景配图`)}
             <p class="event-text">${esc(vm.text)}</p>
             ${detailBody}
             ${variantNote}
@@ -639,6 +660,59 @@ export function eraCardScreen(vm: {
             <div class="options-row">
               <button type="button" class="btn btn-primary" data-continue>继续</button>
             </div>
+          </article>
+        </div>
+      </div>
+    </section>`;
+}
+
+/** 线索卡（plan/v5/02 §十 D10）：2–3 条观察 + 2 个「你怎么理解」。
+ *  与事件卡同壳（年份戳/实况带/时间轴都在），但**不给三观增量的读数**——
+ *  线索只写 flag、不改判定核，界面上也不该暗示它在改。
+ *  E2E 钩子：`.screen-clue` / `[data-clue]` / `[data-clue-prompt]` / `[data-clue-choice]`。 */
+export function clueScreen(vm: {
+  stageIndex: number;
+  stage: Stage;
+  prompts: readonly string[];
+  choices: readonly string[];
+  backdrop: SceneBackdrop;
+  timeline: readonly TimelineSegment[];
+  resources: Resources;
+  lines: LineProgress;
+  band: MoneyBand;
+}): string {
+  const prompts = vm.prompts
+    .map((p, i) => `<li data-clue-prompt="${i}">${esc(p)}</li>`)
+    .join("");
+  const choices = vm.choices
+    .map((c, i) => `<button type="button" class="option" data-clue-choice="${i}">${esc(c)}</button>`)
+    .join("");
+  return `
+    <section class="screen screen-card screen-clue" data-clue="1">
+      ${sceneLayer(vm.backdrop)}
+      ${topbar(vm.stageIndex, true)}
+      <div class="sheet-body">
+        ${timelineRail(vm.timeline)}
+        <div class="rail">
+          ${liveBand({
+            yearBadge: "",
+            stageLabel: STAGE_LABEL[vm.stage],
+            lines: vm.lines,
+            resources: vm.resources,
+            band: vm.band,
+            bump: [],
+          })}
+        </div>
+        <div class="stage-main">
+          <article class="card event-card clue-card">
+            <header class="card-head">
+              <div class="card-meta">
+                <span class="chip chip-line line-fate">线索</span>
+              </div>
+            </header>
+            <ul class="clue-prompts">${prompts}</ul>
+            <p class="clue-ask">你怎么理解？</p>
+            <div class="options">${choices}</div>
           </article>
         </div>
       </div>
@@ -931,34 +1005,41 @@ export function corruptScreen(): string {
     </section>`;
 }
 
-/** 关系图谱页：左环形图谱 + 右同行的人清单（名 / 身份 / 羁绊长度条）。
+/** 关系图谱页：左图谱（家谱树默认 / 关系网切换）+ 右同行的人清单（名 / 身份 / 羁绊长度条）
+ *  + 节点详情面板（点节点看关系值与变化记录，v5/02 §八）。
  *  返回目标由 app 层决定（小结或终局）。 */
-export function relationsScreen(npcs: RunState["npcs"]): string {
+export function relationsScreen(npcs: RunState["npcs"], view: RelationView = "tree"): string {
   const legend = Object.entries(TAG_COLORS)
     .map(([tag, color]) => `<span class="rel-legend-item"><i style="background:${color}"></i>${tag}</span>`)
     .join("");
   const known = Object.values(NPC_PROFILES).filter((p) => p.line !== "fate").length;
   const vm = relationsVM(npcs);
+  // 清单行做成按钮：点开 = 节点详情（同一入口也能从 SVG 节点点进来）
   const rows = vm.nodes
     .filter((n) => n.ring !== -1)
     .map((n) => {
       const color = TAG_COLORS[n.tag];
-      return `<div class="rel-row" data-npc="${esc(n.id)}">
+      return `<button type="button" class="rel-row" data-npc="${esc(n.id)}">
         <span class="rel-name">${esc(n.name)}</span>
         <span class="rel-role">${esc(n.role)} · ${esc(n.tag)}</span>
         <span class="rel-bond" title="羁绊 ${n.bond}">
           <span class="rel-bond-bar" aria-hidden="true"><i style="width:${n.bond}%;background:${color}"></i></span>
           <span>${n.bond}</span>
         </span>
-      </div>`;
+      </button>`;
     })
     .join("");
+  const viewChips = RELATION_VIEWS.map(
+    (v) =>
+      `<label class="chip"><input type="radio" name="relview" value="${v}" data-rel-view="${v}"${v === view ? " checked" : ""}><span>${v === "tree" ? "家谱树" : "关系网"}</span></label>`,
+  ).join("");
   return `
-    <section class="screen screen-relations">
+    <section class="screen screen-relations" data-rel-view-mode="${esc(view)}">
       <div class="screen-head">
         <h2>关系图谱</h2>
-        <p>一圈同行的人。线越粗，羁绊越深；颜色是现在的关系。</p>
+        <p>家谱树从上到下看清血缘；关系网看谁离你更近。点任一个名字——或者图上的人——看这段关系怎么走到今天。</p>
       </div>
+      <div class="rel-views" role="radiogroup" aria-label="图谱视图">${viewChips}</div>
       <div class="rel-wrap">
         <div>
           <div class="relations-slot" data-relations-chart></div>
@@ -966,6 +1047,7 @@ export function relationsScreen(npcs: RunState["npcs"]): string {
         </div>
         <div>
           <div class="rel-list">${rows || '<p class="muted">还没有人在册。</p>'}</div>
+          <div class="rel-detail" data-rel-detail hidden></div>
           <p class="rel-note">横条是羁绊的深浅（0–100），跟在后面的数字就是它的读数。图谱会随你的人生长出新名字（本段人生可能遇见 ${known} 位路人与父母同行）。</p>
           <div class="options-row">
             <button type="button" class="btn btn-primary" data-relations-back>返回</button>
@@ -973,6 +1055,31 @@ export function relationsScreen(npcs: RunState["npcs"]): string {
         </div>
       </div>
     </section>`;
+}
+
+/** 节点详情面板（点节点后填入 [data-rel-detail]）：关系值 + 变化记录逐条（v5/02 §八）。
+ *  没有变更记录时明说一句——不留空白区。 */
+export function relationDetailPanel(detail: NodeDetail): string {
+  const color = TAG_COLORS[detail.tag];
+  const rows =
+    detail.records.length === 0
+      ? '<p class="rel-detail-empty">这一段关系还没有变过。</p>'
+      : `<ol class="rel-detail-list">${detail.records
+          .map(
+            (r) => `<li>
+              <span class="rd-when">${esc(r.ageHint)}</span>
+              <span class="rd-what">${esc(r.optionText)}</span>
+              <span class="rd-delta" data-bond-delta="${r.delta}">${r.delta > 0 ? "+" : ""}${r.delta}</span>
+            </li>`,
+          )
+          .join("")}</ol>`;
+  return `
+    <div class="rel-detail-head">
+      <span class="rel-detail-name">${esc(detail.name)}</span>
+      <span class="rel-detail-role">${esc(detail.role)}</span>
+      <span class="rel-detail-bond"><span class="rel-detail-bar" aria-hidden="true"><i style="width:${detail.bond}%;background:${color}"></i></span><b>${detail.bond}</b><em>${esc(detail.tag)}</em></span>
+    </div>
+    ${rows}`;
 }
 
 /** 设置页：标签列 + 面板两栏（framed-sheet settings-two-column）。
