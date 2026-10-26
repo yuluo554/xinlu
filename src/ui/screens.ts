@@ -13,6 +13,7 @@ import {
   type LineProgress,
   type ResKey,
   type Resources,
+  type RhythmVariant,
   type Stage,
 } from "../engine/model";
 import type { SceneBackdrop } from "../viz/scene";
@@ -340,7 +341,11 @@ export function cardAskScreen(vm: {
   /** v4 年份徽章「YYYY 年 · N 岁」（runYearOf 派生）。 */
   yearBadge: string;
   text: string;
+  /** v5 细看层（plan/v5/02 §四）：v4 写实化原文，主句是它的前缀；缺省不出入口。 */
+  detail?: string;
   options: string[];
+  /** v5 选项折叠层（02 §四）：短句化前的原选项文案，与 options 同序；有值才挂「原话」提示。 */
+  optionDetails?: Array<string | undefined>;
   locks: boolean[];
   line: LineKey;
   critical: boolean;
@@ -356,8 +361,13 @@ export function cardAskScreen(vm: {
   customError?: string;
   /** 积蓄换算档（v4/02 §四：按本卡运行年份归段）。 */
   band: MoneyBand;
+  /** v5 节奏变体（02 §三）：只改操作层的呈现密度与提示，选项文案与判定不动。 */
+  variant?: RhythmVariant;
+  /** v5 事件层级（02 §二）：encounter = 偶遇卡（单选项「就这样走过去」合法，e2e 按此放宽下限）。 */
+  kind?: "main" | "context" | "critical" | "rescue" | "encounter";
 }): string {
   const line = LINE_META[vm.line];
+  const variant = vm.variant ?? "choice";
   // 卡片头只说「这是哪条线的什么事」；年份与岁数归实况带（一处事实只出现一次）
   const head = `
     <header class="card-head">
@@ -367,8 +377,45 @@ export function cardAskScreen(vm: {
         ${vm.critical ? '<span class="critical-badge">重大抉择</span>' : ""}
       </div>
     </header>`;
+  // L1 主体：正文 + 细看入口（02 §六：正文是焦点，原文折在下一页签，内容零损失）
+  const detailBody =
+    vm.detail && vm.detail !== vm.text
+      ? `<details class="ev-detail" data-detail>
+            <summary>细看</summary>
+            <p class="ev-detail-text">${esc(vm.detail)}</p>
+          </details>`
+      : "";
+  // L2 操作：按变体给控件（02 §三）；每个按钮的 data-option 契约不变（E2E 依赖）
+  // 注意 vm.locks[i] 语义 = **可用**（engine.optionLocks 返回 optionAvailable 的布尔表，
+  // v3 起就如此命名）；false 才是资源门槛未过 → 置灰不隐藏。
+  const optionButtons = vm.options
+    .map((o, i) => {
+      const available = vm.locks[i];
+      const original = vm.optionDetails?.[i];
+      const cls = variant === "quick" ? "option option-quick" : "option";
+      const title = !available
+        ? ' title="资源不足，此路暂不可选"'
+        : original
+          ? ` title="原话：${esc(original)}"`
+          : "";
+      const disabled = available ? "" : " disabled";
+      return `<button type="button" class="${cls}${available ? "" : " option-locked"}" data-option="${i}"${disabled}${title}>${esc(o)}</button>`;
+    })
+    .join("");
+  const variantNote =
+    variant === "draw"
+      ? '<p class="variant-note" data-variant-note>抽一张：结果由这一局的手气定。</p>'
+      : variant === "odds"
+        ? '<p class="variant-note" data-variant-note>这一回要看运气的成分——成败由你现在的三观与身家算过。</p>'
+        : "";
+  const actionBlock =
+    variant === "read"
+      ? `<div class="options-row">
+              <button type="button" class="btn btn-primary" data-continue>继续</button>
+            </div>`
+      : `<div class="options${variant === "quick" ? " options-quick" : ""}">${optionButtons}</div>`;
   return `
-    <section class="screen screen-card">
+    <section class="screen screen-card" data-variant="${esc(variant)}">
       ${sceneLayer(vm.backdrop)}
       ${topbar(vm.stageIndex, true)}
       ${floatLayer(vm.floaters)}
@@ -385,20 +432,13 @@ export function cardAskScreen(vm: {
           })}
         </div>
         <div class="stage-main">
-          <article class="card event-card${vm.critical ? " critical" : ""}" data-age-months="${vm.ageMonths}">
+          <article class="card event-card${vm.critical ? " critical" : ""}${variant === "quick" ? " quick" : ""}${vm.kind === "encounter" ? " encounter" : ""}" data-age-months="${vm.ageMonths}" data-variant="${esc(variant)}"${vm.kind ? ` data-kind="${esc(vm.kind)}"` : ""}>
             ${yearStamp(vm.yearBadge)}
             ${head}
             <p class="event-text">${esc(vm.text)}</p>
-            <div class="options">
-              ${vm.options
-                .map(
-                  (o, i) =>
-                    vm.locks[i]
-                      ? `<button type="button" class="option" data-option="${i}">${esc(o)}</button>`
-                      : `<button type="button" class="option option-locked" data-option="${i}" disabled title="资源不足，此路暂不可选">${esc(o)}</button>`,
-                )
-                .join("")}
-            </div>
+            ${detailBody}
+            ${variantNote}
+            ${actionBlock}
             ${
               vm.custom
                 ? `<div class="custom-slot" data-custom-slot>

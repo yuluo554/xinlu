@@ -1,17 +1,22 @@
 #!/usr/bin/env node
-// ═══ 故事写实初筛门（v4-M1''' B 段 · 1.3 落位）═══
-// 口径单源 plan/v4/02 §八（含 ▸ B 段增补）：机检四项——
+// ═══ 故事写实 + v5 文本长度门（v4-M1''' B 段 1.3 起建；v5-M1'''' 扩三项）═══
+// 口径单源 plan/v4/02 §八（含 ▸ B 段增补）+ plan/v5/02 §四（文本长度口径）。
+// v4 四项（扫**完整原文** = detail ?? text，v5 瘦身后原文整段在 detail，内容零损失）：
 //   S.LEN   字数：critical ≥180 字；main/context/rescue ≥100 字
 //   S.ERA   年代锚：年代词表命中 ≥1
 //   S.SENSE 五感：五感词表命中去重词数 ≥2（同词重复不计）
 //   S.REF   支线互引：line≠fate 命中互引词表 ≥1
+// v5 三项（扫展示面）：
+//   S.LEN2  主句 text：中位 ≤120 / P90 ≤150 / 单条 ≤180（02 §四）
+//   S.OPT   选项 text：中位 ≤10 / ≥20 字占比 ≤10% / 单条 ≤16；每题 2–3 个
+//   S.DETAIL detail 覆盖 100% 且单条 ≤600 字；detail 必须以主句开头（原文前缀，防改写）
 // 词表单源在本文件（02 只记构成原则，不誊抄）：年代词取跨年代可感词（事件池
 // 1955–2015 出生全年代共用，单一年代专属物只进时代卡不进事件池）；五感词五池分列；
 // 互引词 = NPC 称谓 ∪ 前事件回指。地域感/家境感/感官类别覆盖/时代契合归人工抽查
 // （docs/v4-story-review.md）。
 // 用法：node scripts/check-story-quality.mjs [--batch=1]（默认全六线）
 // 退出码：0 绿 / 1 红。
-// 本脚本只「查」写实面，不复写口径；改口径必须先改 plan/v4/02 再同步这里。
+// 本脚本只「查」写实面与长度，不复写口径；改口径必须先改 plan 文档再同步这里。
 
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -87,6 +92,20 @@ const REF_WORDS = [
 // ── 门槛（02 §八：critical ≥180；main/context/rescue ≥100）──
 const LEN_MIN = { critical: 180, main: 100, context: 100, rescue: 100 };
 
+// ── v5 长度门门槛（plan/v5/02 §四）──
+const V5 = {
+  /** 主句 text：中位/P90/单条上限。 */
+  TEXT: { median: 120, p90: 150, max: 180 },
+  /** 选项 text：中位/P90 上限（单条），≥20 字占比上限。 */
+  OPT: { median: 10, max: 16, longAt: 20, longRatio: 0.1 },
+  /** detail：单条上限 + 覆盖率。 */
+  DETAIL_MAX: 600,
+  /** 每题选项数区间。 */
+  OPT_COUNT: [2, 3],
+  /** 单屏可见总量（主句 + 全部选项）。 */
+  SCREEN_MAX: 160,
+};
+
 const countChars = (s) => [...s].length;
 const hits = (text, words) => words.filter((w) => text.includes(w));
 const senseHits = (text) => {
@@ -113,42 +132,120 @@ if (!(batchKey in BATCH_LINES)) {
 const lines = BATCH_LINES[batchKey];
 
 const events = JSON.parse(readFileSync(resolve(ROOT, "src/data/events.json"), "utf8"));
-const scoped = events.filter((e) => lines.includes(e.line));
+/** v4 四项只扫主线/支线池；偶遇层（encounter）走自己的 40–80 字口径（plan/v5/02 §二），
+ *  不参与「critical ≥180 / 常规 ≥100」的写实化门槛——它本就是短句留白。 */
+const scoped = events.filter((e) => lines.includes(e.line) && e.type !== "encounter");
 
 const out = (s) => process.stdout.write(s + "\n");
 const problems = [];
 const stats = { len: 0, era: 0, sense: 0, ref: 0 };
 
+/** 展示面主句（v5 瘦身后 ≤120 字）；v4 四项扫**完整原文** = detail ?? text（内容零损失）。 */
+const fullTextOf = (ev) => (typeof ev.detail === "string" && ev.detail ? ev.detail : ev.text);
+
 for (const ev of scoped) {
+  const full = fullTextOf(ev);
   const min = LEN_MIN[ev.type] ?? 100;
-  const len = countChars(ev.text);
+  const len = countChars(full);
   if (len < min) {
-    problems.push(`S.LEN  ${ev.id} 字数 ${len} < ${min}（type=${ev.type}）`);
+    problems.push(`S.LEN  ${ev.id} 原文 ${len} 字 < ${min}（type=${ev.type}；扫 detail ?? text）`);
   } else stats.len++;
 
-  const era = hits(ev.text, ERA_WORDS);
+  const era = hits(full, ERA_WORDS);
   if (era.length < 1) {
     problems.push(`S.ERA  ${ev.id} 年代锚词 0 命中（词表见本文件 ERA_WORDS）`);
   } else stats.era++;
 
-  const s = senseHits(ev.text);
+  const s = senseHits(full);
   if (s.words.length < 2) {
     problems.push(`S.SENSE  ${ev.id} 五感命中去重词数 ${s.words.length} < 2（命中：${s.words.join("/") || "无"}）`);
   } else stats.sense++;
 
   if (ev.line !== "fate") {
-    const ref = hits(ev.text, REF_WORDS);
+    const ref = hits(full, REF_WORDS);
     if (ref.length < 1) {
       problems.push(`S.REF  ${ev.id} 支线互引 0 命中（line=${ev.line}）`);
     } else stats.ref++;
   }
 }
 
-out("故事写实初筛门 · v4/02 §八（含 ▸ B 段增补）· 机检四项 S.LEN/S.ERA/S.SENSE/S.REF");
-out("=".repeat(72));
-for (const p of problems) out(`FAIL  ${p}`);
-out("=".repeat(72));
+// ── v5 三项（扫展示面；plan/v5/02 §四）──
+const pct = (arr, p) => {
+  const s = [...arr].sort((a, b) => a - b);
+  if (!s.length) return 0;
+  // 中位取上中位（偶数取靠上），P90 取 90% 分位（与报告口径一致）
+  return s[Math.min(s.length - 1, Math.floor(s.length * p))];
+};
+const textLens = scoped.map((e) => countChars(e.text));
+const optLens = [];
+let detailMissing = 0;
+let detailTooLong = 0;
+let detailNotPrefix = 0;
+let optCountBad = 0;
+let screenOver = 0;
+for (const ev of scoped) {
+  // S.DETAIL：覆盖 100% + 单条 ≤600 + detail 以主句开头（原文前缀，防「瘦身」变改写）
+  if (typeof ev.detail !== "string" || !ev.detail) {
+    detailMissing++;
+    problems.push(`S.DETAIL ${ev.id} 缺 detail（原文必须整段保留，02 §四 内容零损失）`);
+  } else {
+    if (countChars(ev.detail) > V5.DETAIL_MAX) {
+      detailTooLong++;
+      problems.push(`S.DETAIL ${ev.id} detail ${countChars(ev.detail)} 字 > ${V5.DETAIL_MAX}`);
+    }
+    if (!ev.detail.startsWith(ev.text)) {
+      detailNotPrefix++;
+      problems.push(`S.DETAIL ${ev.id} detail 未以主句开头（主句须是原文前缀）`);
+    }
+  }
+  // S.OPT：每题选项数 2–3
+  const n = Array.isArray(ev.options) ? ev.options.length : 0;
+  if (n < V5.OPT_COUNT[0] || n > V5.OPT_COUNT[1]) {
+    optCountBad++;
+    problems.push(`S.OPT   ${ev.id} 选项数 ${n} 不在 ${V5.OPT_COUNT[0]}–${V5.OPT_COUNT[1]}（02 §四）`);
+  }
+  for (const o of ev.options ?? []) {
+    const l = countChars(o.text);
+    optLens.push(l);
+    if (l > V5.OPT.max) problems.push(`S.OPT   ${ev.id} 选项「${o.text}」${l} 字 > 单条上限 ${V5.OPT.max}`);
+    // 选项原文折叠层同样零损失
+    if (typeof o.detail === "string" && o.detail && o.detail === o.text) {
+      problems.push(`S.DETAIL ${ev.id} 选项 detail 与 text 相同（无折叠意义）`);
+    }
+  }
+  // 单屏可见总量 = 主句 + 全部选项
+  const screen = countChars(ev.text) + (ev.options ?? []).reduce((a, o) => a + countChars(o.text), 0);
+  if (screen > V5.SCREEN_MAX) {
+    screenOver++;
+    problems.push(`S.OPT   ${ev.id} 单屏可见 ${screen} 字 > ${V5.SCREEN_MAX}（02 §四）`);
+  }
+}
+
+const textMedian = pct(textLens, 0.5);
+const textP90 = pct(textLens, 0.9);
+const textMax = Math.max(0, ...textLens);
+const optMedian = pct(optLens, 0.5);
+const optMax = Math.max(0, ...optLens);
+const optLongRatio = optLens.length ? optLens.filter((l) => l >= V5.OPT.longAt).length / optLens.length : 0;
+
+if (textMedian > V5.TEXT.median) problems.push(`S.LEN2  主句中位 ${textMedian} > ${V5.TEXT.median}`);
+if (textP90 > V5.TEXT.p90) problems.push(`S.LEN2  主句 P90 ${textP90} > ${V5.TEXT.p90}`);
+if (textMax > V5.TEXT.max) problems.push(`S.LEN2  主句最长 ${textMax} > ${V5.TEXT.max}`);
+if (optMedian > V5.OPT.median) problems.push(`S.OPT   选项中位 ${optMedian} > ${V5.OPT.median}`);
+if (optMax > V5.OPT.max) problems.push(`S.OPT   选项最长 ${optMax} > ${V5.OPT.max}`);
+if (optLongRatio > V5.OPT.longRatio) {
+  problems.push(`S.OPT   ≥${V5.OPT.longAt} 字选项占比 ${(optLongRatio * 100).toFixed(1)}% > ${V5.OPT.longRatio * 100}%`);
+}
+
+const outLine = (s) => out(s);
+outLine("故事写实 + v5 文本长度门 · v4/02 §八 四项（S.LEN/S.ERA/S.SENSE/S.REF，扫原文）+ v5/02 §四 三项（S.LEN2/S.OPT/S.DETAIL）");
+outLine("=".repeat(78));
+for (const p of problems) outLine(`FAIL  ${p}`);
+outLine("=".repeat(78));
 const label = batchKey === "all" ? "全六线" : `批一（${lines.join("/")}）`;
-out(`扫到：${label} ${scoped.length} 条；S.LEN ${stats.len} 过 / S.ERA ${stats.era} 过 / S.SENSE ${stats.sense} 过 / S.REF ${stats.ref} 过（支线 ${scoped.filter((e) => e.line !== "fate").length} 条）`);
-out(`结论: ${problems.length === 0 ? "绿（四项全过；地域感/家境感待人工抽查 docs/v4-story-review.md）" : `红（${problems.length} 项不达标）`}`);
+outLine(`扫到：${label} ${scoped.length} 条；S.LEN ${stats.len} 过 / S.ERA ${stats.era} 过 / S.SENSE ${stats.sense} 过 / S.REF ${stats.ref} 过（支线 ${scoped.filter((e) => e.line !== "fate").length} 条）`);
+outLine(`长度：主句 中位 ${textMedian} / P90 ${textP90} / 最长 ${textMax}（≤${V5.TEXT.median}/${V5.TEXT.p90}/${V5.TEXT.max}）` +
+  `；选项 中位 ${optMedian} / 最长 ${optMax} / ≥${V5.OPT.longAt} 字占比 ${(optLongRatio * 100).toFixed(1)}%（≤${V5.OPT.median}/≤${V5.OPT.max}/≤${V5.OPT.longRatio * 100}%）` +
+  `；detail 缺 ${detailMissing} / 超长 ${detailTooLong} / 非前缀 ${detailNotPrefix}；单屏 >${V5.SCREEN_MAX} ${screenOver} 条`);
+outLine(`结论: ${problems.length === 0 ? "绿（七项全过；地域感/家境感待人工抽查 docs/v4-story-review.md）" : `红（${problems.length} 项不达标）`}`);
 process.exitCode = problems.length === 0 ? 0 : 1;

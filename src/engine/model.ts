@@ -57,11 +57,13 @@ export type LineState = (typeof LINE_STATES)[number];
 export const NPC_TAGS = ["亲密", "疏离", "决裂", "羁绊"] as const;
 export type NpcTag = (typeof NPC_TAGS)[number];
 
-/** NPC 名字/职责/线别注册表条目（数据文件形状；状态层只存 id/bond/tag）。 */
+/** NPC 名字/职责/线别注册表条目（数据文件形状；状态层只存 id/bond/tag/slot）。 */
 export interface NpcProfile {
   name: string;
   role: string;
   line: LineKey;
+  /** 家庭注册槽分组（parent/grandparent/sibling；非家庭成员为 null，plan/v5/02 §一）。 */
+  group?: "parent" | "grandparent" | "sibling" | null;
 }
 
 export interface NpcState {
@@ -70,6 +72,12 @@ export interface NpcState {
   tag: NpcTag;
   /** 出生家庭 NPC 的本局姓名（names.json 池抽取；渲染时覆盖注册表名，plan/v4/02 §三 ▸ M1''' 增补）。 */
   name?: string;
+  /**
+   * 家庭槽位（family-slots.json 的封闭枚举键，如 parent-mother / gp-maternal-grandma /
+   * sib-older-brother；plan/v5/02 §一）。图谱标签直取该槽的 role，禁显示「父母/祖辈/同辈」泛称。
+   * 非家庭成员无此字段；旧档缺该字段时由 storage 层按 seed 复算回填（存档版本号不变）。
+   */
+  slot?: string;
 }
 
 /** 出生环境四要素；取值为 birth-map.json 的枚举键，代码不内联枚举清单。 */
@@ -144,10 +152,16 @@ export interface RunState {
   migrated?: boolean;
 }
 
-export type EventType = "main" | "context" | "critical" | "rescue";
+export type EventType = "main" | "context" | "critical" | "rescue" | "encounter";
+
+/** 节奏变体（plan/v5/02 §三 单源表；分配实现 = src/engine/rhythm.ts）。 */
+export const RHYTHM_VARIANTS = ["choice", "draw", "odds", "read", "quick"] as const;
+export type RhythmVariant = (typeof RHYTHM_VARIANTS)[number];
 
 export interface EventOption {
   text: string;
+  /** v5 折叠层（plan/v5/02 §四）：短句化前的原选项文案，内容零损失；细看不展开选项原文时为空。 */
+  detail?: string;
   /** v3 主效应（三观增量）；v1 的四维直改 deltas 字段已从 schema 移除。 */
   deltas3: Deltas3;
   resourceDeltas: ResourceDeltas;
@@ -166,10 +180,20 @@ export interface GameEvent {
   line: LineKey;
   ageHint: string;
   ageMonths: number;
-  /** 支线进度增益；缺省按类型 context 8 / critical 15，rescue 恒 0（plan/v3/02 §四）。 */
+  /** 支线进度增益；缺省按类型 context 8 / critical 15，rescue 与 encounter 恒 0（plan/v3/02 §四 + v5/02 §二）。 */
   lineGain?: number;
   /** type = rescue 时必填：触发的资源键。 */
   rescue?: ResKey;
+  /**
+   * v5 细看层（plan/v5/02 §四）：v4 写实化原文整段，主句 `text` 是它的前缀。
+   * 内容零损失——瘦身只切分不移写（validate:story 的 S.DETAIL 守门）。
+   */
+  detail?: string;
+  /**
+   * 节奏变体风险档（plan/v5/02 §三）：`odds` 变体的成功率由 risk + 三观/资源派生；
+   * 缺省时 critical 走 `draw`（三卡等概率）。仅 critical 事件使用。
+   */
+  risk?: "low" | "mid" | "high";
   pre?: string[];
   text: string;
   options: EventOption[];

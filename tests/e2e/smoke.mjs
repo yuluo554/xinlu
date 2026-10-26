@@ -362,17 +362,24 @@ async function main() {
       writeFileSync(join(ROOT, "docs", "assets", vp.fishCardShot), Buffer.from(cardShot.data, "base64"));
 
       // 同步 evaluate 连点：卡片点第 0 项 / 小结与 aftermath 继续 / 开局提交默认组合
-      // v3-M1'':全程采集 data-age-months 序列与选项数（年龄不回退 + ≥3 选项断言）
+      // v3-M1'':全程采集 data-age-months 序列与选项数（年龄不回退 + 选项数断言）
       // v3-M2'':增采状态条值域 / 图标覆盖 / critical 分级 / 浮动层
       // v4-M1''':增采年份徽章（YYYY 年 · N 岁，格式 + 年份随月龄单调）与时代卡出现计数
       // v4-M2''':增采五档词格式 / 阶段计数徽标增长（桌面）/ 阶段条高度恒定（移动 D6=A）/ 小结三观三轴
+      // v5-M1'''':增采 单屏可见字数（≤160，02 §四）/ 节奏变体控件（02 §三）/ 细看折叠层 / 图谱逐位 role
       const ageSeq = [];
       const yearSeq = [];
+      const singleScreen = [];
+      const variantsSeen = new Set();
       let minOptions = Infinity;
+      let maxOptions = 0;
       let endingSeen = false;
       let cardActions = 0;
       let criticalSeen = 0;
       let floatSeen = false;
+      let detailCards = 0;
+      let roleLabels = [];
+      let optionsLockedSeen = false;
       // v4-M3''' 3.1：无图标卡 = objectKey 显式豁免（icon-map objectKey:null，v4/02 §六宁缺毋滥 ≤10%）；
       // 豁免总数 node 侧从对照表算（页面 DOM 无事件 id，精确对账归 validate I 区 + vitest）
       const exemptTotal = Object.values(JSON.parse(readFileSync(join(ROOT, "src", "data", "icon-map.json"), "utf8"))).filter(
@@ -415,6 +422,13 @@ async function main() {
             window.__age = Number(card.dataset.ageMonths);
             window.__opts = document.querySelectorAll("[data-option]").length;
             window.__badge = document.querySelector("[data-year-badge]")?.textContent ?? "";
+            // v5：单屏可见量 = 主句 + 全部选项（02 §四 单屏 ≤160）；变体与细看入口
+            const eventText = card.querySelector(".event-text")?.textContent ?? "";
+            const optTexts = [...card.querySelectorAll("[data-option]")].map((b) => b.textContent ?? "");
+            window.__screen = [...eventText].length + optTexts.reduce((a, t) => a + [...t].length, 0);
+            window.__variant = card.dataset.variant ?? "";
+            window.__kind = card.dataset.kind ?? "";
+            window.__detail = !!card.querySelector("[data-detail]");
             window.__card = {
               critical: card.classList.contains("critical"),
               icon: !!card.querySelector(".ev-icon[data-icon]"),
@@ -422,8 +436,20 @@ async function main() {
             opt.click();
             return "card";
           }
+          // v5 read 变体（偶遇/过场无选项）：走「继续」——同一轮询里也算一次出牌
           const cont = document.querySelector("[data-continue]");
-          if (cont) { cont.click(); return "next"; }
+          if (cont) {
+            const card2 = document.querySelector(".screen-card .event-card[data-age-months]");
+            if (card2) {
+              window.__screen = [...(card2.querySelector(".event-text")?.textContent ?? "")].length +
+                [...card2.querySelectorAll("[data-option]")].reduce((a, b) => a + [...(b.textContent ?? "")].length, 0);
+              window.__variant = card2.dataset.variant ?? "";
+              window.__kind = card2.dataset.kind ?? "";
+              window.__detail = !!card2.querySelector("[data-detail]");
+            }
+            cont.click();
+            return card2 ? "card" : "next";
+          }
           const start = document.querySelector("[data-env-form] button[type=submit]");
           if (start) { start.click(); return "start"; }
           return "stuck:" + (document.querySelector(".screen")?.className ?? "no-screen");
@@ -439,11 +465,14 @@ async function main() {
             nodes: document.querySelectorAll("[data-relations-chart] svg g").length,
             edges: document.querySelectorAll("[data-relations-chart] svg line").length,
             legend: document.querySelectorAll(".rel-legend-item").length,
+            roles: [...document.querySelectorAll(".rel-list .rel-role")].map((e) => e.textContent ?? ""),
           }))()`);
           if (!rel.screen) throw new Error(`${vp.width} 档：图谱页未渲染`);
           if (rel.nodes < 3) throw new Error(`${vp.width} 档：图谱节点 ${rel.nodes} < 3（中心 + 父母）`);
           if (rel.edges < 2) throw new Error(`${vp.width} 档：图谱连线 ${rel.edges} < 2（父母各一线）`);
           if (rel.legend !== 4) throw new Error(`${vp.width} 档：tag 图例非 4 项（实得 ${rel.legend}）`);
+          // v5/02 §一：图谱标签逐位命名（父亲/母亲/祖父/…），禁「父母/祖辈/同辈」泛称
+          roleLabels = rel.roles;
           await cdp.evaluate(`document.querySelector("[data-relations-back]").click()`);
           relationsChecked = true;
           continue;
@@ -463,13 +492,32 @@ async function main() {
               railH: box?.height ?? 0,
               railH0: window.__railH ?? 0,
               floats: !!document.querySelector(".float-layer"),
+              screen: window.__screen ?? 0,
+              variant: window.__variant ?? "",
+              kind: window.__kind ?? "",
+              detail: !!window.__detail,
             };
           })()`);
           ageSeq.push(sample.age);
           const yearMatch = /^(19|20|21)\d{2} 年 · /.exec(sample.badge);
           if (!yearMatch) throw new Error(`${vp.width} 档：年份徽章格式非法「${sample.badge}」（v4/02 §一）`);
           yearSeq.push(Number(sample.badge.slice(0, 4)));
-          minOptions = Math.min(minOptions, sample.opts);
+          // v5：节奏变体（02 §三）与单屏可见量（02 §四）
+          variantsSeen.add(sample.variant);
+          if (!["choice", "draw", "odds", "read", "quick"].includes(sample.variant)) {
+            throw new Error(`${vp.width} 档：未知节奏变体「${sample.variant}」（02 §三 五档枚举）`);
+          }
+          if (sample.screen > 160) {
+            throw new Error(`${vp.width} 档：单屏可见 ${sample.screen} 字 > 160（02 §四；卡 ${sample.age} 月龄）`);
+          }
+          singleScreen.push(sample.screen);
+          if (sample.detail) detailCards++;
+          if (sample.opts > 0) {
+            // v5/02 §二：偶遇卡允许单选项「就这样走过去」；此处只统计主线/支线的选项数下限
+            //（偶遇的 1 选项合法性由 validate E.OPTIONS 与单测守，E2E 不重复判）
+            if (sample.kind !== "encounter") minOptions = Math.min(minOptions, sample.opts);
+            maxOptions = Math.max(maxOptions, sample.opts);
+          }
           if (!sample.card.icon) noIconCards++; // 豁免卡无图标位是预期（v4/02 §六）；超豁免总数即接线回归，verdict 区拦
           if (sample.card.critical) criticalSeen++;
           if (sample.floats) floatSeen = true;
@@ -491,7 +539,25 @@ async function main() {
         if (String(acted).startsWith("stuck:")) throw new Error(`页面卡在未知屏：${acted}`);
       }
       if (!endingSeen) throw new Error(`${vp.width} 档：${MAX_STEPS} 步内未到终局`);
-      if (minOptions < 3) throw new Error(`${vp.width} 档：出现选项数 ${minOptions} < 3 的卡片（v3 口径 ≥3）`);
+      // v5/02 §四：每题 2–3 选项（v3 的「≥3」口径已废止；quick 固定 2，read 变体 0 选项不计）
+      if (minOptions < 2) throw new Error(`${vp.width} 档：出现选项数 ${minOptions} < 2 的卡片（v5/02 §四 每题 2–3）`);
+      if (maxOptions > 3) throw new Error(`${vp.width} 档：出现选项数 ${maxOptions} > 3 的卡片（v5/02 §四 上限 3）`);
+      // v5/02 §三：全程至少出现 2 种节奏变体（同一呈现方式不给「节奏变体」这个名字）
+      if (variantsSeen.size < 2) {
+        throw new Error(`${vp.width} 档：全程只出现 ${variantsSeen.size} 种节奏变体（${[...variantsSeen].join(",")}）`);
+      }
+      // v5/02 §一：图谱标签逐位命名——必须出现父母槽的逐位 role，且不得出现泛称
+      if (!relationsChecked) throw new Error(`${vp.width} 档：未走到图谱页（v3 起既有断言，勿删）`);
+      const rolesJoined = roleLabels.join(" ");
+      if (roleLabels.length === 0) throw new Error(`${vp.width} 档：图谱人物清单为空`);
+      if (!/父亲|母亲/.test(rolesJoined)) {
+        throw new Error(`${vp.width} 档：图谱未出现「父亲/母亲」逐位标签（v5/02 §一）：${rolesJoined}`);
+      }
+      for (const generic of ["父母", "祖辈", "同辈"]) {
+        if (rolesJoined.includes(generic)) {
+          throw new Error(`${vp.width} 档：图谱仍显示泛称「${generic}」（v5/02 §一 禁显示泛称）`);
+        }
+      }
       if (!floatSeen) throw new Error(`${vp.width} 档：全程未观察到后果浮动层（微反馈缺失）`);
       if (noIconCards > exemptTotal) {
         throw new Error(`${vp.width} 档：无图标卡 ${noIconCards} 张 > 豁免总数 ${exemptTotal}（图标接线回归）`);
@@ -709,8 +775,8 @@ async function main() {
         }
       }
 
-      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share, cards: ageSeq.length, ageSpan: `${ageSeq[0]}–${ageSeq[ageSeq.length - 1]}`, eraPolls: eraCards });
-      out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄；年份徽章 ${yearSeq[0]}→${yearSeq[yearSeq.length - 1]} 单调；时代卡轮询 ${eraCards} 次`);
+      results.push({ viewport: vp.width, title: verdict.title, letters: verdict.letters, share: verdict.share, cards: ageSeq.length, ageSpan: `${ageSeq[0]}–${ageSeq[ageSeq.length - 1]}`, eraPolls: eraCards, variants: [...variantsSeen], maxScreen: Math.max(...singleScreen) });
+      out(`      ✓ ${vp.width} 档通关：${verdict.title}（${verdict.letters}）分享卡 ${verdict.share}；卡片 ${ageSeq.length} 张年龄单调 ${ageSeq[0]}→${ageSeq[ageSeq.length - 1]} 月龄；年份徽章 ${yearSeq[0]}→${yearSeq[yearSeq.length - 1]} 单调；时代卡轮询 ${eraCards} 次；节奏变体 ${[...variantsSeen].join("+")}；单屏最长 ${Math.max(...singleScreen)} 字；细看层卡 ${detailCards} 张`);
     }
 
     // ── v3-M2'' 768 中档（三档截图口径：375/768/1280）：桌面竖轨布局断言 + 截图留痕，不重复全量通关 ──
@@ -830,7 +896,7 @@ async function main() {
     out("[5/5] 断言汇总 …");
     out("=".repeat(56));
     for (const r of results) {
-      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项≥3 图标(无图标卡≤豁免) critical分级/五档词状态条/阶段条聚合(D6=A)/浮动层/小结三观三轴/小结场景图/图谱页/种子码/自定义槽离线隐藏/主题四款切换+夜航SVG联动已断言`);
+      out(`PASS  ${r.viewport}px  终局「${r.title}」 typeText=${r.letters} 雷达已渲染 mascot 已渲染 分享卡已落盘(${r.share}) 图鉴已断言 年龄全程单调(${r.ageSpan}) 年份徽章单调 选项2–3 单屏≤160(最长${r.maxScreen}) 节奏变体(${r.variants.join("+")}) 图谱逐位role 图标(无图标卡≤豁免) critical分级/五档词状态条/阶段条聚合(D6=A)/浮动层/小结三观三轴/小结场景图/图谱页/种子码/自定义槽离线隐藏/主题四款切换+夜航SVG联动已断言`);
     }
     out("PASS  v4 自定义出生全流程：三页签/六因素表单/1956 时代卡首屏/年份徽章/我的家庭图谱(本局姓名)/存档 v3 形状");
     out(`PASS  截图留痕 docs/assets/${VIEWPORTS.map((v) => `${v.shot} + ${v.fishCardShot} + ${v.fishEndingShot}`).join(" / ")}`);

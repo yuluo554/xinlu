@@ -957,6 +957,82 @@ body::before {
   padding-left: 4px;
 }
 
+/* ── v5 卡片三层（plan/v5/02 §六）：L1 正文（焦点）+ 细看折叠层；L2 操作（按变体换密集度）；L3 辅助── */
+
+/* 细看：一行小字入口，展开后是 v4 写实化原文（内容零损失，02 §四） */
+.ev-detail {
+  margin: -14px 0 24px;
+}
+
+.ev-detail > summary {
+  list-style: none;
+  display: inline-block;
+  padding: 4px 0;
+  color: var(--ink-3);
+  font-size: var(--fs-label);
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  border-bottom: 1px solid var(--rule);
+}
+
+.ev-detail > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ev-detail > summary::before {
+  content: "＋ ";
+  color: var(--ink-3);
+}
+
+.ev-detail[open] > summary::before {
+  content: "－ ";
+}
+
+.ev-detail-text {
+  margin: 12px 0 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--rule);
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: 1.85;
+  max-width: 44em;
+}
+
+/* quick 变体：紧凑两列短词按钮（同样的选项，更低的阅读成本；02 §三） */
+.options-quick {
+  grid-template-columns: 1fr 1fr;
+  column-gap: 12px;
+  border-top: none;
+}
+
+.options-quick .option-quick {
+  min-height: 48px;
+  padding: 12px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.options-quick .option-quick:hover {
+  padding-left: 10px;
+  border-color: var(--ink-2);
+}
+
+/* draw / odds 变体：操作区上方一句提示（不揭示结果，02 §三「翻牌前后无信息差」） */
+.variant-note {
+  margin: -16px 0 20px;
+  color: var(--ink-3);
+  font-size: var(--fs-label);
+  letter-spacing: 0.01em;
+}
+
+/* 偶遇卡：无边框，只在页边留一道极淡的短竖线（氛围插页，不抢主线） */
+.event-card[data-variant="draw"] .event-text,
+.event-card.quick .event-text {
+  margin-bottom: 22px;
+}
+
 .aftermath {
   margin: 0 0 26px;
   font-size: var(--fs-body);

@@ -4,6 +4,7 @@
 // 图谱页与终局快照共用同一字符串产物（快照收录 = 该 SVG 直接内联，天然序列化）。
 import npcsRaw from "../data/npcs.json";
 import { LINE_KEYS, type LineKey, type NpcState, type NpcTag } from "../engine/model";
+import { familySlotRole } from "../engine/family";
 import { tagOfBond } from "../engine/values";
 
 /** NPC 注册表（名字/职责/线别唯一事实源 = npcs.json，validate N.REG 守门）。 */
@@ -65,10 +66,13 @@ export function relationsVM(npcs: readonly NpcState[]): RelationsVM {
     const profile = NPC_PROFILES[npc.id] ?? { ...FALLBACK, name: npc.id };
     // 出生家庭 NPC 的本局姓名覆盖注册名（plan/v4/02 §三 ▸ M1''' 增补）
     const name = npc.name ?? profile.name;
+    // v5 家庭槽位逐位命名（plan/v5/02 §一）：role 优先取槽位表（父亲/母亲/外公/外婆/哥哥…），
+    // 缺槽位（旧档未回填 / 非家庭成员）回落注册表 role——禁显示「父母/祖辈/同辈」泛称。
+    const role = familySlotRole(npc.slot) ?? profile.role;
     const node: RelationNode = {
       id: npc.id,
       name,
-      role: profile.role,
+      role,
       line: profile.line,
       bond: npc.bond,
       tag: npc.tag ?? tagOfBond(npc.bond),

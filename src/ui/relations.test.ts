@@ -41,6 +41,38 @@ describe("relationsVM（环形布局确定性）", () => {
   });
 });
 
+describe("家庭槽位标签（plan/v5/02 §一：role 逐位命名，禁泛称）", () => {
+  const SLOTTED: NpcState[] = [
+    { id: "mother", bond: 70, tag: "亲密", name: "刘诗涵", slot: "parent-mother" },
+    { id: "father", bond: 70, tag: "亲密", name: "朱瑞霖", slot: "parent-father" },
+    { id: "grandma", bond: 60, tag: "亲密", name: "朱桂英", slot: "gp-maternal-grandma" },
+    { id: "grandpa", bond: 60, tag: "亲密", name: "朱长林", slot: "gp-maternal-grandpa" },
+    { id: "sibling-1", bond: 65, tag: "亲密", name: "朱书瑶", slot: "sib-older-sister" },
+  ];
+
+  it("有槽位时 role 直取槽位表（母亲/父亲/外婆/外公/姐姐）", () => {
+    const vm = relationsVM(SLOTTED);
+    const roleOf = (id: string) => vm.nodes.find((n) => n.id === id)!.role;
+    expect(roleOf("mother")).toBe("母亲");
+    expect(roleOf("father")).toBe("父亲");
+    expect(roleOf("grandma")).toBe("外婆"); // 南方侧系 = maternal
+    expect(roleOf("grandpa")).toBe("外公");
+    expect(roleOf("sibling-1")).toBe("姐姐");
+  });
+
+  it("无槽位（旧档未回填/非家庭成员）回落注册表 role，不崩", () => {
+    const vm = relationsVM(BASE);
+    expect(vm.nodes.find((n) => n.id === "mother")!.role).toBe("母亲");
+    expect(vm.nodes.find((n) => n.id === "father")!.role).toBe("父亲");
+  });
+
+  it("SVG 标签落到产物里；泛称「父母/祖辈/同辈」不出现", () => {
+    const svg = renderRelations(SLOTTED);
+    for (const role of ["母亲", "父亲", "外婆", "外公", "姐姐"]) expect(svg).toContain(role);
+    for (const generic of ["父母", "祖辈", "同辈"]) expect(svg).not.toContain(generic);
+  });
+});
+
 describe("bondToWidth（02 §五：连线宽度 = bond 映射 [1,6]px）", () => {
   it("两端与中段", () => {
     expect(bondToWidth(0)).toBe(1);

@@ -2,7 +2,7 @@
 // 且绝不静默清档，由 UI 据此给出「存档无法读取，可重新开始」的提示（plan/v4/02 §九 ▸ M1''' 增补、plan/02 §六）。
 import birthMapRaw from "../data/birth-map.json";
 import { deriveBirth } from "../engine/engine";
-import { generateFamily } from "../engine/family";
+import { FAMILY_SLOT_TABLE, generateFamily } from "../engine/family";
 import { seedCodeOf } from "../engine/seedcode";
 import {
   DIM_KEYS,
@@ -148,10 +148,29 @@ export function hasSaveKey(): boolean {
   return s.getItem(SAVE_KEY) !== null || s.getItem(LEGACY_SAVE_KEY_V2) !== null || s.getItem(LEGACY_SAVE_KEY_V1) !== null;
 }
 
-/** v3 当前版迁移入口：只透传校验。 */
+/** v3 当前版迁移入口：透传校验 + 家庭槽位回填（v5/02 §一，存档版本号不变）。 */
 function migrateCurrent(raw: unknown): RunState | null {
   if (!isRecord(raw) || raw.v !== SAVE_VERSION) return null;
-  return validateV3(raw);
+  const state = validateV3(raw);
+  return state ? backfillFamilySlots(state) : null;
+}
+
+/**
+ * 家庭槽位回填（plan/v5/02 §一）：v5 之前写入的 v3 档没有 npc.slot。槽位由
+ * generateFamily(env, birthYear, profile, seed) 复算（同 seed 同家庭，纯函数可复算），
+ * 只按 id 对齐补 slot —— 既不覆盖既有 bond/tag/name，也不新增成员（入参已是合法档）。
+ * 家庭 id 取 family-slots.json 注册组；非家庭 NPC（支线途中遇到的）永不补槽。
+ */
+function backfillFamilySlots(state: RunState): RunState {
+  const familyIds = new Set(Object.keys(FAMILY_SLOT_TABLE.groups));
+  const needs = state.npcs.some((n) => n.slot === undefined && familyIds.has(n.id));
+  if (!needs) return state;
+  const family = generateFamily(state.env, state.birthYear, state.profile, state.seed);
+  const slotOf = new Map(family.map((f) => [f.id, f.slot]));
+  const npcs = state.npcs.map((n) =>
+    n.slot === undefined && slotOf.has(n.id) ? { ...n, slot: slotOf.get(n.id)! } : n,
+  );
+  return { ...state, npcs };
 }
 
 // ── v3 校验 ──
@@ -252,12 +271,16 @@ function migrateLegacyV2ToV3(raw: unknown): RunState | null {
     migrated: true,
   });
   if (!base) return null;
-  // 家庭补生成：既有 NPC 保留原 bond/tag；缺失成员与缺失姓名由生成器补齐（同口径同 seed 可复算）。
+  // 家庭补生成：既有 NPC 保留原 bond/tag；缺失成员、缺失姓名与缺失槽位（v5/02 §一）由生成器补齐。
   const family = generateFamily(env, birthYear, profile, seed);
   const byId = new Map(base.npcs.map((n) => [n.id, n]));
   const merged: NpcState[] = base.npcs.map((n) => {
     const gen = family.find((f) => f.id === n.id);
-    return gen && !n.name ? { ...n, name: gen.name } : n;
+    if (!gen) return n;
+    const patched: NpcState = { ...n };
+    if (!patched.name && gen.name) patched.name = gen.name;
+    if (!patched.slot && gen.slot) patched.slot = gen.slot;
+    return patched;
   });
   for (const gen of family) {
     if (!byId.has(gen.id)) merged.push(gen);
@@ -386,20 +409,24 @@ function readNpcs(v: unknown): NpcState[] | null {
   if (!Array.isArray(v)) return null;
   const out: NpcState[] = [];
   for (const item of v) {
-    if (!isRecord(item) || (!exactKeys(item, ["id", "bond", "tag"]) && !exactKeys(item, ["id", "bond", "tag", "name"]))) {
-      return null;
-    }
+    if (!isRecord(item)) return null;
+    // 可选键：name（v4 本局姓名）/ slot（v5 家庭槽位，plan/v5/02 §一）——缺省均合法
+    const keys = ["id", "bond", "tag"];
+    for (const opt of ["name", "slot"]) if (item[opt] !== undefined) keys.push(opt);
+    if (!exactKeys(item, keys)) return null;
     if (typeof item.id !== "string" || !item.id) return null;
     if (typeof item.bond !== "number" || !Number.isInteger(item.bond) || item.bond < 0 || item.bond > 100) {
       return null;
     }
     if (typeof item.tag !== "string" || !(NPC_TAGS as readonly string[]).includes(item.tag)) return null;
     if (item.name !== undefined && (typeof item.name !== "string" || !item.name.trim())) return null;
+    if (item.slot !== undefined && (typeof item.slot !== "string" || !item.slot.trim())) return null;
     out.push({
       id: item.id,
       bond: item.bond,
       tag: item.tag as NpcState["tag"],
       ...(typeof item.name === "string" ? { name: item.name } : {}),
+      ...(typeof item.slot === "string" ? { slot: item.slot } : {}),
     });
   }
   return out;

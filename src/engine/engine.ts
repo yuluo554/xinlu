@@ -222,11 +222,13 @@ export function createRun(
   };
 }
 
-/** 阶段内候选池：pre 满足 + 支线 critical 已解锁 + rescue 仅低值时可见。 */
+/** 阶段内候选池：pre 满足 + 支线 critical 已解锁 + rescue 仅低值时可见。
+ *  v5：偶遇层（encounter）不入此池——它由 encounterFor 单独注入（plan/v5/02 §二）。 */
 function stageCandidates(state: RunState, stage: string): GameEvent[] {
   const consumed = new Set(state.history.map((h) => h.eventId));
   return EVENTS.filter((e) => {
     if (e.stage !== stage || consumed.has(e.id)) return false;
+    if (e.type === "encounter") return false;
     if (!(e.pre ?? []).every((f) => state.flags.includes(f))) return false;
     if (e.type === "critical" && e.line !== "fate" && !lineCriticalUnlocked(state.lines, e.line)) {
       return false;
@@ -540,4 +542,97 @@ export function applyEraCard(state: RunState): RunState {
     kind: "era",
   });
   return { ...withResources, dims, history };
+}
+
+// ── v5 偶遇层注入（plan/v5/02 §二 ▸ v5-M1''''；判定核零改动——注入在 pickEvent 之外）──
+
+/** 每阶段偶遇条数上限（02 §二：0–3 条，可为 0——留白也是偶遇的一部分）。 */
+export const ENCOUNTER_PER_STAGE_MAX = 3;
+const ENCOUNTER_TYPE = "encounter";
+
+/** 本阶段已出过的偶遇条数（history 里 stage 匹配的 encounter 条目数）。 */
+function encountersUsedInStage(state: RunState, stage: string): number {
+  let n = 0;
+  for (const h of state.history) {
+    const ev = EVENT_BY_ID.get(h.eventId);
+    if (ev?.stage === stage && ev.type === ENCOUNTER_TYPE) n += 1;
+  }
+  return n;
+}
+
+/**
+ * 本阶段偶遇配额（02 §二「由种子决定条数与抽选」）：0–3 条，纯种子派生。
+ * 配额按 (seed, stageIndex) 固定——同种子同阶段恒同条数（可复现契约）。
+ */
+export function encounterQuota(state: RunState): number {
+  const stage = STAGES[state.stageIndex];
+  if (!stage) return 0;
+  const r = seededDraw(state.seed, 900 + state.stageIndex * 13);
+  // 四等分：0/1/2/3 条各 1/4
+  return Math.min(ENCOUNTER_PER_STAGE_MAX, Math.floor(r * 4));
+}
+
+/**
+ * 当前是否该出一张偶遇卡（纯函数；同状态恒同结果）：
+ * - 本阶段配额未用完（配额可为 0 = 本阶段没有偶遇，留白）；
+ * - 上一张不是偶遇（偶遇不连发）；
+ * - 上一张不是 critical（重大抉择后不插偶遇，02 §二「偶遇 = 氛围」）；
+ * - 本阶段事件已取尽时不插（不压在阶段尾巴）。
+ * 返回该出的偶遇事件，或 null。
+ */
+export function encounterFor(state: RunState): GameEvent | null {
+  const stage = STAGES[state.stageIndex];
+  if (!stage) return null;
+  const quota = encounterQuota(state);
+  if (quota === 0) return null;
+  const used = encountersUsedInStage(state, stage);
+  if (used >= quota) return null;
+  const last = state.history[state.history.length - 1];
+  if (last) {
+    const lastEvent = EVENT_BY_ID.get(last.eventId);
+    if (lastEvent?.type === ENCOUNTER_TYPE) return null;
+    if (lastEvent?.type === "critical") return null;
+  }
+  const consumed = new Set(state.history.map((h) => h.eventId));
+  const remaining = EVENTS.some(
+    (e) => e.stage === stage && e.type !== ENCOUNTER_TYPE && !consumed.has(e.id),
+  );
+  if (!remaining) return null;
+  // 月龄单调 + 不抢开场（v3/02 §一 口径不变）：
+  //   floor = 本阶段已出过的最大月龄。只允许 floor ≤ 偶遇月龄 ≤ 下一张主线卡月龄，
+  //   且 floor ≥ 0（本阶段已至少出过一张真卡）——否则偶遇会插在开场之前，
+  //   把 pickEvent 的 floor 抬到 22 个月，直接吃掉 3 个月的开场卡。
+  const next = pickEvent(state);
+  if (!next) return null;
+  let floor = -1;
+  for (const h of state.history) {
+    const ev = EVENT_BY_ID.get(h.eventId);
+    if (ev?.stage === stage && ev.ageMonths > floor) floor = ev.ageMonths;
+  }
+  if (floor < 0) return null;
+  const pool = EVENTS.filter(
+    (e) =>
+      e.stage === stage &&
+      e.type === ENCOUNTER_TYPE &&
+      !consumed.has(e.id) &&
+      e.ageMonths >= floor &&
+      e.ageMonths <= next.ageMonths &&
+      (e.pre ?? []).every((f) => state.flags.includes(f)),
+  );
+  if (pool.length === 0) return null;
+  // 抽选槽位随已出偶遇数递增（同局不会重复抽到同一张）
+  const r = seededDraw(state.seed, 950 + state.stageIndex * 17 + used);
+  return pool[Math.floor(r * pool.length) % pool.length]!;
+}
+
+/**
+ * 偶遇入账（与常规选择同一条通道：三观/资源/关系/flag/history 全同构，
+ * 但 lineGainOf 对 encounter 恒 0，因此不推任何线的进度——02 §二）。
+ */
+export function applyEncounterChoice(state: RunState, optionIndex: number): RunState {
+  const event = encounterFor(state);
+  if (!event) throw new Error("applyEncounterChoice：当前无偶遇卡");
+  const option = event.options[optionIndex];
+  if (!option) throw new Error(`applyEncounterChoice：选项越界 ${event.id}#${optionIndex}`);
+  return settleChoice(state, event, option, optionIndex);
 }

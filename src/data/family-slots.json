@@ -1,0 +1,32 @@
+{
+  "_meta": "家庭槽位单源（plan/v5/02 §一）。slots = 封闭槽位枚举 + role 显示；structures = 结构↔槽合法组合与概率形态；groups = npcs.json 注册 id 所属槽组。family.ts 与 validate F 区共读本文件，不得在代码里复写第二份表。",
+  "slots": {
+    "parent-father": { "role": "父亲", "group": "parent" },
+    "parent-mother": { "role": "母亲", "group": "parent" },
+    "gp-paternal-grandpa": { "role": "祖父", "group": "grandparent" },
+    "gp-paternal-grandma": { "role": "祖母", "group": "grandparent" },
+    "gp-maternal-grandpa": { "role": "外公", "group": "grandparent" },
+    "gp-maternal-grandma": { "role": "外婆", "group": "grandparent" },
+    "sib-older-brother": { "role": "哥哥", "group": "sibling" },
+    "sib-older-sister": { "role": "姐姐", "group": "sibling" },
+    "sib-younger-brother": { "role": "弟弟", "group": "sibling" },
+    "sib-younger-sister": { "role": "妹妹", "group": "sibling" }
+  },
+  "structures": {
+    "独生": { "parents": 2, "grandparents": [0, 2], "siblings": [0, 0], "olderSiblings": 0 },
+    "双孩": { "parents": 2, "grandparents": [0, 2], "siblings": [1, 1], "olderSiblings": 1 },
+    "多孩": { "parents": 2, "grandparents": [0, 2], "siblings": [2, 3], "olderSiblings": 1 },
+    "单亲": { "parents": 1, "grandparents": [0, 1], "siblings": [0, 0], "olderSiblings": 0 },
+    "隔代": { "parents": [0, 1], "grandparents": [2, 2], "siblings": [0, 0], "olderSiblings": 0 }
+  },
+  "groups": {
+    "mother": "parent",
+    "father": "parent",
+    "grandma": "grandparent",
+    "grandpa": "grandparent",
+    "sibling-1": "sibling",
+    "sibling-2": "sibling",
+    "sibling-3": "sibling"
+  },
+  "grandparentSide": { "南方": "maternal", "北方": "paternal" }
+}

@@ -239,7 +239,8 @@ describe("pickEvent（v3 单调调度：开卷窗口 + 锚点 + 轮转 + critica
       sequence.push(`${ev.id}(${ev.ageMonths})`);
       state = applyChoice(state, 0);
     }
-    const infantIds = EVENTS.filter((e) => e.stage === "infant").map((e) => e.id).sort();
+    // v5：偶遇层（encounter）不入 pickEvent 候选池（plan/v5/02 §二，由 encounterFor 单独注入）
+    const infantIds = EVENTS.filter((e) => e.stage === "infant" && e.type !== "encounter").map((e) => e.id).sort();
     const consumed = sequence.map((s) => s.split("(")[0]).sort();
     expect(consumed).toEqual(infantIds);
     const criticals = sequence.filter((s) => s.startsWith("infant-02"));

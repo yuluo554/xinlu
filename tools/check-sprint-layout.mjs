@@ -488,9 +488,9 @@ function checkDocumentedToolsExist(doneMilestones) {
   // v2-M3' 清空 check-dist-budget.mjs（预算门随 v2-M3' 3.1 落位，同提交删登记）。
   // v4 套件点名：写实初筛脚本（v4-M1''' 块 1.3 落位 + `npm run validate:story` 同批，落位同提交删本登记）。
   // v4-M1''' B 段已清空 check-story-quality.mjs（2026-10-25 与 243 条重写同提交落位）。
-  // v5 套件点名：节奏门 scripts/check-rhythm.mjs（v5-M1'''' 块 1.4 落位 + `npm run validate:rhythm` 同批；
-  //   落位同提交删本登记——已 ✅ 还留着登记会走 stale 分支变红）。
-  const PENDING_TOOLS = { "scripts/check-rhythm.mjs": "v5-M1''''" };
+  // v5 套件点名：节奏门 scripts/check-rhythm.mjs（v5-M1'''' 块 1.4 落位 + `npm run validate:rhythm` 同批）。
+  // v5-M1'''' 已清空该登记（2026-10-26 落位并同提交删，见 HANDOFF-v5-M1 §三 块 1.4）。
+  const PENDING_TOOLS = {};
   const docs = ["AGENTS.md", ...(existsSync(join(ROOT, "plan")) ? readdirSyncSafe() : [])];
   const referenced = new Set();
   for (const rel of docs) {

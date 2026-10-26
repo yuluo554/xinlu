@@ -1,14 +1,14 @@
 {
-  "mother": { "name": "妈妈", "role": "父母", "line": "fate" },
-  "father": { "name": "爸爸", "role": "父母", "line": "fate" },
-  "grandma": { "name": "祖母", "role": "祖辈", "line": "fate" },
-  "grandpa": { "name": "祖父", "role": "祖辈", "line": "fate" },
-  "sibling-1": { "name": "兄姊", "role": "同辈", "line": "fate" },
-  "sibling-2": { "name": "同辈", "role": "同辈", "line": "fate" },
-  "sibling-3": { "name": "同辈", "role": "同辈", "line": "fate" },
-  "partner": { "name": "小满", "role": "伴侣", "line": "love" },
-  "bestie": { "name": "阿澈", "role": "挚友", "line": "friend" },
-  "teacher": { "name": "周老师", "role": "师", "line": "study" },
-  "mentor": { "name": "老康", "role": "上司", "line": "career" },
-  "doctor": { "name": "林医生", "role": "医生", "line": "health" }
+  "mother": { "name": "妈妈", "role": "母亲", "line": "fate", "group": "parent" },
+  "father": { "name": "爸爸", "role": "父亲", "line": "fate", "group": "parent" },
+  "grandma": { "name": "祖母", "role": "祖母", "line": "fate", "group": "grandparent" },
+  "grandpa": { "name": "祖父", "role": "祖父", "line": "fate", "group": "grandparent" },
+  "sibling-1": { "name": "兄姊", "role": "同辈", "line": "fate", "group": "sibling" },
+  "sibling-2": { "name": "同辈", "role": "同辈", "line": "fate", "group": "sibling" },
+  "sibling-3": { "name": "同辈", "role": "同辈", "line": "fate", "group": "sibling" },
+  "partner": { "name": "小满", "role": "伴侣", "line": "love", "group": null },
+  "bestie": { "name": "阿澈", "role": "挚友", "line": "friend", "group": null },
+  "teacher": { "name": "周老师", "role": "师", "line": "study", "group": null },
+  "mentor": { "name": "老康", "role": "上司", "line": "career", "group": null },
+  "doctor": { "name": "林医生", "role": "医生", "line": "health", "group": null }
 }

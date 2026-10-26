@@ -194,10 +194,12 @@ export function applyBonds(state: RunState, bondDeltas: Record<string, number>):
 }
 
 // ── 线进度（02 §四）──
-/** 事件的线进度增益：rescue 恒 0；缺省 context 8 / critical 15；fate 无进度不入账。 */
+/** 事件的线进度增益：rescue 与 encounter 恒 0（v5/02 §二：偶遇不占进度）；
+ *  缺省 context 8 / critical 15；fate 无进度不入账。 */
 export function lineGainOf(line: LineKey, type: EventType, lineGain?: number): number {
   if (line === "fate") return 0;
   if (type === "rescue") return 0;
+  if (type === "encounter") return 0;
   if (typeof lineGain === "number") return lineGain;
   return type === "critical" ? LINE_GAIN_DEFAULT.critical : LINE_GAIN_DEFAULT.context;
 }
@@ -225,8 +227,8 @@ export function lineStateOf(progress: number): LineState {
 
 // ── 自定义槽增量钳制（02 §七：LLM 产出走本地钳制后才入状态；口径与 validate 同抄 02 §二/§三）──
 
-const DELTAS3_CAP = { main: 3, context: 3, critical: 8, rescue: 3 } as const;
-const RES_CAP = { main: 10, context: 10, critical: 25, rescue: 25 } as const;
+const DELTAS3_CAP: Record<EventType, number> = { main: 3, context: 3, critical: 8, rescue: 3, encounter: 1 };
+const RES_CAP: Record<EventType, number> = { main: 10, context: 10, critical: 25, rescue: 25, encounter: 3 };
 
 /**
  * LLM 归一产出的增量钳制：逐轴截到该事件类型的口径上限，零偏移删键。

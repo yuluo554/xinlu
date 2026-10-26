@@ -8,6 +8,7 @@ import {
   seededDraw,
 } from "../engine/engine";
 import { STAGES, type RunState } from "../engine/model";
+import { generateFamily } from "../engine/family";
 import {
   clear,
   hasSaveKey,
@@ -186,6 +187,7 @@ describe("损坏兜底（绝不静默清档）", () => {
       ["npcs 元素 tag 非法", (raw) => ((raw.npcs as Array<Record<string, unknown>>)[0]!.tag = "挚爱")],
       ["npcs 元素缺 bond", (raw) => delete (raw.npcs as Array<Record<string, unknown>>)[0]!.bond],
       ["npcs 元素 name 非字符串", (raw) => ((raw.npcs as Array<Record<string, unknown>>)[0]!.name = 7)],
+      ["npcs 元素 slot 非字符串", (raw) => ((raw.npcs as Array<Record<string, unknown>>)[0]!.slot = 3)],
       ["migrated 非布尔", (raw) => (raw.migrated = "yes")],
     ];
     for (const [name, mutate] of cases) {
@@ -237,6 +239,30 @@ describe("版本迁移链（plan/v3/02 §八 + plan/v4/02 §九 ▸ M1''' 增补
     expect(backing.get(LEGACY_SAVE_KEY_V1) ?? null).toBeNull();
     // 再次 load 直读 v3，结果一致
     expect(load()).toEqual(loaded);
+  });
+
+  it("v5 槽位回填：旧 v3 档（npc 无 slot）按 seed 复算补齐，bond/tag/name 不动、不新增成员", () => {
+    const run = createRun(ENV, 777);
+    const raw = rawFrom(run);
+    // 抹掉全部 slot（模拟 v5 之前写入的 v3 档），并把 mother 的 bond 改成演化值
+    const npcs = raw.npcs as Array<Record<string, unknown>>;
+    for (const n of npcs) delete n.slot;
+    const motherRow = npcs.find((n) => n.id === "mother")!;
+    motherRow.bond = 83;
+    const text = putRaw(raw);
+
+    const loaded = load();
+    expect(loaded, `旧 v3 档不应被判损坏`).not.toBeNull();
+    // 家庭成员槽位已回填且与生成器一致；非家庭 id 不补
+    const expected = new Map(generateFamily(run.env, run.birthYear, run.profile, run.seed).map((f) => [f.id, f.slot]));
+    for (const n of loaded!.npcs) {
+      expect(n.slot, `${n.id} 槽位应回填`).toBe(expected.get(n.id));
+    }
+    // 既有演化值不受回填影响；成员数不变（回填不新增）
+    expect(loaded!.npcs.find((n) => n.id === "mother")!.bond).toBe(83);
+    expect(loaded!.npcs.length).toBe(run.npcs.length);
+    // 回填是内存态（不静默改写磁盘原文；下次 save 才落 slot）
+    expect(backing.get(SAVE_KEY)).toBe(text);
   });
 
   it("v2 档迁移：既有 bond 保留、家庭补齐缺失成员、v2 key 清理", () => {

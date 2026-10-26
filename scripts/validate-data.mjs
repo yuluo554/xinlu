@@ -30,7 +30,13 @@ if (ARGS.some((a) => !["--count", "--full"].includes(a))) {
 const STAGES = ["infant", "toddler", "childhood", "teen", "youth", "adult", "midlife", "elder"];
 const STAGE_LABEL = { infant: "婴儿", toddler: "幼儿", childhood: "童年", teen: "少年", youth: "青年", adult: "壮年", midlife: "中年", elder: "老年" };
 const DIMS = ["ei", "sn", "tf", "jp"];
-const EVENT_TYPES = ["main", "context", "critical", "rescue"];
+/** 事件类型（v5/02 §二 ▸ v5-M1'''' 增补 encounter 偶遇层；偶遇不推 line、不占进度） */
+const EVENT_TYPES = ["main", "context", "critical", "rescue", "encounter"];
+/** 每题选项数（v5/02 §四：放宽下限、收紧上限——2–3；v3 的「≥3」口径已废止） */
+const OPT_COUNT = [2, 3];
+/** 偶遇层密度（v5/02 §二 ▸ v5-M1''''）：首批 ≥40 条，每阶段 ≥5 */
+const ENC_TOTAL_MIN = 40;
+const ENC_PER_STAGE_MIN = 5;
 const VALUES_AXES = ["worldview", "outlook", "values"];
 const RES_KEYS = ["mood", "money", "health"];
 const LINE_KEYS = ["fate", "study", "career", "love", "friend", "health"];
@@ -38,10 +44,12 @@ const LINE_KEYS = ["fate", "study", "career", "love", "friend", "health"];
 const LINE_DENSITY_ON = ["study", "career", "love", "friend", "health"];
 /** v3/02 §四 ▸ M1'' 增补：支线每阶段每线 ≥3 */
 const LINE_DENSITY_MIN = 3;
-/** 三观增量口径（v3/02 §二）：常规 |Δ| ≤3 / critical ≤8；rescue 同常规 */
-const D3_MAX = { main: 3, context: 3, critical: 8, rescue: 3 };
-/** 资源增量口径（v3/02 §三）：常规 |Δ| ≤10 / critical 与 rescue ≤25 */
-const RES_MAX = { main: 10, context: 10, critical: 25, rescue: 25 };
+/** 三观增量口径（v3/02 §二）：常规 |Δ| ≤3 / critical ≤8；rescue 同常规。
+ *  v5 偶遇层（v5/02 §二）：|Δ3| ≤1——偶遇只给氛围，不动判定核。 */
+const D3_MAX = { main: 3, context: 3, critical: 8, rescue: 3, encounter: 1 };
+/** 资源增量口径（v3/02 §三）：常规 |Δ| ≤10 / critical 与 rescue ≤25。
+ *  v5 偶遇层：|Δ| ≤3，且允许整条不带 resourceDeltas（02 §二「无 resourceDeltas 或 |Δ| ≤3」）。 */
+const RES_MAX = { main: 10, context: 10, critical: 25, rescue: 25, encounter: 3 };
 /** 月龄解析格式（v3/02 §一 ▸ M1'' 增补）：N个月 / N岁 / N岁半 / N岁M个月 */
 function parseAgeMonths(hint) {
   let m = /^(\d+)岁(\d+)个月$/.exec(hint);
@@ -129,7 +137,7 @@ if (npcRegistry && typeof npcRegistry === "object" && !Array.isArray(npcRegistry
 // ── 一、事件库（plan/02 §二 + plan/v3/02 ▸ M1'' 增补：ageMonths / line / deltas3 / 资源 / ≥3 选项 / 单调）──
 const flagsDefined = new Set(); // 按库内顺序累积：pre 只许引用更早事件定义的 flag（§二第 3 项，防不可达死锁）
 const firstFlagSource = new Map();
-const perStage = new Map(STAGES.map((s) => [s, { main: 0, context: 0, critical: 0, rescue: 0 }]));
+const perStage = new Map(STAGES.map((s) => [s, { main: 0, context: 0, critical: 0, rescue: 0, encounter: 0 }]));
 const perStageLine = new Map(STAGES.map((s) => [s, Object.fromEntries(LINE_KEYS.map((l) => [l, 0]))]));
 const seenEventIds = new Set();
 const seenEventTexts = new Set();
@@ -160,6 +168,18 @@ if (Array.isArray(events)) {
     if (!EVENT_TYPES.includes(ev.type)) fail("E.SCHEMA", `${at} type 非法：${JSON.stringify(ev.type)}`);
     if (!LINE_KEYS.includes(ev.line)) fail("E.LINE", `${at} line 缺失或非法：${JSON.stringify(ev.line)}（枚举 fate/study/career/love/friend/health，v3/02 §四）`);
     else if (ev.type === "main" && ev.line !== "fate") fail("E.LINE", `${ev.id} main 事件必须挂 fate 线（主线定锚）`);
+    // v5 偶遇层（v5/02 §二）：line 恒 fate（不推支线进度）；lineGain 不得出现（偶遇不占进度）
+    else if (ev.type === "encounter" && ev.line !== "fate") fail("E.LINE", `${ev.id} encounter 事件 line 必须 fate（偶遇不推 line，v5/02 §二）`);
+    if (ev.type === "encounter") {
+      if (ev.lineGain !== undefined) fail("E.ENC", `${ev.id} encounter 不应带 lineGain（偶遇不占主线/支线进度，v5/02 §二）`);
+      if (typeof ev.detail !== "string" || !ev.detail) fail("E.ENC", `${ev.id} encounter 缺 detail（细看层与主句同为必备，v5/02 §四）`);
+      const tlen = [...(ev.text ?? "")].length;
+      if (tlen < 40 || tlen > 80) fail("E.ENC", `${ev.id} encounter 文案 ${tlen} 字（口径 40–80 字，v5/02 §二）`);
+      // 变体面（v5/02 §三：encounter → draw 或 quick）；本棒曾误写 read 被节奏门抓到，门里补上
+      if (ev.variant !== undefined && !["draw", "quick"].includes(ev.variant)) {
+        fail("E.ENC", `${ev.id} encounter variant 非法：${JSON.stringify(ev.variant)}（只认 draw|quick，v5/02 §三）`);
+      }
+    }
     if (ev.type === "rescue") {
       if (!RES_KEYS.includes(ev.rescue)) fail("E.LINE", `${at} rescue 事件缺 rescue 资源键或非法：${JSON.stringify(ev.rescue)}`);
       else rescuePerRes[ev.rescue] += 1;
@@ -194,9 +214,11 @@ if (Array.isArray(events)) {
       }
     }
 
-    // options：≥3 条（v3 口径收紧，v3/02 §四）；至少一轴 deltas3 非零或带 flag；|Δ| 不超口径
-    if (!Array.isArray(ev.options) || ev.options.length < 3) {
-      fail("E.OPTIONS", `${at} options 缺失或不足 3 条（v3 口径 ≥3，v3/02 §四）`);
+    // options：2–3 条（v5/02 §四：放宽下限、收紧上限；v3 的「≥3」口径已废止）；
+    // 至少一轴 deltas3 非零或带 flag；|Δ| 不超口径。encounter 允许单选项「就这样走过去」。
+    const optMin = ev.type === "encounter" ? 1 : OPT_COUNT[0];
+    if (!Array.isArray(ev.options) || ev.options.length < optMin || ev.options.length > OPT_COUNT[1]) {
+      fail("E.OPTIONS", `${at} options 数 ${Array.isArray(ev.options) ? ev.options.length : "非数组"} 不在 ${optMin}–${OPT_COUNT[1]}（v5/02 §四：每题 2–3；偶遇层允许单选项「就这样走过去」，02 §二）`);
     } else {
       const seenOptText = new Set();
       for (let j = 0; j < ev.options.length; j++) {
@@ -325,6 +347,18 @@ for (const s of STAGES) {
   const c = perStage.get(s);
   const total = c.main + c.context + c.critical + c.rescue;
   if (total < SKELETON_MIN_PER_STAGE) fail("E.DENSITY", `阶段 ${s}（${STAGE_LABEL[s]}）仅 ${total} 条（骨架要求每阶段 ≥${SKELETON_MIN_PER_STAGE}，plan/04 1.1）`);
+}
+// v5 偶遇层密度（v5/02 §二，常开）：全库 ≥40 条且每阶段 ≥5
+let encounterTotal = 0;
+for (const s of STAGES) {
+  const n = perStage.get(s).encounter;
+  encounterTotal += n;
+  if (n < ENC_PER_STAGE_MIN) {
+    fail("E.ENC", `阶段 ${s}（${STAGE_LABEL[s]}）偶遇 ${n} 条 < 口径 ${ENC_PER_STAGE_MIN}（v5/02 §二：每阶段 ≥5）`);
+  }
+}
+if (encounterTotal < ENC_TOTAL_MIN) {
+  fail("E.ENC", `偶遇层共 ${encounterTotal} 条 < 口径 ${ENC_TOTAL_MIN}（v5/02 §二：首批 ≥40）`);
 }
 // --full 密度矩阵（M4 门，fate 线内）：main 4–6 / context ≥8 / critical ≥2
 if (WANT_FULL) {
@@ -802,6 +836,118 @@ for (const slot of ["grandma", "grandpa", "sibling-1", "sibling-2", "sibling-3"]
   if (!row || row.line !== "fate") fail("R.SLOT", `npcs.json 缺家庭注册槽「${slot}」（line=fate，v4/02 §三）`);
 }
 
+// ── F、家庭槽位（plan/v5/02 §一 ▸ v5-M1''''：slot 唯一 / 结构↔槽组合合法 / role↔slot 一致）──
+const familySlots = readJson("family-slots.json");
+let familyStats = null;
+if (familySlots && typeof familySlots === "object" && !Array.isArray(familySlots)) {
+  const slotTable = familySlots.slots;
+  const structures = familySlots.structures;
+  const groups = familySlots.groups;
+  if (!slotTable || typeof slotTable !== "object" || Array.isArray(slotTable)) {
+    fail("F.SCHEMA", "family-slots.json 缺 slots 表");
+  } else {
+    // 槽位形状：role 非空 + group 枚举 + 槽键 kebab
+    const GROUPS = ["parent", "grandparent", "sibling"];
+    for (const [slot, def] of Object.entries(slotTable)) {
+      if (!/^(parent|gp|sib)-[a-z-]+$/.test(slot)) fail("F.SLOT", `槽位键非法（应 parent-/gp-/sib- 前缀 kebab）：${slot}`);
+      if (!def || typeof def !== "object" || Array.isArray(def)) {
+        fail("F.SCHEMA", `slots.${slot} 不是对象`);
+        continue;
+      }
+      if (typeof def.role !== "string" || !def.role.trim()) fail("F.SLOT", `slots.${slot} 缺非空 role`);
+      if (!GROUPS.includes(def.group)) fail("F.SLOT", `slots.${slot}.group 非法：${JSON.stringify(def.group)}`);
+      // role 泛称禁令（本次缺陷本体）：role 不得为「父母/祖辈/同辈」
+      if (["父母", "祖辈", "同辈", "家长"].includes(def.role)) fail("F.ROLE", `slots.${slot}.role 用了泛称「${def.role}」（v5/02 §一：逐位命名）`);
+    }
+    // 父母槽必在（内环锚）
+    for (const need of ["parent-father", "parent-mother"]) {
+      if (!(need in slotTable)) fail("F.SLOT", `slots 缺父母槽「${need}」`);
+    }
+    // 祖辈双侧齐（南北派生两套，缺一侧会让 role 落空）
+    for (const side of ["paternal", "maternal"]) {
+      for (const who of ["grandpa", "grandma"]) {
+        if (!(`gp-${side}-${who}` in slotTable)) fail("F.SLOT", `slots 缺「gp-${side}-${who}」`);
+      }
+    }
+  }
+  // structures：封闭结构与 model 对齐 + 区间形状合法 + 槽组合可满足
+  const STRUCTURES = ["独生", "双孩", "多孩", "单亲", "隔代"];
+  if (!structures || typeof structures !== "object" || Array.isArray(structures)) {
+    fail("F.SCHEMA", "family-slots.json 缺 structures 表");
+  } else {
+    for (const s of STRUCTURES) {
+      const rule = structures[s];
+      if (!rule || typeof rule !== "object" || Array.isArray(rule)) {
+        fail("F.STRUCT", `structures 缺结构「${s}」`);
+        continue;
+      }
+      const rangeOk = (v, lo, hi, label) => {
+        const arr = typeof v === "number" ? [v, v] : Array.isArray(v) ? v : null;
+        if (!arr || arr.length !== 2 || !arr.every(Number.isInteger)) return fail("F.STRUCT", `structures.${s}.${label} 应为整数或 [lo,hi]：${JSON.stringify(v)}`);
+        if (arr[0] < lo || arr[1] > hi || arr[0] > arr[1]) fail("F.STRUCT", `structures.${s}.${label} 出域 [${lo},${hi}]：${JSON.stringify(v)}`);
+        return arr;
+      };
+      rangeOk(rule.parents, 0, 2, "parents");
+      rangeOk(rule.grandparents, 0, 2, "grandparents");
+      const sib = rangeOk(rule.siblings, 0, 3, "siblings");
+      if (!Number.isInteger(rule.olderSiblings) || rule.olderSiblings < 0) fail("F.STRUCT", `structures.${s}.olderSiblings 应为 ≥0 整数`);
+      else if (sib && rule.olderSiblings > sib[1]) fail("F.STRUCT", `structures.${s}.olderSiblings ${rule.olderSiblings} > siblings 上限 ${sib[1]}`);
+      // 隔代必 2 位祖辈（02 §一：隔代 → 祖辈 2）
+      if (s === "隔代") {
+        const g = typeof rule.grandparents === "number" ? [rule.grandparents, rule.grandparents] : rule.grandparents;
+        if (g[0] !== 2 || g[1] !== 2) fail("F.STRUCT", `structures.隔代.grandparents 必为 2（v5/02 §一）：${JSON.stringify(rule.grandparents)}`);
+      }
+      // 独生必 0 同辈
+      if (s === "独生" && sib && (sib[0] !== 0 || sib[1] !== 0)) fail("F.STRUCT", `structures.独生.siblings 必为 0`);
+      // 单亲父母恰 1
+      if (s === "单亲") {
+        const p = typeof rule.parents === "number" ? [rule.parents, rule.parents] : rule.parents;
+        if (p[0] !== 1 || p[1] !== 1) fail("F.STRUCT", `structures.单亲.parents 必为 1`);
+      }
+    }
+    // 结构↔槽组合可满足性：按区间能取到的槽位并集必须都在封闭枚举内（无幽灵槽）
+    const slotNames = new Set(Object.keys(slotTable ?? {}));
+    const usedPrefix = { parent: "parent-", grandparent: "gp-", sibling: "sib-" };
+    for (const [g, prefix] of Object.entries(usedPrefix)) {
+      const list = [...slotNames].filter((n) => n.startsWith(prefix));
+      if (list.length === 0) fail("F.STRUCT", `槽组「${g}」在 slots 里无任何槽位（前缀 ${prefix}）`);
+    }
+  }
+  // groups：npcs.json 注册 id → 槽组，键必须在注册表且分组与槽组前缀一致
+  if (!groups || typeof groups !== "object" || Array.isArray(groups)) {
+    fail("F.SCHEMA", "family-slots.json 缺 groups 表（npcs.json 注册 id 分组）");
+  } else {
+    const expect = { mother: "parent", father: "parent", grandma: "grandparent", grandpa: "grandparent" };
+    for (const [id, group] of Object.entries(groups)) {
+      if (!npcIds.has(id)) fail("F.GROUP", `groups 键「${id}」未在 npcs.json 注册`);
+      if (!["parent", "grandparent", "sibling"].includes(group)) fail("F.GROUP", `groups.${id} 分组非法：${JSON.stringify(group)}`);
+      if (expect[id] && expect[id] !== group) fail("F.GROUP", `groups.${id} 应为 ${expect[id]}，实为 ${group}`);
+    }
+    for (const id of ["mother", "father", "grandma", "grandpa", "sibling-1", "sibling-2", "sibling-3"]) {
+      if (!(id in groups)) fail("F.GROUP", `groups 缺家庭注册 id「${id}」`);
+    }
+  }
+  // grandparentSide：南北两侧闭合
+  const side = familySlots.grandparentSide;
+  if (!side || typeof side !== "object" || Array.isArray(side)) {
+    fail("F.SCHEMA", "family-slots.json 缺 grandparentSide（南北→祖辈侧系派生）");
+  } else {
+    for (const region of ["南方", "北方"]) {
+      if (!["paternal", "maternal"].includes(side[region])) fail("F.SIDE", `grandparentSide.${region} 应为 paternal|maternal：${JSON.stringify(side[region])}`);
+    }
+    for (const sideName of ["paternal", "maternal"]) {
+      if (!Object.values(side).includes(sideName)) fail("F.SIDE", `grandparentSide 未使用侧系「${sideName}」（该侧槽位永不可达）`);
+    }
+  }
+  familyStats = {
+    slots: Object.keys(slotTable ?? {}).length,
+    structures: Object.keys(structures ?? {}).length,
+    groups: Object.keys(groups ?? {}).length,
+  };
+} else {
+  fail("F.SCHEMA", "family-slots.json 应为对象（slots/structures/groups/grandparentSide，v5/02 §一）");
+}
+
 // birth-map v4 四组：枚举齐 + 八因素全组合初始四维落域 [0,100]（超集检查，含手选派生不可达组合）
 let v4Combos = 0;
 if (birthMap && typeof birthMap === "object" && !Array.isArray(birthMap)) {
@@ -879,8 +1025,8 @@ out("=".repeat(56));
 
 const areaOk = (p) => !fails.some((f) => f.startsWith(`[${p}`));
 const lines = [
-  ["FILE", "数据文件 9 份可读且 JSON 合法"],
-  ["E", `事件库 ${eventCount} 条：id 唯一 / 枚举合法 / 选项 ≥3 / 三观增量口径 / 资源口径 / pre 防死锁 / 月龄单调 / 骨架密度 ≥${SKELETON_MIN_PER_STAGE} / 文案去重`],
+  ["FILE", "数据文件 10 份可读且 JSON 合法"],
+  ["E", `事件库 ${eventCount} 条：id 唯一 / 枚举合法 / 选项 ${OPT_COUNT[0]}–${OPT_COUNT[1]} / 三观增量口径 / 资源口径 / pre 防死锁 / 月龄单调 / 骨架密度 ≥${SKELETON_MIN_PER_STAGE} / 文案去重 / 偶遇层 ${encounterTotal} 条（每阶段 ≥${ENC_PER_STAGE_MIN}，v5/02 §二）`],
   ["N", `NPC 关系层（v3/02 §五 ▸ M3'' 增补）：npcs.json 注册 schema + 父母在册 + bondDeltas 键/口径（|Δ| ≤15）`],
   ["L", `多线：line 枚举 / main=fate / rescue 每资源 2 条 / 支线密度 ${LINE_DENSITY_ON.join("+")} 每阶段 ≥${LINE_DENSITY_MIN}（分批口径，love/friend/health 随 M2''/M3'' 开启）`],
   ["B", `birth-map ${birthStats ? `${birthStats.combos}/${BIRTH_COMBOS}` : "—"} 组合覆盖 + 初始值全部落域 [0,100]`],
@@ -890,6 +1036,7 @@ const lines = [
   ["V", `三观层：stage-drift ${driftOk}/24 格（8 阶段×3 轴，|值|≤2）+ monologues ${monoOk}/9 条（3 轴×3 区间）`],
   ["I", `图标对照（v3/02 §九 + v4/02 §六 objectKey）：${iconStats ? `覆盖 ${iconStats.covered}/${iconStats.total} 条事件 + SVG 实物 ${iconStats.disk} 枚（Game-Icons CC-BY）+ 豁免 ${iconStats.exempt} 条（≤${iconStats.exemptMax}）` : "未完成校验"}`],
   ["R", `v4 历法/画像/家庭（v4/02 ▸ M1'''）：era ${eraStats ? `${eraStats.count}/76 主锚逐年无缺（国际 ${eraStats.intl}/≤${ERA_INTL_MAX}；✅${eraStats.verified}/典型 ${eraStats.typical}）+ 查证表对账` : "—"}；names 池 ${namesStats ? `姓 ${namesStats.surnames} + 名 ${namesStats.given}` : "—"}；家庭注册槽 5；birth-map 八因素 ${v4Combos}/${V4_BIRTH_COMBOS} 组合落域`],
+  ["F", `家庭槽位（v5/02 §一）：${familyStats ? `槽位 ${familyStats.slots} 枚（role 逐位、无泛称）+ 结构 ${familyStats.structures} 种（↔槽区间合法）+ 注册组 ${familyStats.groups} 项 + 南北侧系闭合` : "未完成校验"}`],
 ];
 for (const [p, label] of lines) out(`${areaOk(p) ? "PASS" : "FAIL"}  ${label}`);
 for (const f of fails) out(`FAIL  ${f}`);

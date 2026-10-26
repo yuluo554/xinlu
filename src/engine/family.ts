@@ -1,5 +1,8 @@
-// 出生家庭生成器（plan/v4/02 §三 ▸ M1''' 增补；构成/概率/bond 表单源该节）。
+// 出生家庭生成器（plan/v4/02 §三 ▸ M1''' 增补；v5 重构：按槽生成，口径单源 plan/v5/02 §一）。
 // 纯函数、零 DOM、零存储、零过网；seed 确定性——同 (env, birthYear, profile, seed) 必得同一家庭。
+// 槽位表（封闭枚举 / role / 结构↔槽合法组合 / 南北祖辈侧）唯一来源 = src/data/family-slots.json；
+// 本档只按表出牌，不得内联第二份槽位或组合表（validate F 区守门）。
+import familySlotsRaw from "../data/family-slots.json" with { type: "json" };
 import namesRaw from "../data/names.json" with { type: "json" };
 import { seededDraw } from "./engine.ts";
 import { tagOfBond } from "./values.ts";
@@ -12,7 +15,31 @@ type NamePool = {
 };
 const NAMES = namesRaw as unknown as NamePool;
 
-/** 家庭 NPC 槽位 id（npcs.json 注册槽，line 全 fate）。 */
+/** 槽位表形状（family-slots.json）。 */
+export interface FamilySlotDef {
+  role: string;
+  group: "parent" | "grandparent" | "sibling";
+}
+export interface FamilyStructureRule {
+  /** 父母人数：定值或 [下限, 上限]（隔代 0–1）。 */
+  parents: number | [number, number];
+  grandparents: [number, number];
+  siblings: [number, number];
+  /** 同辈里年长的位数（双孩/多孩 = 1，其余 0）。 */
+  olderSiblings: number;
+}
+interface FamilySlotsFile {
+  slots: Record<string, FamilySlotDef>;
+  structures: Record<string, FamilyStructureRule>;
+  groups: Record<string, "parent" | "grandparent" | "sibling">;
+  grandparentSide: Record<string, "paternal" | "maternal">;
+}
+const TABLE = familySlotsRaw as unknown as FamilySlotsFile;
+
+/** 槽位封闭枚举（validate F 区与图谱标签共读）。 */
+export const FAMILY_SLOT_TABLE = TABLE;
+
+/** 家庭 NPC 注册槽 id（npcs.json 注册键，line 全 fate）；槽位细分由 NpcState.slot 承载。 */
 export const FAMILY_SLOTS = {
   mother: "mother",
   father: "father",
@@ -33,9 +60,14 @@ export const GRANDPARENT_BOND = { raised: 75, present: 60 } as const;
 /** 同辈初始 bond。 */
 export const SIBLING_BOND = 65;
 
+/** 槽位 → 显示身份（图谱标签唯一出口；未登记槽返回 undefined，调用方回落注册表 role）。 */
+export function familySlotRole(slot: string | undefined): string | undefined {
+  return slot ? TABLE.slots[slot]?.role : undefined;
+}
+
 /**
  * 姓名包：南北名池按 profile.region 取；同局全名去重；姓重复不占池（同姓常见）。
- * draw 序 10 起顺延（0–8 为 env/birthYear/profile 派生，见 plan/v4/02 §一 ▸ M1''' 增补）。
+ * draw 序 10 起顺延（0–8 为 env/birthYear/profile 派生，30–35 为结构性抽取，见 plan/v4/02 §一 ▸ M1''' 增补）。
  */
 class NameBag {
   private used = new Set<string>();
@@ -71,9 +103,18 @@ class NameBag {
   }
 }
 
+/** 区间/定值 → 人数（r ∈ [0,1)，闭区间均匀取整）。 */
+function countOf(range: number | [number, number], r: number): number {
+  const [low, high] = typeof range === "number" ? [range, range] : range;
+  if (high <= low) return low;
+  return low + (Math.floor(r * (high - low + 1)) % (high - low + 1));
+}
+
 /**
- * 出生家庭生成（构成与 bond 口径见 plan/v4/02 §三 ▸ M1''' 增补）：
- * 父母 2（单亲仅 mother，bond +5 相依为命）；祖辈 0–2（隔代必 2）；同辈 独生 0 / 双孩 1 / 多孩 2–3 / 单亲与隔代 0–2。
+ * 出生家庭生成（构成与 bond 口径见 plan/v5/02 §一 / plan/v4/02 §三 ▸ M1''' 增补）：
+ * 父母按结构（单亲 1 位、隔代 0–1 位、其余 2 位，单亲位由 draw 32 定父或母）；
+ * 祖辈按结构区间，侧系由 profile.region 派生（南方=外公外婆 / 北方=祖父祖母）；
+ * 同辈按结构区间，年长位由 gender draw 定兄或姐，其余为弟或妹。
  * 结构性 draw 用固定序号 30–35，与姓名 draw（10+）互不干扰。
  */
 export function generateFamily(
@@ -83,37 +124,70 @@ export function generateFamily(
   seed: number,
 ): NpcState[] {
   void birthYear; // 预留位：bond 口径表暂不按年代分档（02 §三 ▸ M1''' 增补未引入年代维度）
+  const rule = TABLE.structures[profile.structure];
+  if (!rule) throw new Error(`generateFamily：未知家庭结构「${profile.structure}」（family-slots.json 缺行）`);
   const bag = new NameBag(profile.region, seed);
   const familySurname = bag.surname();
   const out: NpcState[] = [];
-  const push = (id: string, bond: number, gender: "男" | "女", shareSurname: boolean): void => {
+  const push = (
+    id: string,
+    slot: string,
+    bond: number,
+    gender: "男" | "女",
+    shareSurname: boolean,
+  ): void => {
     const surname = shareSurname ? familySurname : bag.surname();
-    out.push({ id, bond, tag: tagOfBond(bond), name: bag.fullName(surname, gender) });
+    out.push({ id, slot, bond, tag: tagOfBond(bond), name: bag.fullName(surname, gender) });
   };
 
-  const singleParent = profile.structure === "单亲";
   const parentBond = PARENT_BOND[env.mood]?.[env.style] ?? 70;
-  push(FAMILY_SLOTS.mother, singleParent ? Math.min(100, parentBond + 5) : parentBond, "女", false);
-  if (!singleParent) {
-    push(FAMILY_SLOTS.father, parentBond, "男", true);
+  const parentCount = countOf(rule.parents, seededDraw(seed, 32));
+  // 单亲/隔代可能只有一位家长：由 draw 36 定父或母（两位家长恒父+母）。
+  const onlyFather = parentCount === 1 && seededDraw(seed, 36) < 0.5;
+  if (parentCount >= 2) {
+    push(FAMILY_SLOTS.mother, "parent-mother", parentBond, "女", false);
+    push(FAMILY_SLOTS.father, "parent-father", parentBond, "男", true);
+  } else if (parentCount === 1 && onlyFather) {
+    push(FAMILY_SLOTS.father, "parent-father", Math.min(100, parentBond + 5), "男", true);
+  } else if (parentCount === 1) {
+    // 独力抚养：bond +5 相依为命（沿 v4 口径）
+    push(FAMILY_SLOTS.mother, "parent-mother", Math.min(100, parentBond + 5), "女", false);
   }
 
-  // 祖辈：隔代必 2（bond 75）；否则 0–2（bond 60）
-  const grandCount = profile.structure === "隔代" ? 2 : Math.floor(seededDraw(seed, 30) * 3) % 3;
+  // 祖辈：侧系由 region 派生；隔代 bond 75（朝夕相处），否则 60（在世）
+  const side = TABLE.grandparentSide[profile.region] ?? "paternal";
+  const grandPrefix = side === "maternal" ? "gp-maternal" : "gp-paternal";
+  const grandCount = countOf(rule.grandparents, seededDraw(seed, 30));
   const grandBond =
     profile.structure === "隔代" ? GRANDPARENT_BOND.raised : GRANDPARENT_BOND.present;
-  if (grandCount >= 1) push(FAMILY_SLOTS.grandma, grandBond, "女", false);
-  if (grandCount >= 2) push(FAMILY_SLOTS.grandpa, grandBond, "男", true);
+  if (grandCount >= 1) push(FAMILY_SLOTS.grandma, `${grandPrefix}-grandma`, grandBond, "女", false);
+  if (grandCount >= 2) push(FAMILY_SLOTS.grandpa, `${grandPrefix}-grandpa`, grandBond, "男", true);
 
-  // 同辈：独生 0 / 双孩 1 / 多孩 2–3 / 单亲与隔代 0–2
-  let siblingCount: number;
-  if (profile.structure === "独生") siblingCount = 0;
-  else if (profile.structure === "双孩") siblingCount = 1;
-  else if (profile.structure === "多孩") siblingCount = 2 + (seededDraw(seed, 31) < 0.5 ? 0 : 1);
-  else siblingCount = Math.floor(seededDraw(seed, 32) * 3) % 3;
-  for (let i = 0; i < siblingCount && i < FAMILY_SLOTS.siblings.length; i++) {
-    const gender: "男" | "女" = seededDraw(seed, 33 + i) < 0.5 ? "男" : "女";
-    push(FAMILY_SLOTS.siblings[i]!, SIBLING_BOND, gender, true);
+  // 同辈：年长位（哥哥/姐姐）在前，其余为弟弟/妹妹。
+  // 槽位唯一约束（plan/v5/02 §一）反推性别派生：年幼位 ≥2 时必须一男一女——
+  // 否则两人同为弟弟（或妹妹）会撞同一封闭槽位。年长位与年幼位槽不重叠，不受此限。
+  const siblingCount = Math.min(
+    countOf(rule.siblings, seededDraw(seed, 31)),
+    FAMILY_SLOTS.siblings.length,
+  );
+  const youngerCount = Math.max(0, siblingCount - rule.olderSiblings);
+  let prevYoungerMale: boolean | undefined;
+  for (let i = 0; i < siblingCount; i++) {
+    const older = i < rule.olderSiblings;
+    let male = seededDraw(seed, 33 + i) < 0.5;
+    if (!older) {
+      // 年幼位第二位强制与第一位异性（恰好两人的情形；三人同辈只有两位年幼）
+      if (youngerCount >= 2 && prevYoungerMale !== undefined) male = !prevYoungerMale;
+      prevYoungerMale = male;
+    }
+    const slot = older
+      ? male
+        ? "sib-older-brother"
+        : "sib-older-sister"
+      : male
+        ? "sib-younger-brother"
+        : "sib-younger-sister";
+    push(FAMILY_SLOTS.siblings[i]!, slot, SIBLING_BOND, male ? "男" : "女", true);
   }
   return out;
 }

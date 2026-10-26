@@ -727,5 +727,125 @@
   },
   "elder-602": {
     "objectKey": "walk"
+  },
+  "infant-701": {
+    "objectKey": "chat-bubble"
+  },
+  "infant-702": {
+    "objectKey": "windchimes"
+  },
+  "infant-703": {
+    "objectKey": "cubes"
+  },
+  "infant-704": {
+    "objectKey": "pinata"
+  },
+  "infant-705": {
+    "objectKey": "night-sleep"
+  },
+  "toddler-701": {
+    "objectKey": "oak"
+  },
+  "toddler-702": {
+    "objectKey": "cat"
+  },
+  "toddler-703": {
+    "objectKey": "claw-hammer"
+  },
+  "toddler-704": {
+    "objectKey": "ice-cream-cone"
+  },
+  "toddler-705": {
+    "objectKey": "pocket-radio"
+  },
+  "childhood-701": {
+    "objectKey": "blackball"
+  },
+  "childhood-702": {
+    "objectKey": "musical-notes"
+  },
+  "childhood-703": {
+    "objectKey": "caterpillar"
+  },
+  "childhood-704": {
+    "objectKey": "gamepad"
+  },
+  "childhood-705": {
+    "objectKey": "hand-saw"
+  },
+  "teen-701": {
+    "objectKey": "choice"
+  },
+  "teen-702": {
+    "objectKey": "quill-ink"
+  },
+  "teen-703": {
+    "objectKey": "folded-paper"
+  },
+  "teen-704": {
+    "objectKey": "crossroad"
+  },
+  "teen-705": {
+    "objectKey": "cycling"
+  },
+  "youth-701": {
+    "objectKey": "cardboard-box"
+  },
+  "youth-702": {
+    "objectKey": "chess-pawn"
+  },
+  "youth-703": {
+    "objectKey": "tv"
+  },
+  "youth-704": {
+    "objectKey": "house-keys"
+  },
+  "youth-705": {
+    "objectKey": "guitar"
+  },
+  "adult-701": {
+    "objectKey": "teapot"
+  },
+  "adult-702": {
+    "objectKey": "price-tag"
+  },
+  "adult-703": {
+    "objectKey": "stethoscope"
+  },
+  "adult-704": {
+    "objectKey": "hanging-sign"
+  },
+  "adult-705": {
+    "objectKey": "balloons"
+  },
+  "midlife-701": {
+    "objectKey": "flower-pot"
+  },
+  "midlife-702": {
+    "objectKey": "body-balance"
+  },
+  "midlife-703": {
+    "objectKey": "keyring"
+  },
+  "midlife-704": {
+    "objectKey": "medical-thermometer"
+  },
+  "midlife-705": {
+    "objectKey": "shop"
+  },
+  "elder-701": {
+    "objectKey": "book-pile"
+  },
+  "elder-702": {
+    "objectKey": "paw-print"
+  },
+  "elder-703": {
+    "objectKey": "three-friends"
+  },
+  "elder-704": {
+    "objectKey": "teapot"
+  },
+  "elder-705": {
+    "objectKey": "piano-keys"
   }
 }

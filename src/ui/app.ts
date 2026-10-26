@@ -6,9 +6,11 @@ import {
   advanceStage,
   applyChoice,
   applyCustomChoice,
+  applyEncounterChoice,
   applyEraCard,
   birthEnvOptions,
   createRun,
+  encounterFor,
   envFromBirth,
   eraEventById,
   eraEventFor,
@@ -22,6 +24,7 @@ import {
   resolveEnding,
 } from "../engine/engine";
 import { runYearOf } from "../engine/year";
+import { stageVariantSequence, variantOf } from "../engine/rhythm";
 import { SEED_MAX, seedCodeOf, seedFromCode } from "../engine/seedcode";
 import {
   DEFAULT_LLM_SETTINGS,
@@ -38,7 +41,7 @@ import {
   rewriteVariant,
 } from "../llm/bypass";
 import type { LlmSettings } from "../llm/config";
-import { STAGES, type BirthEnv, type BirthProfile, type Dims, type Ending, type LineKey, type ResKey, type RunState, type Stage } from "../engine/model";
+import { STAGES, type BirthEnv, type BirthProfile, type Dims, type Ending, type GameEvent, type LineKey, type ResKey, type RhythmVariant, type RunState, type Stage } from "../engine/model";
 import { deriveEndingV3 } from "../engine/values";
 import { clear, hasSaveKey, load, save } from "../storage/storage";
 import { createFishParams, endingFrame, pickChoiceFrame, renderFish, stageFrame, type DeltaDir } from "../viz/fish";
@@ -331,15 +334,32 @@ function renderCard(feedback: typeof pendingFeedback): void {
     renderEraCard();
     return;
   }
+  // v5 偶遇层：优先级次于时代卡、先于主线（plan/v5/02 §二；注入在 pickEvent 之外）
+  const encounter = encounterFor(state);
+  if (encounter) {
+    renderEventCard(encounter, feedback);
+    return;
+  }
   const event = pickEvent(state);
   if (!event) {
     toNext();
     return;
   }
+  renderEventCard(event, feedback);
+}
+
+/** 事件卡渲染（主线/支线/偶遇共用；变体只改呈现密度，选项与判定同一条通道）。 */
+function renderEventCard(event: GameEvent, feedback: typeof pendingFeedback): void {
+  if (!state) return;
   const stage = STAGES[state.stageIndex]!;
   const customError = customSlotError;
   customSlotError = null;
   const llm = loadLlmSettings();
+  const streak = currentStageVariants();
+  const variant = variantOf(event, streak);
+  // 偶遇卡不给 AI 自定义槽（02 §二：偶遇是氛围，不是主抉择；也让 applyCustomChoice 不与
+  // 主线 pickEvent 错配）
+  const isEncounter = event.type === "encounter";
   root.innerHTML = S.cardAskScreen({
     stageIndex: state.stageIndex,
     stage,
@@ -347,7 +367,9 @@ function renderCard(feedback: typeof pendingFeedback): void {
     ageMonths: event.ageMonths,
     yearBadge: `${runYearOf(state.birthYear, event.ageMonths)} 年 · ${event.ageHint}`,
     text: event.text,
+    detail: event.detail,
     options: event.options.map((o) => o.text),
+    optionDetails: event.options.map((o) => o.detail),
     locks: optionLocks(state, event),
     line: event.line,
     critical: event.type === "critical",
@@ -358,13 +380,27 @@ function renderCard(feedback: typeof pendingFeedback): void {
     lines: state.lines,
     bump: feedback?.bump ?? [],
     floaters: feedback?.floaters ?? [],
-    custom: llmUsable(llm),
+    custom: llmUsable(llm) && !isEncounter,
     customError: customError ?? undefined,
     band: bandForYear(runYearOf(state.birthYear, event.ageMonths)),
+    variant,
+    kind: event.type,
   });
   for (const btn of root.querySelectorAll<HTMLButtonElement>("[data-option]")) {
     btn.addEventListener("click", () => onChoose(Number(btn.dataset.option)));
   }
+  // read 变体（偶遇/过场无选项）：一个「继续」= 走第一个选项（引擎侧同一条通道）
+  root.querySelector<HTMLButtonElement>("[data-continue]")?.addEventListener("click", () => {
+    if (!state) return;
+    if (encounterFor(state)) {
+      state = applyEncounterChoice(state, 0);
+      persist();
+      view = "card";
+      render();
+      return;
+    }
+    onChoose(0);
+  });
   bindFamilyOpen();
   root.querySelector<HTMLButtonElement>("[data-custom-submit]")?.addEventListener("click", () => {
     const input = root.querySelector<HTMLInputElement>("[data-custom-slot] .custom-input");
@@ -375,6 +411,14 @@ function renderCard(feedback: typeof pendingFeedback): void {
     void maybeSwapVariant(event.id);
   }
   bindRestart();
+}
+
+/** 本阶段已出变体序列（app 侧派生，供 variantOf 的防单调 relay；纯读 history）。 */
+function currentStageVariants(): RhythmVariant[] {
+  if (!state) return [];
+  const stage = STAGES[state.stageIndex];
+  if (!stage) return [];
+  return stageVariantSequence(state.history, stage, eventById);
 }
 
 /** 变体改写异步落位：缓存命中直接换，否则请求；事件已翻页则丢弃。 */
@@ -439,7 +483,9 @@ async function onCustom(userText: string): Promise<void> {
 
 function onChoose(index: number): void {
   if (!state) return;
-  const event = pickEvent(state);
+  // v5 偶遇卡（02 §二）：与常规卡同一条反馈链，只是入账走 applyEncounterChoice（不推 line）
+  const encounter = encounterFor(state);
+  const event = encounter ?? pickEvent(state);
   if (!event) {
     toNext();
     return;
@@ -456,7 +502,7 @@ function onChoose(index: number): void {
   const dir: DeltaDir = tfDelta > 0 ? "pos" : tfDelta < 0 ? "neg" : "neutral";
   choiceFeedback = pickChoiceFrame(dir, createFishParams(state.dims).mood, state.seed + state.history.length);
   const aftermath = option?.aftermath;
-  state = applyChoice(state, index);
+  state = encounter ? applyEncounterChoice(state, index) : applyChoice(state, index);
   persist();
   if (aftermath) {
     pendingAftermath = { stage: STAGES[state.stageIndex]!, ageHint: event.ageHint, ageMonths: event.ageMonths, text: aftermath };
@@ -492,11 +538,11 @@ function renderAftermath(feedback: typeof pendingFeedback): void {
   bindRestart();
 }
 
-/** 应答后的推进：还有事件 → 下一张卡；取尽 → advanceStage（终局或阶段小结）。 */
+/** 应答后的推进：还有事件（含 v5 偶遇卡）→ 下一张卡；取尽 → advanceStage（终局或阶段小结）。 */
 function toNext(): void {
   if (!state) return;
   pendingAftermath = null;
-  if (pickEvent(state)) {
+  if (pickEvent(state) || encounterFor(state)) {
     view = "card";
     render();
     return;
