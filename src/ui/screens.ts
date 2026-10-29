@@ -37,23 +37,28 @@ import type { Prefs } from "./prefs";
 import { FONT_OPTIONS, MOTION_OPTIONS } from "./prefs";
 import { iconStyle } from "./icons";
 import { NPC_PROFILES, RELATION_VIEWS, TAG_COLORS, relationsVM, renderRelations, type NodeDetail, type RelationView } from "./relations";
-// 语义配图（plan/v5/02 §九 D9）：raw SVG 内联 → 与主题变量联动、无额外请求（K2：静态资源，不经运行时库）
-const SCENE_SVGS = import.meta.glob("../../assets/web-ready/scenes/*.svg", {
+// 语义配图（plan/v5/02 §九 D9）：v5.1.0 起为具象配图（AVIF，800×280），按 URL 引用而非内联。
+// 静态资源走 Vite 的 ?url 导入 → 产出带 hash 的分发文件（K2：不经任何运行时库）。
+// 为何不是 WebP / 不是内联：实测见 docs/v5-M9-scene-webp.md。
+const SCENE_URLS = import.meta.glob("../../assets/web-ready/scenes/*.avif", {
   eager: true,
-  query: "?raw",
+  query: "?url",
   import: "default",
 }) as Record<string, string>;
-/** 文件名（含 .svg）→ 内联 SVG 串。scene-map 的 tags 值就是文件名，两处同一套键。 */
+/** 文件名（含 .avif）→ 分发 URL。scene-map 的 tags 值就是文件名，两处同一套键。 */
 const SCENE_BY_FILE: Record<string, string> = {};
-for (const [path, raw] of Object.entries(SCENE_SVGS)) {
-  SCENE_BY_FILE[path.split("/").pop()!] = raw;
+for (const [path, url] of Object.entries(SCENE_URLS)) {
+  SCENE_BY_FILE[path.split("/").pop()!] = url;
 }
 /** 事件配图槽：豁免（sceneFile 为 null）时返回空串——不渲染空框（v5/02 §九）。 */
 function sceneImage(file: string | null, alt: string): string {
   if (!file) return "";
-  const svg = SCENE_BY_FILE[file];
-  if (!svg) return "";
-  return `<figure class="ev-scene" data-ev-scene="${esc(file)}" role="img" aria-label="${esc(alt)}">${svg}</figure>`;
+  const url = SCENE_BY_FILE[file];
+  if (!url) return "";
+  // width/height 固定 800×280 = 留位防抖动。
+  // 不加 loading="lazy"：屏幕上同时只有当前这一张卡、DOM 里也只有这一个 <img>，
+  // 懒加载省不到任何请求，反而让「图是否真的解码」这类断言失去意义。
+  return `<figure class="ev-scene" data-ev-scene="${esc(file)}"><img src="${esc(url)}" width="800" height="280" alt="${esc(alt)}" decoding="async"></figure>`;
 }
 import { PROVIDERS, type LlmSettings } from "../llm/config";
 import type { RunState } from "../engine/model";

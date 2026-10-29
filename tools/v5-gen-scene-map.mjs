@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** 封闭枚举：标签 → 显示名（场景图文件 = assets/web-ready/scenes/<tag>-<variant>.svg）。 */
+/** 封闭枚举：标签 → 显示名（场景图文件 = assets/web-ready/scenes/<tag>-<variant>.avif（v5.1.0 具象配图））。 */
 export const TAGS = {
   home: "家",
   kitchen: "厨房",
@@ -31,7 +31,6 @@ export const TAGS = {
   market: "市场",
   field: "田野",
   wedding: "婚宴",
-  funeral: "丧事",
   rain: "雨天",
   study: "书桌",
   relic: "旧物",
@@ -47,7 +46,7 @@ export const TAGS = {
 /** objectKey → 标签。只收「图标本身就是这一类场景/场景里的核心物件」的键；
  *  抽象图标（heart-* / choice / crossroad / despair / infinity…）不硬凑——它们不是场景。 */
 const KEY_TAG = {
-  // ── home 家：房屋、家庭、室内陈设 ──
+  // ── home ──
   "family-house": "home",
   "family-tree": "home",
   "house-keys": "home",
@@ -59,9 +58,17 @@ const KEY_TAG = {
   "night-sleep": "home",
   "windchimes": "home",
   "new-born": "home",
-  "tired-eye": "home", // v5-M6：原 night（夜色），困倦/歇息 = 居家场景
-
-  // ── kitchen 厨房：灶台、食材、餐具 ──
+  "tired-eye": "home",
+  "abacus": "home",
+  "treasure-map": "home",
+  "heart-battery": "home",
+  "mountains": "home",
+  "campfire": "home",
+  "walk": "home",
+  "boots": "home",
+  "barefoot": "home",
+  "pinata": "home",
+  // ── kitchen ──
   "fork-knife-spoon": "kitchen",
   "cooking-glove": "kitchen",
   "teapot": "kitchen",
@@ -75,10 +82,18 @@ const KEY_TAG = {
   "ice-cream-cone": "kitchen",
   "mouth-watering": "kitchen",
   "baby-bottle": "kitchen",
-  "basket": "kitchen",
-  "weight-scale": "kitchen",
-
-  // ── school 校园：校门、操场、学籍 ──
+  // ── market ──
+  "basket": "market",
+  "cash": "market",
+  "banknote": "market",
+  "money-stack": "market",
+  "gold-stack": "market",
+  "wallet": "market",
+  "piggy-bank": "market",
+  "strongbox": "market",
+  "profit": "market",
+  "chest": "market",
+  // ── school ──
   "school-bag": "school",
   "graduate-cap": "school",
   "teacher": "school",
@@ -89,16 +104,13 @@ const KEY_TAG = {
   "sport-medal": "school",
   "laurels": "school",
   "running-shoe": "school",
-
-  // ── classroom 教室：课桌与纸笔 ──
+  "star-formation": "school",
+  "ribbon": "school",
+  // ── classroom ──
   "notebook": "classroom",
   "book-cover": "classroom",
   "open-book": "classroom",
-  "papers": "classroom",
-  "checklist": "classroom",
   "calculator": "classroom",
-  "abacus": "classroom",
-  "desk-lamp": "classroom",
   "paint-brush": "classroom",
   "palette": "classroom",
   "easel": "classroom",
@@ -106,8 +118,8 @@ const KEY_TAG = {
   "paper-boat": "classroom",
   "diagram": "classroom",
   "histogram": "classroom",
-
-  // ── street 街巷：街面、店铺、路 ──
+  // ── street ──
+  "papers": "street",
   "shop": "street",
   "shopping-bag": "street",
   "shopping-cart": "street",
@@ -119,39 +131,64 @@ const KEY_TAG = {
   "direction-sign": "street",
   "3d-stairs": "street",
   "stairs-goal": "street",
-
-  // ── station 车站：交通与行李 ──
+  // ── station ──
   "airplane-departure": "station",
   "rolling-suitcase": "station",
   "suitcase": "station",
   "passport": "station",
   "journey": "station",
-  "wavy-itinerary": "station",
-  "treasure-map": "station",
-
-  // ── factory 厂区：厂房、工地、工具 ──
+  // ── factory ──
   "warehouse": "factory",
-  "brick-pile": "factory",
   "gears": "factory",
   "drill": "factory",
   "chisel": "factory",
   "claw-hammer": "factory",
   "hand-saw": "factory",
-  "cubes": "factory",
-
-  // ── office 办公：工位、会议、文件 ──
+  "watchtower": "factory",
+  // ── toy ──
+  "brick-pile": "toy",
+  "cubes": "toy",
+  "dinosaur-rex": "toy",
+  "jigsaw-piece": "toy",
+  "jigsaw-box": "toy",
+  "puzzle": "toy",
+  "gamepad": "toy",
+  // ── office ──
   "briefcase": "office",
   "files": "office",
   "archive-register": "office",
   "contract": "office",
   "round-table": "office",
   "discussion": "office",
-  "video-conference": "office",
   "network-bars": "office",
   "chess-pawn": "office",
-  "chess-rook": "office",
-
-  // ── hospital 医院：诊疗与药物 ──
+  "pouring-chalice": "office",
+  "balloons": "office",
+  // ── media ──
+  "video-conference": "media",
+  "linked-rings": "media",
+  "tv": "media",
+  "pocket-radio": "media",
+  "boombox": "media",
+  "phone": "media",
+  "smartphone": "media",
+  "vibrating-smartphone": "media",
+  "tablet": "media",
+  "wifi-router": "media",
+  "photo-camera": "media",
+  "film-spool": "media",
+  // ── outdoors ──
+  "chess-rook": "outdoors",
+  "body-balance": "outdoors",
+  "muscle-up": "outdoors",
+  "gym-bag": "outdoors",
+  "cycling": "outdoors",
+  "hiking": "outdoors",
+  "kid-slide": "outdoors",
+  "sand-castle": "outdoors",
+  "walking-boot": "outdoors",
+  "caterpillar": "outdoors",
+  // ── hospital ──
   "hospital": "hospital",
   "hospital-cross": "hospital",
   "ambulance": "hospital",
@@ -164,81 +201,27 @@ const KEY_TAG = {
   "pill": "hospital",
   "syringe": "hospital",
   "pulse": "hospital",
-  "thermometer-cold": "rain",
   "heart-organ": "hospital",
   "tooth": "hospital",
   "toothbrush": "hospital",
   "protection-glasses": "hospital",
-  "heart-battery": "hospital",
   "heart-bottle": "hospital",
-
-  // ── outdoors 户外：公园晨练、街边摊、远行（不是医院也不是病房）──
-  "body-balance": "outdoors",
-  "muscle-up": "outdoors",
-  "gym-bag": "outdoors",
-  "cycling": "outdoors",
-  "hiking": "outdoors",
-  "mountains": "outdoors",
-  "kid-slide": "outdoors",
-  "sand-castle": "outdoors",
-  "watchtower": "outdoors",
-  "campfire": "outdoors",
-  "walk": "outdoors",
-  "walking-boot": "outdoors",
-  "boots": "outdoors",
-  "barefoot": "outdoors",
-  "caterpillar": "outdoors", // v5-M6：原 study（书桌）——蚕/蚯蚓是户外小生物
-  "star-formation": "outdoors", // v5-M6：原 night（夜色）——星群是户外天象
-
-  // ── market 市场：买卖与秤 ──
-  "scales": "market",
-  "cash": "market",
-  "banknote": "market",
-  "money-stack": "market",
-  "gold-stack": "market",
-  "wallet": "market",
-  "piggy-bank": "market",
-  "strongbox": "market",
-  "profit": "market",
-  "chest": "market",
-
-  // ── field 田野：农事与土地 ──
-  "plant-watering": "field",
-  "flower-pot": "field",
-  "spring": "field",
-  "oak": "field",
-  "dig-hole": "field",
-
-  // ── wedding 婚宴：婚礼与誓约 ──
-  "engagement-ring": "wedding",
-  "ring": "wedding",
-  "linked-rings": "wedding",
-  "lovers": "wedding",
-  "eternal-love": "wedding",
-  "pouring-chalice": "wedding",
-  "theater-curtains": "wedding",
-  "balloons": "wedding",
-  "pinata": "wedding",
-  "ribbon": "wedding",
-
-  // ── funeral 丧事：告别与纪念 ──
-  "grave-flowers": "funeral",
-  "candle-holder": "funeral",
-  "candle-light": "funeral",
-  // v5-M6 SI-001 修：情绪/时间类抽象符号（hourglass / broken-heart / shattered-heart /
-  // tear-tracks / despair / two-shadows / sunrise / sundial / sparkles）**摘出**——
-  // 它们不是任何场景的物件（`heart-*` 系的例外见 study 段末注），摘出后转显式豁免。
-
-  // ── night 夜色：v5-M6 退役（摘出上列图标后该类只剩 tired-eye 与 star-formation 两条事件，
-  //    少于 2 张图在哈希下必留死图；两条改挂 home / outdoors，图稿同笔删除）──
-
-  // ── rain 雨天：雨雪与水（标签含义 = 「雨雪天气」，故 snowflake 归此类而非夜色）──
+  // ── rain ──
+  "thermometer-cold": "rain",
   "water-splash": "rain",
   "snowflake-1": "rain",
-
-  // ── meal 饭桌：v5-M6 退役（社交图标 meeple-group / three-friends / shaking-hands 摘出后事件归零）──
-
-  // ── study 书桌：读写与自学（v5-M6 起只留「读写/文书」类物件）──
+  // ── field ──
+  "plant-watering": "field",
+  "flower-pot": "field",
+  "oak": "field",
+  "dig-hole": "field",
+  // ── wedding ──
+  "engagement-ring": "wedding",
+  "ring": "wedding",
+  "lovers": "wedding",
+  "eternal-love": "wedding",
+  "theater-curtains": "wedding",
+  // ── study ──
   "book-pile": "study",
   "bookshelf": "study",
   "bookmark": "study",
@@ -251,42 +234,16 @@ const KEY_TAG = {
   "love-letter": "study",
   "envelope": "study",
   "mailbox": "study",
-
-  // ── v5-M6 SI-001 修复：原硬塞进 study 的四批键改挂各自的语义场景 ──
-  // 判据仍是同一条（「图标本身是这类场景的核心物件」）——兔子是 `pet` 的主体、拼图是 `toy`、
-  // 电视收音机是 `media`、吉他琴键话筒是 `music`；它们不是书桌的物件，落 study 才会「画书堆配兔子」。
-  // ── pet 宠物：家养小动物 ──
+  // ── pet ──
   "rabbit": "pet",
   "cat": "pet",
   "paw-print": "pet",
-  // ── toy 玩物：玩具与游戏 ──
-  "dinosaur-rex": "toy",
-  "jigsaw-piece": "toy",
-  "jigsaw-box": "toy",
-  "puzzle": "toy",
-  "gamepad": "toy",
-  // ── media 影音：家电、通信与影像器材 ──
-  "tv": "media",
-  "pocket-radio": "media",
-  "boombox": "media",
-  "phone": "media",
-  "smartphone": "media",
-  "vibrating-smartphone": "media",
-  "tablet": "media",
-  "wifi-router": "media",
-  "photo-camera": "media",
-  "film-spool": "media",
-  // ── music 器乐：乐器与演唱器材 ──
-  "musical-notes": "music",
+  // ── music ──
   "guitar": "music",
   "piano-keys": "music",
   "microphone": "music",
   "old-microphone": "music",
-  // 仍摘出：drama-masks（戏剧面具 = 舞台行当，本图库无舞台类）→ 显式豁免。
-
-  // 也随 v5-M6 改挂：tired-eye → home（困倦/歇息 = 居家），caterpillar / star-formation → outdoors（户外）。
-
-  // ── relic 旧物：旧盒子、老照片、旧信 ──
+  // ── relic ──
   "cardboard-box": "relic",
   "cardboard-box-closed": "relic",
   "calendar": "relic",
@@ -307,17 +264,72 @@ const VARIANTS = {
   market: ["stall", "scales"],
   field: ["rows", "harvest"],
   wedding: ["table", "hall"],
-  // funeral 第 3 张（v5-M6 补）：摘出情绪图标后该类只剩 3 条事件，2 张图在哈希下必死 1 张
-  funeral: ["hall", "flowers", "candles"],
   rain: ["street", "umbrella"],
   outdoors: ["park", "road"],
   study: ["books", "lamp", "writing"],
   relic: ["box", "photo", "letter"],
-  // v5-M6 SI-001 修复新增四类（图稿见 tools/v5-gen-scenes.mjs 对应段）
   pet: ["cat", "cage"],
   toy: ["jigsaw", "gamepad"],
   media: ["tv", "radio", "phone"],
   music: ["guitar", "piano", "mic"],
+};
+
+/**
+ * objectKey → 指定变体（v5.0.2 语义错配修复，HANDOFF-v5-M8 观察区「新四类变体语义异质性」转做）。
+ *
+ * 为什么需要它：默认取图 = 标签内按事件 id 哈希高位轮换（同 id 恒同图、同类分散）。该口径对
+ * 「同类内变体语义同质」的标签成立（home 四张都是家、kitchen 三张都是厨房），但对**变体语义异质**
+ * 的标签会把具体物件配错：实测 `pet` 的 rabbit/dog/pigeon 事件全落到 pet-cat（猫图配狗/鸽），
+ * `media` 的「看电视」落 radio、「收音机」落 tv，`music` 的「吉他」落 piano、「电子琴」落 mic。
+ * 机制 = 哈希不感知 objectKey，只感知事件 id；异质变体之间没有「随便哪张都行」的互换性。
+ *
+ * 规则：表内键 = 固定用该变体（不再轮换）；表外键 = 维持哈希轮换。
+ * 判据 = 逐条读事件文本后人工指定（docs/v5-scenes.md §四 留痕），不是自动推断。
+ * 未列入的异质键若仍错配，进 docs/v5-scenes.md §四 的「已知残留」清单，不静默。
+ */
+const KEY_PIN = {
+  // pet：猫图只配猫事件；兔事件配笼中兔（pet-cage 画面 = 笼中白兔）；狗/鸽/项圈类配笼筐意象
+  rabbit: "cage", // toddler-013 兔子在笼中 → pet-cage（画面即笼中白兔）
+  cat: "cat",
+  "paw-print": "cage", // 狗走/鸽群/项圈：无狗图鸽图，笼筐是「养小动物」的最贴近意象（残留登记 §四）
+  // media：家电对位（video-conference / linked-rings 为 v5.1.0 棒改挂 media 的键：视频通话 = 手持设备画面）
+  tv: "tv",
+  "pocket-radio": "radio",
+  boombox: "radio",
+  phone: "phone",
+  smartphone: "phone",
+  "vibrating-smartphone": "phone",
+  tablet: "phone",
+  "wifi-router": "phone", // 路由器无专图；phone 画面含通信设备组（残留登记 §四）
+  "photo-camera": "phone", // 相机无专图；同上
+  "film-spool": "phone",
+  "video-conference": "phone", // youth-003 异地视频通话 = 手持设备
+  "linked-rings": "phone", // youth-402 视频里说下雨 = 手持设备
+  // music：乐器对位
+  guitar: "guitar",
+  "piano-keys": "piano",
+  microphone: "mic",
+  "old-microphone": "mic",
+  // toy：拼图对手柄；积木（brick-pile/cubes）配积木显眼的 jigsaw 平铺图
+  "dinosaur-rex": "jigsaw",
+  "jigsaw-piece": "jigsaw",
+  "jigsaw-box": "jigsaw",
+  puzzle: "jigsaw",
+  "brick-pile": "jigsaw", // 积木高塔 = jigsaw 平铺里的木块
+  cubes: "jigsaw", // 收积木 = 同上
+  gamepad: "gamepad",
+  // office：圆桌/会议对位（空会议室只配「开会/面谈」类，不配独白/视频类）
+  "round-table": "meeting",
+  discussion: "meeting",
+  "archive-register": "meeting", // 小组管账 = 围议
+  files: "desk", // 实习独读档案 = 桌面文件（空会议室不贴）
+};
+
+/** 显式豁免理由（v5.0.2：funeral 三图退役）。键 = objectKey，值 = 退役原因（写进 scene-map._meta 供追溯）。 */
+const EXEMPT_NOTES = {
+  "grave-flowers": "funeral 类退役（v5.0.2）：三张源图含 AI 生成乱码汉字横幅与 AI 人脸遗像，目检不合格且无法重生成，整类转显式豁免",
+  "candle-holder": "funeral 类退役（v5.0.2），同上",
+  "candle-light": "funeral 类退役（v5.0.2），同上",
 };
 
 const REPORT = process.argv.includes("--report");
@@ -339,8 +351,21 @@ if (deadKeys.length) {
   process.stderr.write(`scene-map：映射表含 ${deadKeys.length} 个 icon-map 里不存在的 objectKey：${deadKeys.join(", ")}\n`);
   process.exit(1);
 }
+// pin 表同理：键必须存在于 icon-map，且变体名必须落在该键所属标签的 VARIANTS 里（写错 = 静默回落到哈希，错配复活）
+const deadPins = Object.entries(KEY_PIN).filter(([k, v]) => {
+  if (!liveKeys.has(k)) return true;
+  const tag = KEY_TAG[k];
+  return !(tag && (VARIANTS[tag] || []).includes(v));
+});
+if (deadPins.length) {
+  process.stderr.write(
+    `scene-map：pin 表含 ${deadPins.length} 个无效条目（键不存在或变体不在该标签清单）：` +
+      deadPins.map(([k, v]) => `${k}→${v}`).join(", ") + "\n",
+  );
+  process.exit(1);
+}
 
-const map = Object.fromEntries(Object.entries(VARIANTS).map(([tag, list]) => [tag, list.map((v) => `${tag}-${v}.svg`)]));
+const map = Object.fromEntries(Object.entries(VARIANTS).map(([tag, list]) => [tag, list.map((v) => `${tag}-${v}.avif`)]));
 const covered = [];
 const exempt = [];
 for (const ev of events) {
@@ -353,11 +378,14 @@ const ratio = covered.length / events.length;
 
 const out = {
   _meta:
-    "语义配图映射（plan/v5/02 §九 D9）。结构：{tags: {tag: [场景图文件名…]}, keyTag: {icon objectKey → tag}}。" +
-    "事件取图 = iconMap[事件id].objectKey → keyTag → tags（该标签内按事件 id 的稳定哈希轮换，同 id 恒同图）。" +
-    "未命中 keyTag 的事件 = 显式豁免（不配图、不留空框），清单见 docs/v5-scenes.md。",
+    "语义配图映射（plan/v5/02 §九 D9）。结构：{tags: {tag: [场景图文件名…]}, keyTag: {icon objectKey → tag}, " +
+    "keyPin: {objectKey → 指定变体（v5.0.2 语义错配修复，异质变体不再哈希轮换）}}。" +
+    "事件取图 = iconMap[事件id].objectKey → keyTag → tags（keyPin 命中则用指定变体，否则该标签内按事件 id 的稳定哈希轮换，同 id 恒同图）。" +
+    "未命中 keyTag 的事件 = 显式豁免（不配图、不留空框），清单见 docs/v5-scenes.md。" +
+    "v5.0.2 豁免增补：" + JSON.stringify(EXEMPT_NOTES),
   tags: map,
   keyTag: KEY_TAG,
+  keyPin: KEY_PIN,
 };
 
 if (!REPORT) writeFileSync(resolve(ROOT, "src/data/scene-map.json"), JSON.stringify(out, null, 2) + "\n");

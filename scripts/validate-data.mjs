@@ -819,7 +819,8 @@ if (sceneMap && Array.isArray(events)) {
   const diskScenes = new Set();
   if (existsSync(sceneDir)) {
     for (const name of readdirSync(sceneDir)) {
-      if (name.endsWith(".svg")) diskScenes.add(name);
+      // v5.1.0：分发物改为 AVIF（具象配图）。源 WebP 在 scenes-src/，不参与分发、不在此扫。
+      if (name.endsWith(".avif")) diskScenes.add(name);
     }
   }
   const tags = sceneMap.tags;
@@ -841,7 +842,7 @@ if (sceneMap && Array.isArray(events)) {
         continue;
       }
       for (const file of list) {
-        if (typeof file !== "string" || !/^[a-z][a-z0-9-]*\.svg$/.test(file)) {
+        if (typeof file !== "string" || !/^[a-z][a-z0-9-]*\.avif$/.test(file)) {
           fail("S.FILE", `标签「${tag}」场景文件名非法：${JSON.stringify(file)}`);
           continue;
         }

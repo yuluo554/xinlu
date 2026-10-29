@@ -37,6 +37,22 @@ describe("标签与图库（scene-map.json）", () => {
       expect(SCENE_TAGS).toContain(tag);
     }
   });
+
+  it("keyPin 无死键且变体可解析：pin 的键必须挂在该变体所属标签下", () => {
+    // v5.1.0（合并另一会话的 keyPin 机制后补的守卫）：pin 是「图标 → 指定变体」，
+    // 一旦 keyTag 被改挂到别的标签而 pin 没跟着改，就会 pin 到不存在的 `${tag}-${variant}.avif`——
+    // 运行时回落到哈希轮换（不报错），于是「修了语义却静默失效」。这条门就是防它。
+    const pin = (MAP as { keyPin?: Record<string, string> }).keyPin;
+    if (!pin) return;
+    const problems: string[] = [];
+    for (const [key, variant] of Object.entries(pin)) {
+      const tag = MAP.keyTag[key];
+      if (!tag) { problems.push(`${key}：pin 存在但 keyTag 里没有这个键`); continue; }
+      const file = `${tag}-${variant}.avif`;
+      if (!(MAP.tags[tag] ?? []).includes(file)) problems.push(`${key}：pin「${variant}」解析不到 ${file}`);
+    }
+    expect(problems, problems.join("；")).toEqual([]);
+  });
 });
 
 describe("取图（sceneTagOf / sceneFileOf）", () => {

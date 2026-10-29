@@ -13,6 +13,8 @@ interface SceneMapFile {
   _meta?: string;
   tags: Record<string, string[]>;
   keyTag: Record<string, string>;
+  /** v5.0.2：objectKey → 指定变体（异质变体不再哈希轮换；语义错配修复，见 tools/v5-gen-scene-map.mjs KEY_PIN）。 */
+  keyPin?: Record<string, string>;
 }
 
 const MAP = sceneMapRaw as unknown as SceneMapFile;
@@ -54,6 +56,9 @@ export function sceneTagOf(objectKey: string | null | undefined): SceneTag | nul
 
 /**
  * 事件该用哪张场景图（文件名）；豁免返回 null。
+ * v5.0.2：objectKey 命中 `keyPin` 时用指定变体（异质变体不做哈希轮换，避免「猫图配狗事件」）；
+ * 未命中才按事件 id 哈希高位轮换。pin 的变体名解析为 `${tag}-${variant}.<ext>`，
+ * 解析不到（表写错/图被删）时**回落到哈希轮换**而非返回 null——宁可旧错配也不静默丢配图。
  * @param eventId 事件 id（用于在同标签的多张变体间稳定轮换）
  * @param objectKey 该事件的图标名
  */
@@ -62,6 +67,13 @@ export function sceneFileOf(eventId: string, objectKey: string | null | undefine
   if (!tag) return null;
   const list = MAP.tags[tag];
   if (!list || list.length === 0) return null;
+  if (objectKey && MAP.keyPin) {
+    const variant = MAP.keyPin[objectKey];
+    if (variant) {
+      const pinned = list.find((f) => f === `${tag}-${variant}.avif` || f === `${tag}-${variant}.svg`);
+      if (pinned) return pinned;
+    }
+  }
   return list[variantIndex(eventId, list.length)]!;
 }
 

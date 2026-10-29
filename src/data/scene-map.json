@@ -1,102 +1,97 @@
 {
-  "_meta": "语义配图映射（plan/v5/02 §九 D9）。结构：{tags: {tag: [场景图文件名…]}, keyTag: {icon objectKey → tag}}。事件取图 = iconMap[事件id].objectKey → keyTag → tags（该标签内按事件 id 的稳定哈希轮换，同 id 恒同图）。未命中 keyTag 的事件 = 显式豁免（不配图、不留空框），清单见 docs/v5-scenes.md。",
+  "_meta": "语义配图映射（plan/v5/02 §九 D9）。结构：{tags: {tag: [场景图文件名…]}, keyTag: {icon objectKey → tag}, keyPin: {objectKey → 指定变体（v5.0.2 语义错配修复，异质变体不再哈希轮换）}}。事件取图 = iconMap[事件id].objectKey → keyTag → tags（keyPin 命中则用指定变体，否则该标签内按事件 id 的稳定哈希轮换，同 id 恒同图）。未命中 keyTag 的事件 = 显式豁免（不配图、不留空框），清单见 docs/v5-scenes.md。v5.0.2 豁免增补：{\"grave-flowers\":\"funeral 类退役（v5.0.2）：三张源图含 AI 生成乱码汉字横幅与 AI 人脸遗像，目检不合格且无法重生成，整类转显式豁免\",\"candle-holder\":\"funeral 类退役（v5.0.2），同上\",\"candle-light\":\"funeral 类退役（v5.0.2），同上\"}",
   "tags": {
     "home": [
-      "home-threshold.svg",
-      "home-courtyard.svg",
-      "home-bedroom.svg",
-      "home-window.svg"
+      "home-threshold.avif",
+      "home-courtyard.avif",
+      "home-bedroom.avif",
+      "home-window.avif"
     ],
     "kitchen": [
-      "kitchen-stove.svg",
-      "kitchen-table.svg",
-      "kitchen-vegetables.svg"
+      "kitchen-stove.avif",
+      "kitchen-table.avif",
+      "kitchen-vegetables.avif"
     ],
     "school": [
-      "school-gate.svg",
-      "school-field.svg",
-      "school-corridor.svg"
+      "school-gate.avif",
+      "school-field.avif",
+      "school-corridor.avif"
     ],
     "classroom": [
-      "classroom-blackboard.svg",
-      "classroom-desks.svg",
-      "classroom-paper.svg"
+      "classroom-blackboard.avif",
+      "classroom-desks.avif",
+      "classroom-paper.avif"
     ],
     "street": [
-      "street-alley.svg",
-      "street-shopfront.svg",
-      "street-crossing.svg"
+      "street-alley.avif",
+      "street-shopfront.avif",
+      "street-crossing.avif"
     ],
     "station": [
-      "station-platform.svg",
-      "station-luggage.svg",
-      "station-ticket.svg"
+      "station-platform.avif",
+      "station-luggage.avif",
+      "station-ticket.avif"
     ],
     "factory": [
-      "factory-hall.svg",
-      "factory-machine.svg"
+      "factory-hall.avif",
+      "factory-machine.avif"
     ],
     "office": [
-      "office-desk.svg",
-      "office-meeting.svg"
+      "office-desk.avif",
+      "office-meeting.avif"
     ],
     "hospital": [
-      "hospital-ward.svg",
-      "hospital-corridor.svg",
-      "hospital-medicine.svg"
+      "hospital-ward.avif",
+      "hospital-corridor.avif",
+      "hospital-medicine.avif"
     ],
     "market": [
-      "market-stall.svg",
-      "market-scales.svg"
+      "market-stall.avif",
+      "market-scales.avif"
     ],
     "field": [
-      "field-rows.svg",
-      "field-harvest.svg"
+      "field-rows.avif",
+      "field-harvest.avif"
     ],
     "wedding": [
-      "wedding-table.svg",
-      "wedding-hall.svg"
-    ],
-    "funeral": [
-      "funeral-hall.svg",
-      "funeral-flowers.svg",
-      "funeral-candles.svg"
+      "wedding-table.avif",
+      "wedding-hall.avif"
     ],
     "rain": [
-      "rain-street.svg",
-      "rain-umbrella.svg"
+      "rain-street.avif",
+      "rain-umbrella.avif"
     ],
     "outdoors": [
-      "outdoors-park.svg",
-      "outdoors-road.svg"
+      "outdoors-park.avif",
+      "outdoors-road.avif"
     ],
     "study": [
-      "study-books.svg",
-      "study-lamp.svg",
-      "study-writing.svg"
+      "study-books.avif",
+      "study-lamp.avif",
+      "study-writing.avif"
     ],
     "relic": [
-      "relic-box.svg",
-      "relic-photo.svg",
-      "relic-letter.svg"
+      "relic-box.avif",
+      "relic-photo.avif",
+      "relic-letter.avif"
     ],
     "pet": [
-      "pet-cat.svg",
-      "pet-cage.svg"
+      "pet-cat.avif",
+      "pet-cage.avif"
     ],
     "toy": [
-      "toy-jigsaw.svg",
-      "toy-gamepad.svg"
+      "toy-jigsaw.avif",
+      "toy-gamepad.avif"
     ],
     "media": [
-      "media-tv.svg",
-      "media-radio.svg",
-      "media-phone.svg"
+      "media-tv.avif",
+      "media-radio.avif",
+      "media-phone.avif"
     ],
     "music": [
-      "music-guitar.svg",
-      "music-piano.svg",
-      "music-mic.svg"
+      "music-guitar.avif",
+      "music-piano.avif",
+      "music-mic.avif"
     ]
   },
   "keyTag": {
@@ -112,6 +107,15 @@
     "windchimes": "home",
     "new-born": "home",
     "tired-eye": "home",
+    "abacus": "home",
+    "treasure-map": "home",
+    "heart-battery": "home",
+    "mountains": "home",
+    "campfire": "home",
+    "walk": "home",
+    "boots": "home",
+    "barefoot": "home",
+    "pinata": "home",
     "fork-knife-spoon": "kitchen",
     "cooking-glove": "kitchen",
     "teapot": "kitchen",
@@ -125,8 +129,16 @@
     "ice-cream-cone": "kitchen",
     "mouth-watering": "kitchen",
     "baby-bottle": "kitchen",
-    "basket": "kitchen",
-    "weight-scale": "kitchen",
+    "basket": "market",
+    "cash": "market",
+    "banknote": "market",
+    "money-stack": "market",
+    "gold-stack": "market",
+    "wallet": "market",
+    "piggy-bank": "market",
+    "strongbox": "market",
+    "profit": "market",
+    "chest": "market",
     "school-bag": "school",
     "graduate-cap": "school",
     "teacher": "school",
@@ -137,14 +149,12 @@
     "sport-medal": "school",
     "laurels": "school",
     "running-shoe": "school",
+    "star-formation": "school",
+    "ribbon": "school",
     "notebook": "classroom",
     "book-cover": "classroom",
     "open-book": "classroom",
-    "papers": "classroom",
-    "checklist": "classroom",
     "calculator": "classroom",
-    "abacus": "classroom",
-    "desk-lamp": "classroom",
     "paint-brush": "classroom",
     "palette": "classroom",
     "easel": "classroom",
@@ -152,6 +162,7 @@
     "paper-boat": "classroom",
     "diagram": "classroom",
     "histogram": "classroom",
+    "papers": "street",
     "shop": "street",
     "shopping-bag": "street",
     "shopping-cart": "street",
@@ -168,26 +179,52 @@
     "suitcase": "station",
     "passport": "station",
     "journey": "station",
-    "wavy-itinerary": "station",
-    "treasure-map": "station",
     "warehouse": "factory",
-    "brick-pile": "factory",
     "gears": "factory",
     "drill": "factory",
     "chisel": "factory",
     "claw-hammer": "factory",
     "hand-saw": "factory",
-    "cubes": "factory",
+    "watchtower": "factory",
+    "brick-pile": "toy",
+    "cubes": "toy",
+    "dinosaur-rex": "toy",
+    "jigsaw-piece": "toy",
+    "jigsaw-box": "toy",
+    "puzzle": "toy",
+    "gamepad": "toy",
     "briefcase": "office",
     "files": "office",
     "archive-register": "office",
     "contract": "office",
     "round-table": "office",
     "discussion": "office",
-    "video-conference": "office",
     "network-bars": "office",
     "chess-pawn": "office",
-    "chess-rook": "office",
+    "pouring-chalice": "office",
+    "balloons": "office",
+    "video-conference": "media",
+    "linked-rings": "media",
+    "tv": "media",
+    "pocket-radio": "media",
+    "boombox": "media",
+    "phone": "media",
+    "smartphone": "media",
+    "vibrating-smartphone": "media",
+    "tablet": "media",
+    "wifi-router": "media",
+    "photo-camera": "media",
+    "film-spool": "media",
+    "chess-rook": "outdoors",
+    "body-balance": "outdoors",
+    "muscle-up": "outdoors",
+    "gym-bag": "outdoors",
+    "cycling": "outdoors",
+    "hiking": "outdoors",
+    "kid-slide": "outdoors",
+    "sand-castle": "outdoors",
+    "walking-boot": "outdoors",
+    "caterpillar": "outdoors",
     "hospital": "hospital",
     "hospital-cross": "hospital",
     "ambulance": "hospital",
@@ -200,59 +237,23 @@
     "pill": "hospital",
     "syringe": "hospital",
     "pulse": "hospital",
-    "thermometer-cold": "rain",
     "heart-organ": "hospital",
     "tooth": "hospital",
     "toothbrush": "hospital",
     "protection-glasses": "hospital",
-    "heart-battery": "hospital",
     "heart-bottle": "hospital",
-    "body-balance": "outdoors",
-    "muscle-up": "outdoors",
-    "gym-bag": "outdoors",
-    "cycling": "outdoors",
-    "hiking": "outdoors",
-    "mountains": "outdoors",
-    "kid-slide": "outdoors",
-    "sand-castle": "outdoors",
-    "watchtower": "outdoors",
-    "campfire": "outdoors",
-    "walk": "outdoors",
-    "walking-boot": "outdoors",
-    "boots": "outdoors",
-    "barefoot": "outdoors",
-    "caterpillar": "outdoors",
-    "star-formation": "outdoors",
-    "scales": "market",
-    "cash": "market",
-    "banknote": "market",
-    "money-stack": "market",
-    "gold-stack": "market",
-    "wallet": "market",
-    "piggy-bank": "market",
-    "strongbox": "market",
-    "profit": "market",
-    "chest": "market",
+    "thermometer-cold": "rain",
+    "water-splash": "rain",
+    "snowflake-1": "rain",
     "plant-watering": "field",
     "flower-pot": "field",
-    "spring": "field",
     "oak": "field",
     "dig-hole": "field",
     "engagement-ring": "wedding",
     "ring": "wedding",
-    "linked-rings": "wedding",
     "lovers": "wedding",
     "eternal-love": "wedding",
-    "pouring-chalice": "wedding",
     "theater-curtains": "wedding",
-    "balloons": "wedding",
-    "pinata": "wedding",
-    "ribbon": "wedding",
-    "grave-flowers": "funeral",
-    "candle-holder": "funeral",
-    "candle-light": "funeral",
-    "water-splash": "rain",
-    "snowflake-1": "rain",
     "book-pile": "study",
     "bookshelf": "study",
     "bookmark": "study",
@@ -268,22 +269,6 @@
     "rabbit": "pet",
     "cat": "pet",
     "paw-print": "pet",
-    "dinosaur-rex": "toy",
-    "jigsaw-piece": "toy",
-    "jigsaw-box": "toy",
-    "puzzle": "toy",
-    "gamepad": "toy",
-    "tv": "media",
-    "pocket-radio": "media",
-    "boombox": "media",
-    "phone": "media",
-    "smartphone": "media",
-    "vibrating-smartphone": "media",
-    "tablet": "media",
-    "wifi-router": "media",
-    "photo-camera": "media",
-    "film-spool": "media",
-    "musical-notes": "music",
     "guitar": "music",
     "piano-keys": "music",
     "microphone": "music",
@@ -292,5 +277,37 @@
     "cardboard-box-closed": "relic",
     "calendar": "relic",
     "alarm-clock": "relic"
+  },
+  "keyPin": {
+    "rabbit": "cage",
+    "cat": "cat",
+    "paw-print": "cage",
+    "tv": "tv",
+    "pocket-radio": "radio",
+    "boombox": "radio",
+    "phone": "phone",
+    "smartphone": "phone",
+    "vibrating-smartphone": "phone",
+    "tablet": "phone",
+    "wifi-router": "phone",
+    "photo-camera": "phone",
+    "film-spool": "phone",
+    "video-conference": "phone",
+    "linked-rings": "phone",
+    "guitar": "guitar",
+    "piano-keys": "piano",
+    "microphone": "mic",
+    "old-microphone": "mic",
+    "dinosaur-rex": "jigsaw",
+    "jigsaw-piece": "jigsaw",
+    "jigsaw-box": "jigsaw",
+    "puzzle": "jigsaw",
+    "brick-pile": "jigsaw",
+    "cubes": "jigsaw",
+    "gamepad": "gamepad",
+    "round-table": "meeting",
+    "discussion": "meeting",
+    "archive-register": "meeting",
+    "files": "desk"
   }
 }

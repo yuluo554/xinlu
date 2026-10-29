@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ═══ dist 体积预算门(v2-M3' 3.1,判据单源 plan/v4/02 §十 ▸ M2''' 增补)═══
-//   1. dist/ 全部产物 gzip 求和 > 预算线(v4: 850KB,plan/v4/02 §十 ▸ M2''' 增补) → FAIL(发布红线,红灯即停发);
+//   1. dist/ 全部产物 gzip 求和 > 预算线(v4: 850KB,plan/v4/02 §十 ▸ M2''' 增补;v5.0.2 维持不抬) → FAIL(发布红线,红灯即停发);
 //   2. dist 内图像资产单张原始字节 > 50KB → WARN + 清单(源在 assets/ 不入 dist 的不计——
 //      本门只扫 dist/,天然满足;WARN 不影响退出码,但清单留痕供下一轮裁剪);
 //   3. dist/ 不存在 → NOTE 跳过(先 npm run build 可全量核查),退出码 0。
@@ -17,6 +17,15 @@ const DIST = join(ROOT, "dist");
 //    内容工程为 v4 主轴不裁,M1''' A/B 两段内容增量(era 库+names 池+243 条写实文本)已实打 714.34KB,
 //    余量预留给 M2''' 主题/小结与 M3''' 配图/objectKey 增量;v3 期 650KB 口径(plan/v3/02 §九)随 v3 腿留档;
 //    压缩 WebP > 减帧 > 降分辨率纪律不变)──
+// ── v5.0.2 配图层接入：**不抬线**，维持 850KB（用户 2026-10-29 两次明示：压进线、不第三次抬线）──
+//    v5.1.0 棒曾抬到 920KB，本棒撤回。两方实测都记录在案（docs/v5-M9-scene-webp.md §三）：
+//      · v5.1.0 棒：AVIF 逐图 crf45–60 = 131.6KB（mean SSIM 0.888 / min 0.820），放不进 850，故抬线；
+//        并称均匀 crf58 = 84.4KB 但 min SSIM 0.62、桌面 864px 画幅纹理区可见涂抹、余量仅 ~8KB。
+//      · 本棒：均匀 crf58 + `-still-picture 1` 实测 **86.2KB gz**，全量 build **843.60KB < 850KB 绿**；
+//        目检（AVIF→PNG 转码对照）主体可辨，涂抹集中在渐变区，375 档 104px 图区不可见。
+//    取舍（用户拍板）：线纪律优先于桌面纹理保真；8KB 余量的脆弱性与 min SSIM 0.62 已登记
+//    backlog 观察区。下一轮若打红或收到「糊」反馈：正路是逐图分配且合计 ≤92KB（v5.1.0 的
+//    131.6KB 表不达标勿直接复用），或提请用户重新拍板抬线——不许静默重编码或静默抬线。
 const BUDGET_BYTES = 850 * 1024; // gzip 总量 ≤ 850KB
 const WARN_IMAGE_BYTES = 50 * 1024; // 单张图像 ≤ 50KB
 const IMAGE_EXT = /\.(png|jpe?g|webp|gif|svg|ico|avif)$/i;

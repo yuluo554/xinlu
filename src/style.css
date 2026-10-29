@@ -977,7 +977,7 @@ body {
   overflow: hidden;
 }
 
-.ev-scene svg {
+.ev-scene img {
   display: block;
   width: 100%;
   height: auto;
@@ -990,8 +990,9 @@ body {
     max-height: 104px;
   }
 
-  .ev-scene svg {
+  .ev-scene img {
     max-height: 104px;
+    object-fit: cover;
   }
 }
 

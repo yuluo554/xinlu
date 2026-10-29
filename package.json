@@ -2,7 +2,7 @@
   "name": "xinlu",
   "description": "心路 · 人格演化人生模拟（界面清爽、双端即开即玩的网页人生模拟游戏）",
   "private": true,
-  "version": "5.0.1",
+  "version": "5.1.0",
   "type": "module",
   "license": "MIT",
   "engines": {

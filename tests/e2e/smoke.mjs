@@ -543,6 +543,10 @@ async function main() {
       // v5 配图（plan/v5/02 §九）：见过配图的卡数 + 见过的场景图文件名集合 + 豁免卡数
       let sceneCards = 0;
       const sceneFiles = new Set();
+      // v5.1.0 具象配图：<img> 解码失败计数（naturalWidth===0 = 资源 404 / 格式不支持）
+      let sceneImgBroken = 0;
+      // v5.1.0：至少一张配图必须真解码到 800×280（证明 AVIF 路径与格式在浏览器侧可用）
+      let sceneImgOk = 0;
       let eraCards = 0;
       let summarySeen = null;
       // v5/02 §三 L2「触控 ≥44px」机检（v5-M6 补）：口径此前只有 CSS token（`.option` 56 / `.option-quick` 48 / `.btn` 44）
@@ -777,6 +781,12 @@ async function main() {
               kind: window.__kind ?? "",
               detail: !!window.__detail,
               scene: document.querySelector(".event-card [data-ev-scene]")?.dataset.evScene ?? "",
+              // v5.1.0：配图是 <img>（AVIF）而非内联 SVG——记解码结果与 src
+              sceneImg: (() => {
+                const im = document.querySelector(".event-card [data-ev-scene] img");
+                if (!im) return null;
+                return { src: im.getAttribute("src") ?? "", w: im.naturalWidth, h: im.naturalHeight, done: im.complete };
+              })(),
               // v5/02 §三 L2：事件卡内的触控目标（选项按钮 / 「继续」按钮）边长实测
               ctrls: (() => {
                 const bs = [...document.querySelectorAll(".event-card [data-option], .event-card [data-continue]")];
@@ -795,6 +805,15 @@ async function main() {
           if (sample.scene) {
             sceneCards++;
             sceneFiles.add(sample.scene);
+            // v5.1.0：<img> 必须真解码（AVIF 路径失效 / 404 时 complete 且 naturalWidth 恒 0）
+            // 只判「已结束但宽为 0」——采样时仍在解码中的不算错，避免误报。
+            const si = sample.sceneImg;
+            if (!si) sceneImgBroken++;
+            else if (si.done && si.w === 0) sceneImgBroken++;
+            else if (si.w === 800 && si.h === 280) sceneImgOk++;
+            else if (si.w !== 0 && (si.w !== 800 || si.h !== 280)) {
+              throw new Error(`${vp.width} 档：场景图「${sample.scene}」解码尺寸 ${si.w}×${si.h} ≠ 800×280`);
+            }
           }
           const yearMatch = /^(19|20|21)\d{2} 年 · /.exec(sample.badge);
           if (!yearMatch) throw new Error(`${vp.width} 档：年份徽章格式非法「${sample.badge}」（v4/02 §一）`);
@@ -867,13 +886,19 @@ async function main() {
       }
       if (!floatSeen) throw new Error(`${vp.width} 档：全程未观察到后果浮动层（微反馈缺失）`);
       // v5 语义配图（plan/v5/02 §九）：一局跑下来要有配图，且配图不止一张（变体轮换生效）；
-      // 文件名必须形如 <tag>-<variant>.svg（不是空串 / 不是随便什么）
+      // 文件名必须形如 <tag>-<variant>.avif（v5.1.0 具象配图层：AVIF 分发，见 docs/v5-M9-scene-webp.md）
       if (sceneCards < 10) throw new Error(`${vp.width} 档：全局带配图的卡仅 ${sceneCards} 张（配图接线疑似回归）`);
       if (sceneFiles.size < 6) {
         throw new Error(`${vp.width} 档：只用过 ${sceneFiles.size} 张不同的场景图（变体轮换疑似失效）`);
       }
       for (const f of sceneFiles) {
-        if (!/^[a-z][a-z0-9-]*\.svg$/.test(f)) throw new Error(`${vp.width} 档：场景图文件名非法「${f}」`);
+        if (!/^[a-z][a-z0-9-]*\.avif$/.test(f)) throw new Error(`${vp.width} 档：场景图文件名非法「${f}」`);
+      }
+      if (sceneImgBroken > 0) {
+        throw new Error(`${vp.width} 档：${sceneImgBroken} 张场景配图的 <img> 解码失败（naturalWidth=0，资源路径或格式失效）`);
+      }
+      if (sceneImgOk < 1) {
+        throw new Error(`${vp.width} 档：全程没有一张场景配图解码到 800×280（AVIF 解码路径疑似未生效）`);
       }
       // v5 轻量线索（plan/v5/02 §十）：非线索局允许 0 处；出现时必须合口径（上面 acted==="clue" 已逐项断言）
       // v5 轻量线索（plan/v5/02 §十）：一局走完必须真的遇到线索卡——

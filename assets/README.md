@@ -140,3 +140,32 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 | 来源 | **项目自产**（AI 生成，2026-10-26）：8 阶段小结场景插画（infant/toddler/childhood/teen/youth/adult/midlife/elder 各 1 张），单色剪影风与 Game-Icons 事件图标层同语言 |
 | 许可证 | 自产物以 **CC0** 释放（本项目为作者，无第三方权利）；credits 无新增署名行（自产无署名义务） |
 | 处理 | 手写紧凑 SVG（每张 <4KB），fill 用 CSS 变量（`--ink-3`/`--accent` 等 + fallback），四主题（米纸/月白/夜航/青瓷）随主题联动；`screens.ts` summaryScreen 主题头内联渲染；逐张对文案留痕 `docs/v4-M3-icons.md` §二 |
+
+## v5.1.0 增量节 · AI 生成场景配图（`web-ready/scenes/`，52 枚 AVIF）
+
+> 依据 plan/v5/02 §九（D9 语义配图层升级）与 docs/v5-M9-scene-webp.md（体积/格式决策）。
+> 许可门白名单**无需扩展**：前缀 `assets/web-ready/` 已在 D1=B 白名单内。
+
+| 项 | 内容 |
+|---|---|
+| 生成工具 | **豆包（Doubao）** 文生图，经本机 UI 操作批量生成（非浏览器自动化） |
+| 生成日期 | **2026-10-28**（55 张全量生成；同日入库） |
+| 总张数 | **55 张生成 → 52 张在用 + 3 张退役**（`funeral` 整类退役，见 docs/v5-scenes.md §3.2） |
+| 规格 | 800×280（400:140 画幅），AI 出图后统一裁切；分发格式 AVIF（AV1 帧内，逐图 crf45–60，合计 ≈132KB） |
+| 提示词清单 | **[docs/场景配图提示词清单.xlsx](../docs/场景配图提示词清单.xlsx)**（三表：55 个场景提示词 / 8 阶段 / 250 图标） |
+| 源图 | `assets/web-ready/scenes-src/*.webp`（只作编码输入，**不参与构建分发**）；退役图在 `scenes-src/retired/` |
+| 编码器 | `tools/v5-scenes-encode.mjs`（离线工具，产物已入库） |
+
+**许可与权利声明**
+
+- 上述配图**全部为 AI 生成**，本项目作者依生成工具服务条款使用；
+- **不含任何第三方版权素材**（未使用外部图库、未拼接他人作品）；
+- **未包含真实人物肖像**（画面中的"人物"为 AI 合成，不对应任何真实个体），**未包含任何品牌标识**；
+- 因此 **credits 无新增署名行**（无第三方权利人可署）；许可门 `check-assets-license.mjs` 仍为 **0 FAIL**。
+
+**已知表现限制**（与 v5.0.x 线稿层的差别，如实记录）
+
+- 55 张为独立 AI 出图，**画风不完全一致**（个别张为黑白/低饱和，如 `rain-umbrella`、医院与丧事类），
+  与线稿时代"同一套画法"不同；若要统一需整批重生成。
+- 配图为**语义复用**（一图多事件），不承诺每事件独有配图；逐张与事件的语义核对留痕见
+  [docs/v5-scenes.md](../docs/v5-scenes.md) §三。

@@ -36,3 +36,7 @@ assets/**/*.jpg
 
 # 发布本地工作目录（Release 说明草稿/附件副本，走 Release 页为单源）
 dist-release/
+
+# 本机临时实验目录（编码对照 / 转码视图 / 背景试色；用完即删，绝不入库）
+.tmp-*/
+.tmp-cft.json
