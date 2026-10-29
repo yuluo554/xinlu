@@ -141,7 +141,7 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 | 许可证 | 自产物以 **CC0** 释放（本项目为作者，无第三方权利）；credits 无新增署名行（自产无署名义务） |
 | 处理 | 手写紧凑 SVG（每张 <4KB），fill 用 CSS 变量（`--ink-3`/`--accent` 等 + fallback），四主题（米纸/月白/夜航/青瓷）随主题联动；`screens.ts` summaryScreen 主题头内联渲染；逐张对文案留痕 `docs/v4-M3-icons.md` §二 |
 
-## v5.1.0 增量节 · AI 生成场景配图（`web-ready/scenes/`，52 枚 AVIF）
+## v5.0.2 增量节 · AI 生成场景配图（`web-ready/scenes/`，52 枚 AVIF）
 
 > 依据 plan/v5/02 §九（D9 语义配图层升级）与 docs/v5-M9-scene-webp.md（体积/格式决策）。
 > 许可门白名单**无需扩展**：前缀 `assets/web-ready/` 已在 D1=B 白名单内。
@@ -151,7 +151,7 @@ Ocean Animals by Jana Ochse / 2D!PIXX (CC-BY 4.0) — www.2dpixx.de
 | 生成工具 | **豆包（Doubao）** 文生图，经本机 UI 操作批量生成（非浏览器自动化） |
 | 生成日期 | **2026-10-28**（55 张全量生成；同日入库） |
 | 总张数 | **55 张生成 → 52 张在用 + 3 张退役**（`funeral` 整类退役，见 docs/v5-scenes.md §3.2） |
-| 规格 | 800×280（400:140 画幅），AI 出图后统一裁切；分发格式 AVIF（AV1 帧内，逐图 crf45–60，合计 ≈132KB） |
+| 规格 | 800×280（400:140 画幅），AI 出图后统一裁切；分发格式 AVIF（AV1 帧内，均匀 crf58 + `-still-picture 1`，合计 86.0KB） |
 | 提示词清单 | **[docs/场景配图提示词清单.xlsx](../docs/场景配图提示词清单.xlsx)**（三表：55 个场景提示词 / 8 阶段 / 250 图标） |
 | 源图 | `assets/web-ready/scenes-src/*.webp`（只作编码输入，**不参与构建分发**）；退役图在 `scenes-src/retired/` |
 | 编码器 | `tools/v5-scenes-encode.mjs`（离线工具，产物已入库） |

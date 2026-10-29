@@ -36,7 +36,7 @@ const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, 
 const cards = [];
 for (const [tag, list] of Object.entries(map.tags)) {
   for (const file of list) {
-    // v5.1.0：分发物 = AVIF 具象配图（file:// 绝对 URL 直接引用，不再内联 SVG）
+    // v5.0.2：分发物 = AVIF 具象配图（file:// 绝对 URL 直接引用，不再内联 SVG）
     const url = `file:///${join(scenesDir, file).replace(/\\/g, "/")}`;
     cards.push(
       `<figure><div class="box"><img src="${esc(url)}" width="800" height="280" alt=""></div><figcaption>${esc(file.replace(/\.avif$/, ""))}</figcaption></figure>`,

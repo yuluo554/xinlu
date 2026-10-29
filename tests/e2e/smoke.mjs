@@ -545,7 +545,7 @@ async function main() {
       const sceneFiles = new Set();
       // v5.1.0 具象配图：<img> 解码失败计数（naturalWidth===0 = 资源 404 / 格式不支持）
       let sceneImgBroken = 0;
-      // v5.1.0：至少一张配图必须真解码到 800×280（证明 AVIF 路径与格式在浏览器侧可用）
+      // v5.0.2：至少一张配图必须真解码到 800×280（证明 AVIF 路径与格式在浏览器侧可用）
       let sceneImgOk = 0;
       let eraCards = 0;
       let summarySeen = null;
@@ -781,7 +781,7 @@ async function main() {
               kind: window.__kind ?? "",
               detail: !!window.__detail,
               scene: document.querySelector(".event-card [data-ev-scene]")?.dataset.evScene ?? "",
-              // v5.1.0：配图是 <img>（AVIF）而非内联 SVG——记解码结果与 src
+              // v5.0.2：配图是 <img>（AVIF）而非内联 SVG——记解码结果与 src
               sceneImg: (() => {
                 const im = document.querySelector(".event-card [data-ev-scene] img");
                 if (!im) return null;
@@ -805,7 +805,7 @@ async function main() {
           if (sample.scene) {
             sceneCards++;
             sceneFiles.add(sample.scene);
-            // v5.1.0：<img> 必须真解码（AVIF 路径失效 / 404 时 complete 且 naturalWidth 恒 0）
+            // v5.0.2：<img> 必须真解码（AVIF 路径失效 / 404 时 complete 且 naturalWidth 恒 0）
             // 只判「已结束但宽为 0」——采样时仍在解码中的不算错，避免误报。
             const si = sample.sceneImg;
             if (!si) sceneImgBroken++;

@@ -1,4 +1,4 @@
-# v5.1.0 · 语义配图层（D9）逐张对文案留痕
+# v5.0.2 · 语义配图层（D9）逐张对文案留痕
 
 > 依据 [plan/v5/02 §九](../plan/v5/02-数据与口径.md)（D9 口径）与 [plan/10 §五](../plan/10-5.0优化方案.md)。
 > 判据单源 = [src/data/scene-map.json](../src/data/scene-map.json)（映射表）与 `assets/web-ready/scenes/`（图库实物，AVIF）。
@@ -6,14 +6,14 @@
 > + `src/ui/scenes.test.ts`（取图稳定 + 无死图 + 覆盖复算）。本档是**逐张对文案**的人工留痕。
 > 重跑本档：`node tools/v5-scenes-doc.mjs`（表格从数据实算，不手抄）。
 
-## §一、v5.1.0 换层：线稿 → 具象配图（AVIF）
+## §一、v5.0.2 换层：线稿 → 具象配图（AVIF）
 
-| 项 | v5.0.x（线稿） | v5.1.0（本版） | 依据 |
+| 项 | v5.0.x（线稿） | v5.0.2（本版） | 依据 |
 |---|---|---|---|
 | 画面 | 自产 CC0 单色线稿 SVG，`?raw` 内联进 JS | **AI 生成具象配图，800×280，AVIF 分发** | 素材来源与许可见 [assets/README.md](../assets/README.md)；体积与格式决策见 [docs/v5-M9-scene-webp.md](v5-M9-scene-webp.md) |
-| 体积 | 55 张合计 38.8KB 原始 / 19.3KB gzip（内联） | **52 张，分发 AVIF 合计 ≈143KB（逐图 crf45–60）** | 源 WebP 合计 990.8KB，任何 WebP 画质都压不进原 850KB 预算门；AVIF 是唯一能保住 400:140 分辨率的路径 |
-| 预算门 | 850KB | **920KB**（第三次抬线 850→920，实测净成本 ≈ 配图层） | [plan/v5/00 §决策记录](../plan/v5/00-README总览.md) + [docs/v5-M9-scene-webp.md](v5-M9-scene-webp.md) |
-| 引用方式 | 内联 SVG（随 JS 一起到） | `import.meta.glob(?url)` + `<img loading="lazy">` | 屏外图不占首屏请求；`.avif` 强制不内联（Vite 默认把 <4KB 转 base64，会吃 33% 体积并让 lazy 失效） |
+| 体积 | 55 张合计 38.8KB 原始 / 19.3KB gzip（内联） | **52 张，分发 AVIF 合计 86.2KB（均匀 crf58）** | 源 WebP 合计 990.8KB，任何 WebP 画质都压不进 850KB 预算门；AVIF 800×280 全分辨率 crf58 是唯一两全的档位 |
+| 预算门 | 850KB | **850KB（未抬）**，实测 dist **844.03KB**（余量 5.97KB） | [plan/v5/00 §决策记录](../plan/v5/00-README总览.md) + [docs/v5-M9-scene-webp.md](v5-M9-scene-webp.md) |
+| 引用方式 | 内联 SVG（随 JS 一起到） | `import.meta.glob(?url)` + `<img>` | 每张图独立成文件；`.avif` 强制不内联（Vite 默认把 <4KB 转 base64，会吃 33% 体积） |
 | 图库规模 | 55 张 / 21 类 | **52 张 / 20 类**（`funeral` 整类退役，见 §三） | 覆盖 77.3%（口径 ≥60%） |
 | 覆盖 | 239/295 = 81.0% | **228/295 = 77.3%** | 语义订正后摘出 7 键 + 退役 1 类；宁可豁免也不给错图（v5.0.1 教训） |
 

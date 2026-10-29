@@ -39,7 +39,7 @@ describe("标签与图库（scene-map.json）", () => {
   });
 
   it("keyPin 无死键且变体可解析：pin 的键必须挂在该变体所属标签下", () => {
-    // v5.1.0（合并另一会话的 keyPin 机制后补的守卫）：pin 是「图标 → 指定变体」，
+    // v5.0.2（合并另一会话的 keyPin 机制后补的守卫）：pin 是「图标 → 指定变体」，
     // 一旦 keyTag 被改挂到别的标签而 pin 没跟着改，就会 pin 到不存在的 `${tag}-${variant}.avif`——
     // 运行时回落到哈希轮换（不报错），于是「修了语义却静默失效」。这条门就是防它。
     const pin = (MAP as { keyPin?: Record<string, string> }).keyPin;

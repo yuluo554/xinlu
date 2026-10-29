@@ -88,7 +88,7 @@ for (const name of sources) {
 const out = (s) => process.stdout.write(s + "\n");
 out("场景配图编码器 · 源 WebP → 分发 AVIF（判据单源 docs/v5-M9-scene-webp.md）");
 out("=".repeat(56));
-out(`${checkOnly ? "核验" : "编码"} ${sources.length} 张 · AVIF / 800×280 / yuv420p / 逐图 crf${DEFAULT_CRF}±${checkOnly ? "" : ` · 本轮新编码 ${encoded} 张`}`);
+out(`${checkOnly ? "核验" : "编码"} ${sources.length} 张 · AVIF / 800×280 / yuv420p / 均匀 crf${DEFAULT_CRF}${checkOnly ? "" : ` · 本轮新编码 ${encoded} 张`}`);
 out(`PASS  分发物合计 ${(total / 1024).toFixed(1)}KB（单张上限 ${MAX_BYTES / 1024}KB）`);
 if (oversized.length) out(`WARN  单张超限 ${oversized.length} 件：${oversized.join("、")}`);
 out("=".repeat(56));

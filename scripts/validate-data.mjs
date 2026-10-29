@@ -819,7 +819,7 @@ if (sceneMap && Array.isArray(events)) {
   const diskScenes = new Set();
   if (existsSync(sceneDir)) {
     for (const name of readdirSync(sceneDir)) {
-      // v5.1.0：分发物改为 AVIF（具象配图）。源 WebP 在 scenes-src/，不参与分发、不在此扫。
+      // v5.0.2：分发物改为 AVIF（具象配图）。源 WebP 在 scenes-src/，不参与分发、不在此扫。
       if (name.endsWith(".avif")) diskScenes.add(name);
     }
   }

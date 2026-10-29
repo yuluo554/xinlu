@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** 封闭枚举：标签 → 显示名（场景图文件 = assets/web-ready/scenes/<tag>-<variant>.avif（v5.1.0 具象配图））。 */
+/** 封闭枚举：标签 → 显示名（场景图文件 = assets/web-ready/scenes/<tag>-<variant>.avif（v5.0.2 具象配图））。 */
 export const TAGS = {
   home: "家",
   kitchen: "厨房",
