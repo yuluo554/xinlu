@@ -37,7 +37,7 @@ import type { Prefs } from "./prefs";
 import { FONT_OPTIONS, MOTION_OPTIONS } from "./prefs";
 import { iconStyle } from "./icons";
 import { NPC_PROFILES, RELATION_VIEWS, TAG_COLORS, relationsVM, renderRelations, type NodeDetail, type RelationView } from "./relations";
-// 语义配图（plan/v5/02 §九 D9）：v5.1.0 起为具象配图（AVIF，800×280），按 URL 引用而非内联。
+// 语义配图（plan/v5/02 §九 D9）：v5.0.2 起为具象配图（AVIF，800×280），按 URL 引用而非内联。
 // 静态资源走 Vite 的 ?url 导入 → 产出带 hash 的分发文件（K2：不经任何运行时库）。
 // 为何不是 WebP / 不是内联：实测见 docs/v5-M9-scene-webp.md。
 const SCENE_URLS = import.meta.glob("../../assets/web-ready/scenes/*.avif", {

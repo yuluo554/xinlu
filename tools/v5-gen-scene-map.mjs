@@ -292,7 +292,7 @@ const KEY_PIN = {
   rabbit: "cage", // toddler-013 兔子在笼中 → pet-cage（画面即笼中白兔）
   cat: "cat",
   "paw-print": "cage", // 狗走/鸽群/项圈：无狗图鸽图，笼筐是「养小动物」的最贴近意象（残留登记 §四）
-  // media：家电对位（video-conference / linked-rings 为 v5.1.0 棒改挂 media 的键：视频通话 = 手持设备画面）
+  // media：家电对位（video-conference / linked-rings 为 v5.0.2 棒改挂 media 的键：视频通话 = 手持设备画面）
   tv: "tv",
   "pocket-radio": "radio",
   boombox: "radio",

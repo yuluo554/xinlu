@@ -86,7 +86,7 @@ const distDir = join(ROOT, "dist");
 if (existsSync(join(distDir, "index.html"))) {
   // vite 把资源拍平到 dist/assets/(去目录、名后带 hash):按 basename 还原后回源树对账——
   // dist 图像的还原名必须能在白名单跟踪图像里找到同名源。
-  // ⚠️ v5.1.0 修的一个真 bug：源文件名本身可能长得像「带 hash」——
+  // ⚠️ v5.0.2 修的一个真 bug：源文件名本身可能长得像「带 hash」——
   //    `hospital-corridor.avif` 的 `-corridor` 恰好是 8 个字符，会被 VITE_HASH 误剥成 `hospital.avif`，
   //    于是 dist 里 `hospital-corridor-<hash>.avif` 反而溯源失败（实测撞上 6 张：*-corridor / *-platform /
   //    *-crossing / *-umbrella / *-medicine）。修法 = 源名**原样**与**去 hash 后**都收进白名单。

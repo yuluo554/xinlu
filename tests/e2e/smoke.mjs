@@ -543,7 +543,7 @@ async function main() {
       // v5 配图（plan/v5/02 §九）：见过配图的卡数 + 见过的场景图文件名集合 + 豁免卡数
       let sceneCards = 0;
       const sceneFiles = new Set();
-      // v5.1.0 具象配图：<img> 解码失败计数（naturalWidth===0 = 资源 404 / 格式不支持）
+      // v5.0.2 具象配图：<img> 解码失败计数（naturalWidth===0 = 资源 404 / 格式不支持）
       let sceneImgBroken = 0;
       // v5.0.2：至少一张配图必须真解码到 800×280（证明 AVIF 路径与格式在浏览器侧可用）
       let sceneImgOk = 0;
@@ -886,7 +886,7 @@ async function main() {
       }
       if (!floatSeen) throw new Error(`${vp.width} 档：全程未观察到后果浮动层（微反馈缺失）`);
       // v5 语义配图（plan/v5/02 §九）：一局跑下来要有配图，且配图不止一张（变体轮换生效）；
-      // 文件名必须形如 <tag>-<variant>.avif（v5.1.0 具象配图层：AVIF 分发，见 docs/v5-M9-scene-webp.md）
+      // 文件名必须形如 <tag>-<variant>.avif（v5.0.2 具象配图层：AVIF 分发，见 docs/v5-M9-scene-webp.md）
       if (sceneCards < 10) throw new Error(`${vp.width} 档：全局带配图的卡仅 ${sceneCards} 张（配图接线疑似回归）`);
       if (sceneFiles.size < 6) {
         throw new Error(`${vp.width} 档：只用过 ${sceneFiles.size} 张不同的场景图（变体轮换疑似失效）`);
